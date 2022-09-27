@@ -1,0 +1,11 @@
+merge_dt_dict = {'date':[],
+                'update':[],
+                'serverip':[]}
+
+data_df = pd.DataFrame(merge_dt_dict)
+
+
+df2 =  pd.DataFrame(dc2)
+dc2 = {'date':[3],
+                'update':[5],
+                'serverip':['f']}
