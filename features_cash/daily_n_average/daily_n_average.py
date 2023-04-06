@@ -32,7 +32,7 @@ def daily_n_rolling(daily_df, dic, window, min_periods):
     :param dic:
     :param window:
     :param min_periods:
-    :return: Ò
+    :return:
     """
     vol_n = daily_df['vol'].rolling(window=window,
                                     min_periods=min_periods,
