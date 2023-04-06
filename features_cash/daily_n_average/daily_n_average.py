@@ -6,20 +6,15 @@
 # @FileName: daily_n_change.py
 ===========================
 
-计算 "三日线" 并存储 MySQL 库
+计算 "N日线" 并存储 MySQL 库
 
 """
-import logging
 import os
 import sys
-import time
 import datetime
 
-from utils.utils import get_mock_connection, get_logger, exec_mysql_script, load_table, exec_mysql_sql, \
-    exec_create_table_script, get_cfg, get_sql_engine, query_last_sync_date
+from utils.utils import get_mock_connection, get_logger, exec_create_table_script, get_cfg, get_sql_engine
 import pandas as pd
-
-
 
 package_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append('%s/../../utils' % package_path)
@@ -36,7 +31,7 @@ def calculate(drop_exist):
     logger = get_logger('daily_n_change', cfg['logging']['filename'])
 
     # 获取股票列表
-    ts_code_sql = 'select ts_code from %s.stock_basic' % cfg['mysql']['database']
+    ts_code_sql = 'select ts_code from %s.stock_basic order by ts_code asc' % cfg['mysql']['database']
     logger.info('Load ts_code from table [stock_basic] with sql [%s]' % ts_code_sql)
     ts_code_list = pd.read_sql(ts_code_sql, engine)['ts_code']
 
@@ -76,15 +71,19 @@ def calculate(drop_exist):
             daily_sql = "select ts_code,trade_date,vol,amount from %s.daily where ts_code = '%s' and trade_date <= %s" \
                         % (cfg['mysql']['database'], ts_code, step_date_str)
             logger.info('Load daily data from table [daily] with sql [%s]' % daily_sql)
-            daily = pd.read_sql(daily_sql, engine)
+            daily = pd.read_sql(daily_sql, engine, index_col='trade_date')
 
-            dic = {'ts_code': ts_code, 'trade_date': step_date_str}
-            for step in steps:
-                amount = daily['amount'][-step:].sum() * 1000
-                vol = daily['vol'][-step:].sum() * 100
-                dic['avg_%s' % step] = amount / vol
-            res = pd.DataFrame([dic])
-            res.to_sql('daily_n_average', connection, index=False, if_exists='append', chunksize=5000)
+            # 如果 step_date 是交易日
+            if daily.index.__contains__(int(step_date_str)):
+                dic = {'ts_code': ts_code, 'trade_date': step_date_str}
+                for step in steps:
+                    amount = daily['amount'][-step:].sum() * 1000
+                    vol = daily['vol'][-step:].sum() * 100
+                    dic['avg_%s' % step] = amount / vol
+                res = pd.DataFrame([dic])
+                res.to_sql('daily_n_average', connection, index=False, if_exists='append', chunksize=5000)
+
+            # 计算后一日数据
             step_date += + datetime.timedelta(days=1)
 
 

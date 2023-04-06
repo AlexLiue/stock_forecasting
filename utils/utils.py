@@ -504,7 +504,7 @@ def get_sql_engine():
     user = cfg['mysql']['user']
     passwd = cfg['mysql']['password']
     db = cfg['mysql']['database']
-    return create_engine("mysql://%s:%s@%s:%s/%s" % (user, passwd, host, port, db), encoding='utf-8', echo=True)
+    return create_engine("mysql://%s:%s@%s:%s/%s" % (user, passwd, host, port, db), encoding='utf-8', echo=False)
 
 
 def enable_print_all():
