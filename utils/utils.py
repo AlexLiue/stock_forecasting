@@ -18,6 +18,105 @@ import logging
 import time
 
 
+def query_last_sync_date(sql):
+    """
+    查询历史同步数据的最大日期
+    :param sql: 执行查询的SQL
+    :return: 查询结果
+    """
+    cfg = get_cfg()
+    logger = get_logger("utils", cfg['logging']['filename'])
+    conn = get_mysql_connection()
+    cursor = conn.cursor()
+    cursor.execute(sql + ';')
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    last_date = result[0][0]
+    result = "19700101"
+    if last_date is not None:
+        result = str(last_date)
+    logger.info("Query last sync date with sql [%s], result: [%s]" % (sql, result))
+    return result
+
+
+def query_table_is_exist(table_name):
+    sql = "SELECT count(1) from information_schema.TABLES t WHERE t.TABLE_NAME ='%s'" % table_name
+    conn = get_mysql_connection()
+    cursor = conn.cursor()
+    cursor.execute(sql + ';')
+    count = cursor.fetchall()[0][0]
+    if int(count) > 0:
+        return True
+    else:
+        return False
+
+
+def exec_create_table_script(script_dir, drop_exist):
+    """
+    执行 SQL 脚本
+    :param script_dir: 脚本路径
+    :param drop_exist: 如果表存在是否先 Drop 后再重建
+    :return:
+    """
+    table_name = str(script_dir).split('/')[-1]
+    table_exist = query_table_is_exist(table_name)
+    if (not table_exist) | (table_exist & drop_exist):
+        cfg = get_cfg()
+        logger = get_logger(table_name, cfg['logging']['filename'])
+        db = get_mysql_connection()
+        cursor = db.cursor()
+        count = 0
+        flt_cnt = 0
+        suc_cnt = 0
+        str1 = ''
+        for home, dirs, files in os.walk(script_dir):
+            for filename in files:
+                if filename.endswith('.sql'):
+                    dir_name = os.path.dirname(os.path.abspath(__file__))
+                    full_name = os.path.join(dir_name, script_dir, filename)
+                    file_object = open(full_name)
+                    for line in file_object:
+                        if not line.startswith("--") and not line.startswith('/*'):  # 处理注释
+                            str1 = str1 + ' ' + ' '.join(line.strip().split())  # pymysql一次只能执行一条sql语句
+                    file_object.close()  # 循环读取文件时关闭文件很重要，否则会引起bug
+        for commandSQL in str1.split(';'):
+            command = commandSQL.strip()
+            if command != '':
+                try:
+                    logger.info('Execute SQL [%s]' % command.strip())
+                    cursor.execute(command.strip() + ';')
+                    count = count + 1
+                    suc_cnt = suc_cnt + 1
+                except db.DatabaseError as e:
+                    print(e)
+                    print(command)
+                    flt_cnt = flt_cnt + 1
+                    pass
+        logger.info('Execute result: Total [%s], Succeed [%s] , Failed [%s] ' % (count, suc_cnt, flt_cnt))
+        cursor.close()
+        db.close()
+        if flt_cnt > 0:
+            raise Exception('Execute SQL script [%s] failed. ' % script_dir)
+
+
+# 获取两个日期的最小值
+def min_date(date1, date2):
+    if date1 <= date2:
+        return date1
+    else:
+        return date2
+
+
+def max_date(date1, date2):
+    if date1 >= date2:
+        return date1
+    else:
+        return date2
+
+
+
+
 # 加载配置信息函数
 def get_cfg():
     cfg = configparser.ConfigParser()
@@ -61,6 +160,7 @@ def get_logger(log_name, file_name):
     log_level = cfg['logging']['level']
     backup_days = int(cfg['logging']['backupDays'])
     logger = logging.getLogger(log_name)
+    logging.getLogger('sqlalchemy.engine').setLevel(logging.ERROR)
     logger.setLevel(log_level)
     log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'logs')
     log_file = os.path.join(log_dir, '%s.%s' % (file_name, str(datetime.datetime.now().strftime('%Y-%m-%d'))))

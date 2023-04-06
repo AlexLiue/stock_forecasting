@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/9/15 16:08
 # @Author  : PcLiu
-# @FileName: daily_n.py
+# @FileName: daily_n_change.py
 ===========================
 
 基于 daily_n 表(N 日线)数据, 构建特征
