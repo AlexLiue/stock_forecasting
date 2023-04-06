@@ -11,33 +11,19 @@
 """
 import argparse
 
-from features_cash.daily_n import daily_n
+from features_cash.daily_n_average import daily_n_average
 
 
-def init_features_cash():
-    """
-    初始化特征预处理数据
-    :return:
-    """
-    daily_n.init()  # N 日线特征
-
-
-def append_features_cash():
-    """
-    追加特征预处理数据
-    :return:
-    """
-    daily_n.append()
+def exec_features_cash(overwrite):
+    daily_n_average.calculate(overwrite)  # 计算 N 日均线写入 daily_n_average 表
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='sync mode args')
-    parser.add_argument("--mode", type=str, default='', help='同步模式: init(初始化模式), append(增量追加模式)')
+    parser.add_argument("--overwrite", action='store_true')
     args = parser.parse_args()
-    mode = args.mode
-    if mode == 'init':
-        init_features_cash()
-    elif mode == 'append':
-        append_features_cash()
+    if args.overwrite:
+        exec_features_cash(overwrite=True)
     else:
-        print('Useage: python data_syn.py --mode [init | append | init_spc | append_spc]')
+        exec_features_cash(overwrite=False)
+

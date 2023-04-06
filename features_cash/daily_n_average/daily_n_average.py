@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/9/15 16:31
 # @Author  : PcLiu
-# @FileName: daily_n_change.py
+# @FileName: daily_n_average.py
 ===========================
 
 计算 "N日线" 并存储 MySQL 库
@@ -28,7 +28,7 @@ def calculate(drop_exist):
     cfg = get_cfg()
     connection = get_mock_connection()
     engine = get_sql_engine()
-    logger = get_logger('daily_n_change', cfg['logging']['filename'])
+    logger = get_logger('daily_n_average', cfg['logging']['filename'])
 
     # 获取股票列表
     ts_code_sql = 'select ts_code from %s.stock_basic order by ts_code asc' % cfg['mysql']['database']
