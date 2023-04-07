@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import pymysql
 import tushare as ts
+from matplotlib import pyplot as plt
 from sqlalchemy import create_engine
 import logging
 import time
@@ -517,6 +518,10 @@ def enable_print_all():
     np.set_printoptions(threshold=np.inf)
 
 
+
+
+
 if __name__ == '__main__':
-    dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data_syn', 'trade_cal')
-    exec_mysql_script(dir_path)
+    enable_print_all()
+
+

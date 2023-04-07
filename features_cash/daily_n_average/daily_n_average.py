@@ -63,7 +63,7 @@ def calculate(drop_exist):
     logger = get_logger('daily_n_average', cfg['logging']['filename'])
 
     # 获取股票列表
-    ts_code_sql = 'select ts_code from %s.stock_basic order by ts_code asc' % cfg['mysql']['database']
+    ts_code_sql = 'select distinct ts_code from %s.stock_basic order by ts_code asc' % cfg['mysql']['database']
     logger.info('Load ts_code from table [stock_basic] with sql [%s]' % ts_code_sql)
     ts_code_list = pd.read_sql(ts_code_sql, engine)['ts_code']
 
@@ -87,7 +87,6 @@ def calculate(drop_exist):
     ts_code_size = ts_code_list.shape[0]
     for ts_code_index in range(ts_code_size):
         ts_code = ts_code_list[ts_code_index]
-
         # 读取指定股票数据
         end_date_str = str(datetime.datetime.now().strftime('%Y%m%d'))
         daily_sql = "select ts_code,trade_date,vol,amount from %s.daily where ts_code = '%s' order by trade_date asc" \
@@ -105,14 +104,17 @@ def calculate(drop_exist):
             if avg_n.shape[0] > 0:
                 logger.info(
                     'Step ([%d] of [%d]): Write [%s] records of ts_code[%s] into table [daily_n] with [%s]' %
-                    (ts_code_index, ts_code_size, avg_n.shape[0], ts_code, connection.engine))
+                    (ts_code_index, ts_code_size-1, avg_n.shape[0], ts_code, connection.engine))
                 avg_n.to_sql('daily_n_average', connection, index=False, if_exists='append', chunksize=5000)
         else:
             # 增量追加：手工计算 N 日均线
-            last_date = str(trade_dates.loc[ts_code]['trade_date'] + 1)  # 历史计算日期 + 1 作为断点继续计算的起始日期
+            last_date_his = datetime.datetime.strptime(str(trade_dates.loc[ts_code]['trade_date']), '%Y%m%d')
+            last_date = str((last_date_his + datetime.timedelta(days=1)).strftime('%Y%m%d'))
+            # 历史计算日期 + 1 作为断点继续计算的起始日期
             begin_date = str(earliest_trade_dates.loc[ts_code]['trade_date'])
             start_date_str = max(last_date, begin_date)
-            logger.info("Calculate ts_code[%s] start_date[%s] end_date[%s]" % (ts_code, start_date_str, end_date_str))
+            logger.info("'Step ([%d] of [%d]): Calculate ts_code[%s] start_date[%s] end_date[%s]" %
+                        (ts_code_index, ts_code_size-1, ts_code, start_date_str, end_date_str))
 
             # 循环日期计算
             start_date = datetime.datetime.strptime(start_date_str, '%Y%m%d')
@@ -132,6 +134,7 @@ def calculate(drop_exist):
                         vol = daily['vol'][-window:].sum() * 100
                         dic['avg_%s' % window] = amount / vol
                     res = pd.DataFrame([dic])
+                    logger.info()
                     res.to_sql('daily_n_average', connection, index=False, if_exists='append', chunksize=5000)
 
                 # 计算后一日数据
