@@ -26,7 +26,7 @@ ON stock.* TO 'testuser'@'%' ; FLUSH PRIVILEGES;
 
 ## 特征数据
 
-### 3 日线 计算
+### N 日线 计算
+为降低重复计算成本, 每日追加计算昨日交易的 N 日线 [features_cash/daily_n_average/daily_n_average.py](features_cash/daily_n_average/daily_n_average.py)
 
-为降低重复计算成本, 3日线计算结果,存储于 MySQL 数据库中
 

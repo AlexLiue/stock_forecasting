@@ -49,6 +49,11 @@ def daily_n_rolling(daily_df, dic, window, min_periods):
 
 
 def calculate(drop_exist):
+    """
+    计算 N 日线
+    :param drop_exist: 是否重新计算
+    :return:
+    """
     dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
     exec_create_table_script(dir_path, drop_exist)
 
@@ -68,14 +73,17 @@ def calculate(drop_exist):
     logger.info('Load ts_code earliest trade_date from table [daily] with sql [%s]' % earliest_trade_date_sql)
     earliest_trade_dates = pd.read_sql(earliest_trade_date_sql, engine, index_col='ts_code')
 
-    # 查询历史最大同步日期(构建计算的日期范围)
+    # 查询历史最大同步日期(构建增量计算的日期范围)
     trade_date_sql = 'select ts_code, max(trade_date) as trade_date from %s.daily_n_average group by ts_code' % \
                      cfg['mysql']['database']
     logger.info('Load ts_code last calculate date from table [daily_n_average] with sql [%s]' % trade_date_sql)
     trade_dates = pd.read_sql(trade_date_sql, engine, index_col='ts_code')
 
+    # N 日线窗口大小
     windows = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 21, 31, 45, 61, 91, 123, 187, 365, 731, 1095,
                99999]
+
+    # 为降低处理内存占，采用循环依次加载单只股票数据，然后并计算处理
     ts_code_size = ts_code_list.shape[0]
     for ts_code_index in range(ts_code_size):
         ts_code = ts_code_list[ts_code_index]
@@ -87,8 +95,9 @@ def calculate(drop_exist):
         logger.info('Load daily data from table [daily] with sql [%s]' % daily_sql)
         daily_df = pd.read_sql(daily_sql, engine, index_col='trade_date')
 
+        # 根据是否曾初始化数据, 才用不同的计算方式
         if not trade_dates.index.__contains__(ts_code):
-            # 基于 rolling 计算 N 日均线
+            # 初始化：基于 rolling 计算 N 日均线
             dic = {'ts_code': daily_df['ts_code'], 'trade_date': daily_df.index}
             for window in windows:
                 daily_n_rolling(daily_df=daily_df, dic=dic, window=window, min_periods=1)
@@ -99,13 +108,13 @@ def calculate(drop_exist):
                     (ts_code_index, ts_code_size, avg_n.shape[0], ts_code, connection.engine))
                 avg_n.to_sql('daily_n_average', connection, index=False, if_exists='append', chunksize=5000)
         else:
-            # 手工计算 N 日均线
-            last_date = str(trade_dates.loc[ts_code]['trade_date'] + 1)  # 历史计算日期 + 1 断点继续计算
+            # 增量追加：手工计算 N 日均线
+            last_date = str(trade_dates.loc[ts_code]['trade_date'] + 1)  # 历史计算日期 + 1 作为断点继续计算的起始日期
             begin_date = str(earliest_trade_dates.loc[ts_code]['trade_date'])
             start_date_str = max(last_date, begin_date)
             logger.info("Calculate ts_code[%s] start_date[%s] end_date[%s]" % (ts_code, start_date_str, end_date_str))
 
-            # 循环计算
+            # 循环日期计算
             start_date = datetime.datetime.strptime(start_date_str, '%Y%m%d')
             end_date = datetime.datetime.strptime(end_date_str, '%Y%m%d')
             step_date = start_date
@@ -114,9 +123,10 @@ def calculate(drop_exist):
                 step_date_int = int(str(step_date.strftime('%Y%m%d')))
                 daily = daily_df[daily_df.index <= step_date_int]
 
-                # 如果 step_date 是交易日
+                # 如果 step_date 是交易日, 则 daily 必包含数据
                 if daily.index.__contains__(step_date_int):
                     dic = {'ts_code': ts_code, 'trade_date': step_date_int}
+                    # 计算单日的 N 日线
                     for window in windows:
                         amount = daily['amount'][-window:].sum() * 1000
                         vol = daily['vol'][-window:].sum() * 100
