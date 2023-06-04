@@ -24,7 +24,7 @@ def plot(ts_code, columns):
     # 加载数据
     cfg = get_cfg()
     engine = get_sql_engine()
-    load_sql = "select trade_date, %s from %s.daily_n_average where ts_code = '%s' order by trade_date asc" % \
+    load_sql = "select trade_date, %s from %s.daily_n_average where ts_code like '%s' order by trade_date asc" % \
                (columns,  cfg['mysql']['database'], ts_code,)
 
     df = pd.read_sql(load_sql, engine)
@@ -34,6 +34,6 @@ def plot(ts_code, columns):
 
 
 if __name__ == '__main__':
-    ts_code_arg = '000001.SZ'
+    ts_code_arg = '005777'
     columns_arg = 'avg_1, avg_2, avg_3, avg_4, avg_31, avg_61'
     plot(ts_code_arg, columns_arg)

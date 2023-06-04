@@ -94,7 +94,7 @@ def calculate(drop_exist):
         logger.info('Load daily data from table [daily] with sql [%s]' % daily_sql)
         daily_df = pd.read_sql(daily_sql, engine, index_col='trade_date')
 
-        # 根据是否曾初始化数据, 才用不同的计算方式
+        # 根据是否曾初始化数据, 采用不同的计算方式
         if not trade_dates.index.__contains__(ts_code):
             # 初始化：基于 rolling 计算 N 日均线
             dic = {'ts_code': daily_df['ts_code'], 'trade_date': daily_df.index}
@@ -134,7 +134,6 @@ def calculate(drop_exist):
                         vol = daily['vol'][-window:].sum() * 100
                         dic['avg_%s' % window] = amount / vol
                     res = pd.DataFrame([dic])
-                    logger.info()
                     res.to_sql('daily_n_average', connection, index=False, if_exists='append', chunksize=5000)
 
                 # 计算后一日数据
