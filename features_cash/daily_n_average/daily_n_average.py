@@ -18,7 +18,7 @@ import sys
 
 import pandas as pd
 
-from utils.utils import get_mock_connection, get_logger, exec_create_table_script, get_cfg, get_sql_engine
+from features_cash.utils.utils import get_mock_connection, get_logger, exec_create_table_script, get_cfg, get_sql_engine
 
 package_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append('%s/../../utils' % package_path)
@@ -60,7 +60,7 @@ def calculate(drop_exist):
     cfg = get_cfg()
     connection = get_mock_connection()
     engine = get_sql_engine()
-    logger = get_logger('daily_n_average', cfg['logging']['filename'])
+    logger = get_logger('daily_n_average', cfg['feature-logging']['filename'])
 
     # 获取股票列表
     ts_code_sql = 'select distinct ts_code from %s.stock_basic order by ts_code asc' % cfg['mysql']['database']

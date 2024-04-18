@@ -16,7 +16,7 @@ import datetime
 
 import pandas as pd
 
-from utils.utils import get_cfg, get_sql_engine
+from launch_cash.utils.utils import get_cfg, get_sql_engine
 
 
 def plot(ts_code, columns):

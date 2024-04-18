@@ -1,48 +1,25 @@
--- stock.daily definition
+-- stock.top_inst definition
 
--- 日线
-DROP TABLE IF EXISTS `daily_n_average`;
-CREATE TABLE `daily_n_average`
+DROP TABLE IF EXISTS `top_inst`;
+CREATE TABLE `top_inst`
 (
-    `ts_code`      varchar(16)        DEFAULT NULL COMMENT '股票代码',
     `trade_date`   int                DEFAULT NULL COMMENT '交易日期',
-
-    `avg_1`     double             DEFAULT NULL COMMENT '1日均线',
-    `avg_2`     double             DEFAULT NULL COMMENT '2日均线',
-    `avg_3`     double             DEFAULT NULL COMMENT '3日均线',
-    `avg_4`     double             DEFAULT NULL COMMENT '4日均线',
-    `avg_5`     double             DEFAULT NULL COMMENT '5日均线',
-    `avg_6`     double             DEFAULT NULL COMMENT '6日均线',
-    `avg_7`     double             DEFAULT NULL COMMENT '7日均线',
-    `avg_8`     double             DEFAULT NULL COMMENT '8日均线',
-    `avg_9`     double             DEFAULT NULL COMMENT '9日均线',
-    `avg_10`    double             DEFAULT NULL COMMENT '10日均线',
-    `avg_11`    double             DEFAULT NULL COMMENT '11日均线',
-    `avg_12`    double             DEFAULT NULL COMMENT '12日均线',
-    `avg_13`    double             DEFAULT NULL COMMENT '13日均线',
-    `avg_14`    double             DEFAULT NULL COMMENT '14日均线',
-    `avg_15`    double             DEFAULT NULL COMMENT '15日均线',
-    `avg_16`    double             DEFAULT NULL COMMENT '16日均线',
-    `avg_18`    double             DEFAULT NULL COMMENT '18日均线',
-    `avg_21`    double             DEFAULT NULL COMMENT '21日均线',
-    `avg_31`    double             DEFAULT NULL COMMENT '31日均线',
-    `avg_45`    double             DEFAULT NULL COMMENT '45日均线',
-    `avg_61`    double             DEFAULT NULL COMMENT '61日均线',
-    `avg_91`    double             DEFAULT NULL COMMENT '91日均线',
-    `avg_123`    double             DEFAULT NULL COMMENT '123日均线',
-    `avg_187`    double             DEFAULT NULL COMMENT '187日均线',
-    `avg_365`    double             DEFAULT NULL COMMENT '365日均线',
-    `avg_731`    double             DEFAULT NULL COMMENT '731日均线',
-    `avg_1095`   double             DEFAULT NULL COMMENT '1095日均线',
-    `avg_99999`  double             DEFAULT NULL COMMENT '99999日均线',
-
+    `ts_code`      varchar(16)        DEFAULT NULL COMMENT 'TS代码',
+    `exalter`      varchar(64)        DEFAULT NULL COMMENT '营业部名称',
+    `buy`          double             DEFAULT NULL COMMENT '买入额（万）',
+    `buy_rate`     double             DEFAULT NULL COMMENT '买入占总成交比例',
+    `sell`         double             DEFAULT NULL COMMENT '卖出额（万）',
+    `sell_rate`    double             DEFAULT NULL COMMENT '卖出占总成交比例',
+    `net_buy`      double             DEFAULT NULL COMMENT '净成交额（万）',
+    `side`         varchar(2)         DEFAULT NULL COMMENT '买卖类型0买入1卖出',
+    `reason`       text,
     `created_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     UNIQUE KEY `daily_ts_code_idx` (`ts_code`, `trade_date`) USING BTREE,
     UNIQUE KEY `daily_trade_date_idx` (`trade_date`, `ts_code`) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci COMMENT ='A股N日线行情'
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='沪深股票-市场参考数据-龙虎榜机构明细'
     /*!50100 PARTITION BY RANGE (`trade_date`)
     (PARTITION p1990 VALUES LESS THAN (19901231) ENGINE = InnoDB,
     PARTITION p1991 VALUES LESS THAN (19911231) ENGINE = InnoDB,
@@ -100,4 +77,3 @@ CREATE TABLE `daily_n_average`
     PARTITION p2043 VALUES LESS THAN (20431231) ENGINE = InnoDB,
     PARTITION p2044 VALUES LESS THAN (20441231) ENGINE = InnoDB,
     PARTITION p2045 VALUES LESS THAN (20451231) ENGINE = InnoDB) */;
-

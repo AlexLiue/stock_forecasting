@@ -10,16 +10,16 @@
 
 | 项目包名          | 包路径                            | 包说明                |  
 |:--------------|:-------------------------------|:-------------------|  
-| datas         | [datas](datas)                 | 原始 MySQL 数据读取以及粗加工 |  
-| features      | [features](features)           | 特征加工处理             |  
+| datas         | [datas](forecasting/datas)                 | 原始 MySQL 数据读取以及粗加工 |  
+| features      | [features](forecasting/features)           | 特征加工处理             |  
 | features_cash | [features_cash](features_cash) | 特征与加工处理并存储 MySQL   |  
 
 ### Python 源文件说明
 
 | 项目包名    | Python 源文件                          | 源文件说明          |    
 |:--------|:------------------------------------|:---------------|    
-| datas   | [tools.py](datas/tools.py)          | 数据读取-公共函数定义    |  
-| datas   | [trande_cal.py](datas/trade_cal.py) | 数据读取-交易所交易日历信息 |    
+| datas   | [tools.py](forecasting/datas/tools.py)          | 数据读取-公共函数定义    |  
+| datas   | [trande_cal.py](forecasting/datas/trade_cal.py) | 数据读取-交易所交易日历信息 |    
 
 CREATE USER 'testuser'@'%' IDENTIFIED BY 'testpasswd'; GRANT ALL PRIVILEGES ON test.* TO 'testuser'@'%' ; GRANT SELECT
 ON stock.* TO 'testuser'@'%' ; FLUSH PRIVILEGES;
