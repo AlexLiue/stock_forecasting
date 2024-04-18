@@ -104,7 +104,7 @@ def exec_create_table_script(script_dir, drop_exist):
     table_exist = query_table_is_exist(table_name)
     if (not table_exist) | (table_exist & drop_exist):
         cfg = get_cfg()
-        logger = get_logger(table_name, cfg['logging']['filename'])
+        logger = get_logger(table_name, cfg['sync-logging']['filename'])
         db = get_mysql_connection()
         cursor = db.cursor()
         count = 0

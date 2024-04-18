@@ -18,7 +18,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-from features_cash.utils.utils import get_cfg, get_sql_engine
+from features_calculate.utils.utils import get_cfg, get_sql_engine
 
 
 def plot(ts_code, columns):
