@@ -16,7 +16,7 @@ import datetime
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.font_manager import FontProperties
+
 
 from features_cash.utils.utils import get_cfg, get_sql_engine
 
