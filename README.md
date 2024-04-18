@@ -2,31 +2,40 @@
 
 ## 数据源 [Tushare](https://tushare.pro)
 
-数据同步拉取工具: [https://github.com/AlexLiue/tushare_sync](https://github.com/AlexLiue/tushare_sync)
+
+数据同步拉取: [https://github.com/AlexLiue/stock_forecasting/tree/master/tushare_sync](https://github.com/AlexLiue/stock_forecasting/tree/master/tushare_sync)   
+附加特征计算：[https://github.com/AlexLiue/stock_forecasting/tree/master/features_cash](https://github.com/AlexLiue/stock_forecasting/tree/master/features_cash)   
+股票预测分析：[https://github.com/AlexLiue/stock_forecasting/tree/master/forecasting](https://github.com/AlexLiue/stock_forecasting/tree/master/forecasting)    
 
 ## 项目文件说明
-
 ### Python 包结构说明
 
 | 项目包名          | 包路径                            | 包说明                |  
 |:--------------|:-------------------------------|:-------------------|  
-| datas         | [datas](forecasting/datas)                 | 原始 MySQL 数据读取以及粗加工 |  
-| features      | [features](forecasting/features)           | 特征加工处理             |  
-| features_cash | [features_cash](features_cash) | 特征与加工处理并存储 MySQL   |  
+| tushare_sync  | [tushare_sync](tushare_sync)   | 原始 MySQL 数据读取以及粗加工 |  
+| features_cash | [features_cash](features_cash) | 特征加工处理             |  
+| forecasting   | [forecasting](forecasting)     | 根据特征信息进行模型预测       |  
 
-### Python 源文件说明
 
-| 项目包名    | Python 源文件                          | 源文件说明          |    
-|:--------|:------------------------------------|:---------------|    
-| datas   | [tools.py](forecasting/datas/tools.py)          | 数据读取-公共函数定义    |  
-| datas   | [trande_cal.py](forecasting/datas/trade_cal.py) | 数据读取-交易所交易日历信息 |    
+## 使用手册
 
-CREATE USER 'testuser'@'%' IDENTIFIED BY 'testpasswd'; GRANT ALL PRIVILEGES ON test.* TO 'testuser'@'%' ; GRANT SELECT
-ON stock.* TO 'testuser'@'%' ; FLUSH PRIVILEGES;
+### 配置 Python 环境
+Python 版本 >= 3.8.x ， 安装依赖包 [requirements.txt](requirements.txt)
+```commandline
+pip install -r requirements.txt
+```
 
-## 特征数据
+### 配置本地 mysql 数据库
+```
+CREATE USER 'tushare'@'%' IDENTIFIED BY 'tushare'; 
+GRANT ALL PRIVILEGES ON tushare.* TO 'tushare'@'%' ; 
+GRANT SELECT ON tushare.* TO 'tushare'@'%' ; 
+FLUSH PRIVILEGES;
+```
 
-### N 日线 计算
-为降低重复计算成本, 每日追加计算昨日交易的 N 日线 [features_cash/daily_n_average/daily_n_average.py](features_cash/daily_n_average/daily_n_average.py)
+### 创建本地数据库用户  
+
+
+
 
 
