@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/9/15 16:31
 # @Author  : PcLiu
-# @FileName: daily_n.py
+# @FileName: daily_n_break.py
 ===========================
 
 计算 "N日线" 并存储 MySQL 库
@@ -150,8 +150,8 @@ def calculate(drop_exist):
                     for window in windows:
                         amount_n = daily['amount'][-window:].sum() * 1000
                         vol_n = daily['vol'][-window:].sum() * 100
-                        low_n = daily['low'][-window].min()
-                        high_n = daily['high'][-window].max()
+                        low_n = daily['low'][-window:].min()
+                        high_n = daily['high'][-window:].max()
                         dic['avg_%s' % window] = amount_n / vol_n
                         dic['low_%s' % window] = low_n
                         dic['high_%s' % window] = high_n

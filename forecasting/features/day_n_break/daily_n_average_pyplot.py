@@ -18,20 +18,26 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-from features_calculate.utils.utils import get_cfg, get_sql_engine
+from forecasting.utils.utils import get_cfg, get_sql_engine
 
 
-def plot(ts_code, columns):
+def plot(ts_code, columns, begin_day):
+    """
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 21, 31, 45, 61, 91, 123, 187, 365, 731, 1095, 99999]
+    :param ts_code: 股票代码
+    :param columns: 打印的列
+    :return:
+    """
     # 加载数据
     cfg = get_cfg()
     engine = get_sql_engine()
-    load_sql = f"select trade_date, {columns} from {cfg['mysql']['database']}.daily_n_average" \
-               f" where ts_code like '{ts_code}%%' order by trade_date asc"
+    load_sql = f"select trade_date, {columns} from {cfg['mysql']['database']}.daily_n" \
+               f" where ts_code like '{ts_code}%%' and trade_date>={begin_day} order by trade_date asc"
     df = pd.read_sql(load_sql, engine)
 
     df['trade_date'] = df['trade_date'].map(lambda date: datetime.datetime.strptime(str(date), '%Y%m%d'))
     df.plot(x='trade_date',
-            y=['avg_1', 'avg_2', 'avg_3', 'avg_4', 'avg_31', 'avg_61'],
+            y=['avg_1', 'avg_2', 'avg_4', 'avg_7', 'avg_14', 'avg_31', 'avg_61', 'avg_91'],
             title=ts_code
             )
     plt.title(ts_code)
@@ -46,5 +52,6 @@ def plot(ts_code, columns):
 
 if __name__ == '__main__':
     ts_code_arg = '000001'
-    columns_arg = 'avg_1, avg_2, avg_3, avg_4, avg_31, avg_61'
-    plot(ts_code_arg, columns_arg)
+    columns_arg = 'avg_1, avg_2,  avg_4, avg_7, avg_14, avg_31, avg_61, avg_91'
+    begin_day = 20240405
+    plot(ts_code_arg, columns_arg, begin_day)
