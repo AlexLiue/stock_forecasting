@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/9/15 16:31
 # @Author  : PcLiu
-# @FileName: daily_n_break.py
+# @FileName: daily_n.py
 ===========================
 
 计算 "N日线" 并存储 MySQL 库

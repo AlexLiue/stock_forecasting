@@ -488,14 +488,17 @@ def get_query_condition(ts_code='', start_date='', end_date=''):
     return condition
 
 
-def load_table(table_name, ts_code='', start_date='', end_date=''):
+def load_table(table_name, ts_code='', start_date='', end_date='', index_col=''):
     condition = get_query_condition(ts_code, start_date, end_date)
     # 执行 SQL 查询
     engine = get_sql_engine()
     sql = "SELECT * " \
           "FROM %s t " \
           "WHERE %s " % (table_name, condition)
-    return pd.read_sql(sql, engine)
+    if index_col != '':
+        return pd.read_sql(sql, engine, index_col=index_col)
+    else:
+        return pd.read_sql(sql, engine)
 
 
 def get_sql_engine():

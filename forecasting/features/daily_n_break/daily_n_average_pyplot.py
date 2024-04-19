@@ -36,8 +36,12 @@ def plot(ts_code, columns, begin_day):
     df = pd.read_sql(load_sql, engine)
 
     df['trade_date'] = df['trade_date'].map(lambda date: datetime.datetime.strptime(str(date), '%Y%m%d'))
+    # df.plot(x='trade_date',
+    #         y=['avg_1', 'avg_2', 'avg_4', 'avg_7', 'low_7', 'high_7', 'avg_14', 'avg_31', 'avg_61', 'avg_91'],
+    #         title=ts_code
+    #         )
     df.plot(x='trade_date',
-            y=['avg_1', 'avg_2', 'avg_4', 'avg_7', 'avg_14', 'avg_31', 'avg_61', 'avg_91'],
+            y=columns_arg.replace(' ','').split(','),
             title=ts_code
             )
     plt.title(ts_code)
@@ -52,6 +56,6 @@ def plot(ts_code, columns, begin_day):
 
 if __name__ == '__main__':
     ts_code_arg = '000001'
-    columns_arg = 'avg_1, avg_2,  avg_4, avg_7, avg_14, avg_31, avg_61, avg_91'
+    columns_arg = 'avg_1, avg_14, low_14, high_14, avg_3'
     begin_day = 20240405
     plot(ts_code_arg, columns_arg, begin_day)
