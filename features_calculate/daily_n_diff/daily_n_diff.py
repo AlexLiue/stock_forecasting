@@ -19,8 +19,10 @@ import datetime
 
 import numpy as np
 import pandas as pd
+from scipy import signal
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator
+from scipy.interpolate import make_interp_spline
 
 from forecasting.utils.utils import load_table
 
@@ -33,26 +35,28 @@ pd.set_option('display.width', 100000)
 np.set_printoptions(threshold=np.inf)
 
 
-def get_daily_n_diff(ts_code, start_date, end_date, diff_list):
+def get_daily_n_diff(ts_code, start_date, end_date):
     """
-    获取上升突破 N 日线的股票 N 取值
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 21, 31, 45, 61, 91, 123, 187, 365]
+    获取 N 日线的差值, 获得 短线、中线、长线指标
 
-    diff_1 取值:  (avg_2 - avg_6)*0.7 + (avg_3 - avg_7)*0.3
+    N日线可选项： [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 21, 31, 45, 61, 91, 123, 187, 365]
+
+    特征值说明:
+    diff_day: 短线， 做 T 指标，当峰值下降时卖出, 等待<0, 再次突破 0 时买入（操作前提： 长线上升, 中线的值 > 0）
+    diff_weak: 中线,  建仓指标，突破 0 时准备建仓, 跌破 0 时清苍（操作前提， 长线出现极点后 ）
+    diff_month: 长线,  做 T / 建仓 参考指标
 
     :param ts_code: 股票代码
     :param start_date: 开始时间
     :param end_date: 结束时间
-    :param diff_list: N日线差值列表
     :return:
     """
     daily_n = load_table('daily_n', ts_code=ts_code, start_date=start_date, end_date=end_date)
     daily_n['trade_date'] = daily_n['trade_date'].map(lambda date: datetime.datetime.strptime(str(date), '%Y%m%d'))
-
-    daily_n['diff_1'] = (daily_n['avg_2'] + daily_n['avg_3'] - daily_n['avg_6'] - daily_n['avg_7']) / 2
-
     dic = {'ts_code': daily_n['ts_code'], 'trade_date': daily_n['trade_date'], 'avg': daily_n['avg_1'],
-           'diff_1': (daily_n['avg_2'] - daily_n['avg_6']) * 0.7 + (daily_n['avg_3'] - daily_n['avg_7']) * 0.3
+           'diff_1': daily_n['avg_2'] - daily_n['avg_6'],
+           'diff_2': daily_n['avg_7'] - daily_n['avg_14'],
+           'diff_3': signal.savgol_filter((daily_n['avg_31'] - daily_n['avg_91']), 61, 1),
            }
 
     return pd.DataFrame(dic)
@@ -60,14 +64,13 @@ def get_daily_n_diff(ts_code, start_date, end_date, diff_list):
 
 def test():
     ts_code = '000001.SZ'
-    start_date = '20230401'
-    end_date = '20240601'
-    # N 日线差值列表, 如 2_4 表示： 2日均线 - 4日均线, 如果值 > 0 则处于上升阶段, 如果值 < 0 则处于下降阶段
-    diff_list = ['2_6', '3_7']
-    df = get_daily_n_diff(ts_code, start_date, end_date, diff_list)
+    start_date = '20230101'
+    end_date = '20240501'
+
+    df = get_daily_n_diff(ts_code, start_date, end_date)
 
     ax = df.plot(x='trade_date', secondary_y=['avg'])
-    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.xaxis.set_major_locator(MultipleLocator(20))
 
     ax.set_ylabel('N日线差')
     ax.right_ax.set_ylabel('股价')
@@ -84,7 +87,6 @@ def test():
     plt.xlabel('交易日')
     plt.ylabel('股价')
     plt.show()
-
 
 
 if __name__ == '__main__':

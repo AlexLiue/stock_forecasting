@@ -8,6 +8,7 @@
 import configparser
 import datetime
 import os
+import sys
 
 import numpy as np
 import pandas as pd
@@ -176,11 +177,16 @@ def get_logger(log_name, file_name):
 
         if os.path.exists(clen_file):
             os.remove(clen_file)
-        handler = logging.FileHandler(log_file, encoding='utf-8')
+        file_handler = logging.FileHandler(log_file, encoding='utf-8')
         file_fmt = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s - %(name)s ] %(message)s '
         formatter = logging.Formatter(file_fmt)
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+
+        console_fmt = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s - %(name)s ] %(message)s '
+        console_handler = logging.StreamHandler(stream=sys.stdout)
+        console_handler.setFormatter(logging.Formatter(fmt=console_fmt))
+        logger.addHandler(console_handler)
     logger.info("Logger File [%s]" % log_file)
     return logger
 
@@ -505,7 +511,8 @@ def get_sql_engine():
     user = cfg['mysql']['user']
     passwd = cfg['mysql']['password']
     db = cfg['mysql']['database']
-    return create_engine("mysql://%s:%s@%s:%s/%s" % (user, passwd, host, port, db), encoding='utf-8', echo=False)
+    url = "mysql://%s:%s@%s:%s/%s" % (user, passwd, host, port, db)
+    return create_engine(url=url, echo=False)
 
 
 def enable_print_all():
@@ -522,6 +529,6 @@ def enable_print_all():
 
 
 if __name__ == '__main__':
-    enable_print_all()
+    get_sql_engine()
 
 

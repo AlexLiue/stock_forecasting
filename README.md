@@ -21,19 +21,24 @@
 
 ### 配置 Python 环境
 Python 版本 >= 3.8.x ， 安装依赖包 [requirements.txt](requirements.txt)
-```commandline
-pip install -r requirements.txt
+```shell
+pip install tushare --upgrade
+#  基于 Python 安装
+python -m pip install TA-Lib
+# 基于 Conda 安装
+conda install conda-forge::ta-lib
 ```
 
-### 配置本地 mysql 数据库
-```
+### 配置MySQL 
+```shell
 CREATE USER 'tushare'@'%' IDENTIFIED BY 'tushare'; 
 GRANT ALL PRIVILEGES ON tushare.* TO 'tushare'@'%' ; 
 GRANT SELECT ON tushare.* TO 'tushare'@'%' ; 
+ALTER USER 'tushare'@'%' IDENTIFIED WITH mysql_native_password BY 'tushare';
 FLUSH PRIVILEGES;
+
 ```
 
-### 创建本地数据库用户  
 
 
 

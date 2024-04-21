@@ -35,7 +35,7 @@ def plot(ts_code, columns, begin_day):
                f" where ts_code like '{ts_code}%%' and trade_date>={begin_day} order by trade_date asc"
     df = pd.read_sql(load_sql, engine)
 
-    df['trade_date'] = df['trade_date'].map(lambda date: datetime.datetime.strptime(str(date), '%Y%m%d'))
+    df['trade_date'] = df['trade_date'].map(lambda date: str(date))
     # df.plot(x='trade_date',
     #         y=['avg_1', 'avg_2', 'avg_4', 'avg_7', 'low_7', 'high_7', 'avg_14', 'avg_31', 'avg_61', 'avg_91'],
     #         title=ts_code

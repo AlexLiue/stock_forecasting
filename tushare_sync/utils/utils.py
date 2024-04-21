@@ -9,6 +9,7 @@ import configparser
 import datetime
 import logging
 import os
+import sys
 import time
 
 import pandas as pd
@@ -61,7 +62,7 @@ def get_logger(log_name, file_name):
     backup_days = int(cfg['sync-logging']['backupDays'])
     logger = logging.getLogger(log_name)
     logger.setLevel(log_level)
-    log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'logs')
+    log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../..', 'logs')
     log_file = os.path.join(log_dir, '%s.%s' % (file_name, str(datetime.datetime.now().strftime('%Y-%m-%d'))))
     if file_name != '':
         if not os.path.exists(log_dir):
@@ -74,11 +75,17 @@ def get_logger(log_name, file_name):
 
         if os.path.exists(clen_file):
             os.remove(clen_file)
-        handler = logging.FileHandler(log_file, encoding='utf-8')
+        file_handler = logging.FileHandler(log_file, encoding='utf-8')
         file_fmt = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s - %(name)s ] %(message)s '
         formatter = logging.Formatter(file_fmt)
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+
+        console_fmt = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s - %(name)s ] %(message)s '
+        console_handler = logging.StreamHandler(stream=sys.stdout)
+        console_handler.setFormatter(logging.Formatter(fmt=console_fmt))
+        logger.addHandler(console_handler)
+
     logger.info("Logger File [%s]" % log_file)
     return logger
 

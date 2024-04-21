@@ -8,6 +8,7 @@
 import configparser
 import datetime
 import os
+import sys
 
 import numpy as np
 import pandas as pd
@@ -176,11 +177,16 @@ def get_logger(log_name, file_name):
 
         if os.path.exists(clen_file):
             os.remove(clen_file)
-        handler = logging.FileHandler(log_file, encoding='utf-8')
+        file_handler = logging.FileHandler(log_file, encoding='utf-8')
         file_fmt = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s - %(name)s ] %(message)s '
         formatter = logging.Formatter(file_fmt)
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+
+        console_fmt = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s - %(name)s ] %(message)s '
+        console_handler = logging.StreamHandler(stream=sys.stdout)
+        console_handler.setFormatter(logging.Formatter(fmt=console_fmt))
+        logger.addHandler(console_handler)
     logger.info("Logger File [%s]" % log_file)
     return logger
 
@@ -494,7 +500,7 @@ def load_table(table_name, ts_code='', start_date='', end_date='', index_col='')
     engine = get_sql_engine()
     sql = "SELECT * " \
           "FROM %s t " \
-          "WHERE %s " % (table_name, condition)
+          "WHERE %s  ORDER BY ts_code, trade_date" % (table_name, condition)
     if index_col != '':
         return pd.read_sql(sql, engine, index_col=index_col)
     else:
@@ -508,7 +514,7 @@ def get_sql_engine():
     user = cfg['mysql']['user']
     passwd = cfg['mysql']['password']
     db = cfg['mysql']['database']
-    return create_engine("mysql://%s:%s@%s:%s/%s" % (user, passwd, host, port, db), encoding='utf-8', echo=False)
+    return create_engine("mysql://%s:%s@%s:%s/%s" % (user, passwd, host, port, db), echo=False)
 
 
 def enable_print_all():
