@@ -276,22 +276,21 @@ def DMA(DF, N1, N2, M):  # 平均差(不同 N 日均线的差值)
 
 def DIF_AVG(DF, N1, N2):
     """
-    基于成交均价 AVG: (AMOUNT *1000)/(VOL *100), 使用 MA 计算平均差
+    基于成交均价 AVG 计算平均差, 使用 MA 不加权
     """
-    AVG = DF['amount'] / DF['vol']
+    AVG = DF['avg']
     DIF = MA(AVG, N1) - MA(AVG, N2)
     DICT = {'DIF_AVG': DIF}
     VAR = pd.DataFrame(DICT)
     return VAR
 
 
-def DIF_EAVG(DF, N1, N2):
+def DIF_AVG_E(DF, N1, N2):
     """
-    基于成交均价 AVG: (AMOUNT *1000)/(VOL *100), 使用 EMA 计算平均差
-    N1 加权， N2 不加权
+    基于成交均价 AVG 计算平均差,  短线 N1 使用 MEA 加权， 长线 N2 使用 MA 不加权
     """
-    AVG = DF['amount'] / DF['vol']
+    AVG = DF['avg']
     DIF = EMA(AVG, N1) - MA(AVG, N2)
-    DICT = {'DIF_AVG': DIF}
+    DICT = {'DIF_AVG_E': DIF}
     VAR = pd.DataFrame(DICT)
     return VAR

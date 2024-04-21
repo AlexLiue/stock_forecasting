@@ -52,11 +52,12 @@ def get_daily_n_diff(ts_code, start_date, end_date):
     :return:
     """
     daily_n = load_table('daily_n', ts_code=ts_code, start_date=start_date, end_date=end_date)
-    daily_n['trade_date'] = daily_n['trade_date'].map(lambda date: datetime.datetime.strptime(str(date), '%Y%m%d'))
+    daily_n['trade_date'] = daily_n['trade_date'].map(lambda date:str(date))
     dic = {'ts_code': daily_n['ts_code'], 'trade_date': daily_n['trade_date'], 'avg': daily_n['avg_1'],
-           'diff_1': daily_n['avg_2'] - daily_n['avg_6'],
-           'diff_2': daily_n['avg_7'] - daily_n['avg_14'],
-           'diff_3': signal.savgol_filter((daily_n['avg_31'] - daily_n['avg_91']), 61, 1),
+           'diff_1': daily_n['avg_2'] - daily_n['avg_5'],
+           'diff_2': daily_n['avg_7'] - daily_n['avg_15'],
+           'diff_3': signal.savgol_filter((daily_n['avg_31'] - daily_n['avg_61']), 31, 5),
+
            }
 
     return pd.DataFrame(dic)
