@@ -27,7 +27,7 @@ def get_features(daily):
     dif_eavg_w = DIF_AVG_E(daily, 7, 15).rename(columns={'DIF_AVG_E': 'DIF_AVG_EW'})
     dif_eavg_m = DIF_AVG_E(daily, 31, 61).rename(columns={'DIF_AVG_E': 'DIF_AVG_EM'})
     return pd.concat(
-        [daily[['trade_date', 'avg']],
+        [daily[['ts_code', 'trade_date', 'avg']],
          skdj,
          dif_eavg_d, dif_eavg_w, dif_eavg_m
 
@@ -44,7 +44,7 @@ def plot_skdj_avg(df):
     fig.add_trace(go.Scatter(x=df['trade_date'], y=df['DIF_AVG_EW'], name='DIF_AVG_EW', xaxis='x', yaxis='y3'))
     fig.add_trace(go.Scatter(x=df['trade_date'], y=df['DIF_AVG_EM'], name='DIF_AVG_EM', xaxis='x', yaxis='y3'))
     fig.update_layout(
-        title_text="N 日特征参数", title_x=0.5,
+        title_text=f"{df.at[0,'ts_code']} N 日特征参数", title_x=0.5,
         margin=dict(l=10, r=10, b=40, t=40),
         xaxis=dict(domain=[0.08, 0.98], showline=True),
         yaxis1=dict(title=dict(text='SKDJ-( K / D 百分位)', standoff=10), titlefont=dict(color="#006400"),
@@ -63,8 +63,9 @@ def plot_skdj_avg(df):
 
 
 if __name__ == '__main__':
-    ts_code = '000001.SZ'
-    start_date = '20210101'
+    # ts_code = '000001.SZ'
+    ts_code = '601611.SH'
+    start_date = '20200101'
     end_date = '20240501'
     daily = load_table('daily', ts_code=ts_code, start_date=start_date, end_date=end_date)
     daily['trade_date'] = daily['trade_date'].map(lambda date: str(date))

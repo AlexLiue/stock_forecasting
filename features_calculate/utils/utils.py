@@ -27,7 +27,7 @@ def query_last_sync_date(sql):
     :return: 查询结果
     """
     cfg = get_cfg()
-    logger = get_logger("utils", cfg['logging']['filename'])
+    logger = get_logger("util", cfg['logging']['filename'])
     conn = get_mysql_connection()
     cursor = conn.cursor()
     cursor.execute(sql + ';')

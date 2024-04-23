@@ -22,21 +22,24 @@
 ### 配置 Python 环境
 Python 版本 >= 3.8.x ， 安装依赖包 [requirements.txt](requirements.txt)
 ```shell
+# 股票源
+conda install -c conda-forge quandl
 pip install tushare --upgrade
+conda install -c conda-forge pytrends
 #  基于 Python 安装
 python -m pip install TA-Lib
-# 基于 Conda 安装
-conda install conda-forge::ta-lib
+# 时间序分析包 
+conda install -c conda-forge prophet
+
 ```
 
 ### 配置MySQL 
 ```shell
-CREATE USER 'tushare'@'%' IDENTIFIED BY 'tushare'; 
-GRANT ALL PRIVILEGES ON tushare.* TO 'tushare'@'%' ; 
-GRANT SELECT ON tushare.* TO 'tushare'@'%' ; 
-ALTER USER 'tushare'@'%' IDENTIFIED WITH mysql_native_password BY 'tushare';
+CREATE USER 'stock'@'%' IDENTIFIED BY 'stock';
+CREATE DATABASE stock;
+GRANT ALL PRIVILEGES ON stock.* TO 'stock'@'%';
+ALTER USER 'stock'@'%' IDENTIFIED WITH mysql_native_password BY 'stock';
 FLUSH PRIVILEGES;
-
 ```
 
 

@@ -22,7 +22,7 @@ from features_calculate.utils.utils import get_mock_connection, get_logger, exec
     get_sql_engine
 
 package_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append('%s/../../utils' % package_path)
+sys.path.append('%s/../../util' % package_path)
 print(sys.path)
 
 

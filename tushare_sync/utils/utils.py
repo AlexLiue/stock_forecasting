@@ -166,7 +166,7 @@ def query_last_sync_date(sql):
     :param sql: 执行查询的SQL
     :return: 查询结果
     """
-    logger = get_logger("utils", 'data_syn.log')
+    logger = get_logger("util", 'data_syn.log')
     conn = get_mysql_connection()
     cursor = conn.cursor()
     cursor.execute(sql + ';')
@@ -203,7 +203,7 @@ def get_ts_code_list(interval, ts_code_limit):
     """
     # 创建 API / Connection / Logger 对象
     ts_api = get_tushare_api()
-    logger = get_logger("utils", 'data_syn.log')
+    logger = get_logger("util", 'data_syn.log')
 
     result = pd.Series(data=None, index=None, name=None, dtype=str)
     ts_code_offset = 0  # 读取偏移量
