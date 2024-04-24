@@ -48,7 +48,7 @@ def sync(drop_exist):
         query_date = "SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(CAST(IFNULL(max(trade_date),19900101) AS CHAR)," \
                      "'%%Y%%m%%d'), INTERVAL 1 DAY),'%%Y%%m%%d') as trade_date " \
                      f"FROM {cfg['mysql']['database']}.stock_daily_qfq WHERE symbol ='{symbol}';"
-        logger.info(f"Execute SQL [{query_date}]")
+        logger.info(f"Execute SQL  [{query_date}]")
         start_date = pd.read_sql(query_date, engine).iloc[0, 0]
         end_date = str(datetime.datetime.now().strftime('%Y%m%d'))
         if start_date < end_date:
@@ -74,8 +74,6 @@ def sync(drop_exist):
         else:
             logger.info(f"Execute Sync [{index}/{basic_info.shape[0]}] Symbol[{symbol}] Name[{name}] "
                         f"StartDate[{start_date}] EndDate[{end_date}], Skip Exec Sync ")
-
-
 
 
 # 增量追加表数据, 股票列表不具备增量条件, 全量覆盖
