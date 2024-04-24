@@ -34,12 +34,10 @@ def sync(drop_exist):
     engine = get_mock_connection()
     query_sql = f"SELECT sbi.`symbol`, sbi.`name` " \
                 f"FROM {cfg['mysql']['database']}.stock_basic_info sbi " \
-                f"WHERE exchange!='HKSE' " \
+                "WHERE exchange!='HKSE' AND name not like 'ST%%' AND name not like '*ST%%'" \
                 f"ORDER BY sbi.`symbol` ASC; "
     logger.info(f"Execute SQL [{query_sql}]")
-
     basic_info = pd.read_sql(query_sql, engine)
-    basic_info = basic_info[~(basic_info['name'].str.startswith('ST') | basic_info['name'].str.startswith('*ST'))]
 
     for index, row in basic_info.iterrows():
         symbol = row.iloc[0]
@@ -52,7 +50,7 @@ def sync(drop_exist):
         start_date = pd.read_sql(query_date, engine).iloc[0, 0]
         end_date = str(datetime.datetime.now().strftime('%Y%m%d'))
         if start_date < end_date:
-            logger.info(f"Execute Sync [{index}/{basic_info.shape[0]}] Symbol[{symbol}] Name[{name}] "
+            logger.info(f"Execute Sync [{index+1}/{basic_info.shape[0]}] Symbol[{symbol}] Name[{name}] "
                         f"StartDate[{start_date}] EndDate[{end_date}]")
             daily = ak.stock_zh_a_hist(symbol=symbol, period="daily",
                                        start_date=start_date, end_date=end_date, adjust="qfq")

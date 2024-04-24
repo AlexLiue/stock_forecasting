@@ -77,23 +77,4 @@ def use_age():
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='sync mode args')
-
-    parser.add_argument('--mode', required=True, choices=['normal', 'special'],
-                        type=str, default='',
-                        help='同步模式: normal(同步常规表),'
-                             ' special(同步特殊表)')
-    parser.add_argument('--drop_exist', action='store_true',
-                        help='初始化建表过程如果表已存在 Drop 后再建')
-
-    args = parser.parse_args()
-    mode = args.mode
-    dropExist = args.drop_exist
-    print('Args: --mode [%s] --drop_exist [%s]' % (mode, dropExist))
-
-    if mode == 'normal':
-        sync(dropExist)
-    elif mode == 'special':
-        sync_spc(dropExist)
-    else:
-        use_age()
+    sync(False)

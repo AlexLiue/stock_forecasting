@@ -6,10 +6,14 @@ import pandas as pd
 
 
 def EMA(DF, N):
+    """
+    指数平均数指标(Exponential Moving Average，EXPMA或EMA) 指数平均数指标也叫EXPMA指标, 对N日内的价格进行加权算术平均
+    """
     return pd.Series.ewm(DF, span=N, min_periods=N - 1, adjust=True).mean()
 
 
 def MA(DF, N):
+
     return pd.Series.rolling(DF, N).mean()
 
 

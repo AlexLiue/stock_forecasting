@@ -117,8 +117,6 @@ def max_date(date1, date2):
         return date2
 
 
-
-
 # 加载配置信息函数
 def get_cfg():
     cfg = configparser.ConfigParser()
@@ -474,11 +472,11 @@ def exec_sync_with_spec_date_column(table_name, api_name, fields, date_column,
         step = step + datetime.timedelta(days=1)
 
 
-def get_query_condition(ts_code='', start_date='', end_date=''):
+def get_query_condition(symbol='', start_date='', end_date=''):
     # 构建查询 Where 条件
     condition = ''
-    if ts_code != '':
-        condition = condition + 'ts_code=\'%s\'' % ts_code
+    if symbol != '':
+        condition = condition + 'symbol=\'%s\'' % symbol
     if start_date != '':
         if condition == '':
             condition = condition + 'trade_date>=%s' % start_date
@@ -494,17 +492,24 @@ def get_query_condition(ts_code='', start_date='', end_date=''):
     return condition
 
 
-def load_table(table_name, ts_code='', start_date='', end_date='', index_col=''):
-    condition = get_query_condition(ts_code, start_date, end_date)
-    # 执行 SQL 查询
-    engine = get_sql_engine()
-    sql = "SELECT * " \
-          "FROM %s t " \
-          "WHERE %s  ORDER BY ts_code, trade_date" % (table_name, condition)
-    if index_col != '':
-        return pd.read_sql(sql, engine, index_col=index_col)
-    else:
-        return pd.read_sql(sql, engine)
+def load_table(engine, db, table, symbol, start_date, end_date, logger):
+    condition = get_query_condition(symbol, start_date, end_date)
+    sql = f"SELECT * FROM {db}.{table} t WHERE {condition} ORDER BY symbol, trade_date"
+    logger.info(f"Execute SQL  [{sql}]")
+    pd.read_sql(sql, engine)
+
+
+# def load_table(table_name, ts_code='', start_date='', end_date='', index_col=''):
+#     condition = get_query_condition(ts_code, start_date, end_date)
+#     # 执行 SQL 查询
+#     engine = get_sql_engine()
+#     sql = "SELECT * " \
+#           "FROM %s t " \
+#           "WHERE %s  ORDER BY ts_code, trade_date" % (table_name, condition)
+#     if index_col != '':
+#         return pd.read_sql(sql, engine, index_col=index_col)
+#     else:
+#         return pd.read_sql(sql, engine)
 
 
 def get_sql_engine():
@@ -527,10 +532,5 @@ def enable_print_all():
     np.set_printoptions(threshold=np.inf)
 
 
-
-
-
 if __name__ == '__main__':
     enable_print_all()
-
-
