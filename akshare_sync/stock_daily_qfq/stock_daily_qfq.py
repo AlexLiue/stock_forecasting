@@ -49,8 +49,8 @@ def sync(drop_exist):
         logger.info(f"Execute SQL  [{query_date}]")
         start_date = pd.read_sql(query_date, engine).iloc[0, 0]
         end_date = str(datetime.datetime.now().strftime('%Y%m%d'))
-        if start_date < end_date:
-            logger.info(f"Execute Sync [{index+1}/{basic_info.shape[0]}] Symbol[{symbol}] Name[{name}] "
+        if start_date <= end_date:
+            logger.info(f"Execute Sync [{index}/{basic_info.shape[0]-1}] Symbol[{symbol}] Name[{name}] "
                         f"StartDate[{start_date}] EndDate[{end_date}]")
             daily = ak.stock_zh_a_hist(symbol=symbol, period="daily",
                                        start_date=start_date, end_date=end_date, adjust="qfq")
@@ -64,7 +64,7 @@ def sync(drop_exist):
                 daily.columns = ["trade_date", "symbol", "open", "close", "high", "low", "vol",
                                  "amount", "amp", "pct_chg", "pct_amt", "tr"]
                 daily.to_sql("stock_daily_qfq", engine, index=False, if_exists='append', chunksize=5000)
-                logger.info(f"Execute Sync [{index}/{basic_info.shape[0]}] Symbol[{symbol}] Name[{name}] "
+                logger.info(f"Execute Sync [{index}/{basic_info.shape[0]-1}] Symbol[{symbol}] Name[{name}] "
                             f"Write[{daily.shape[0]}] Records")
             if int(end_date) - int(start_date) > 30:
                 time.sleep(5)

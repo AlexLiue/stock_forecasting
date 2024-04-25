@@ -155,10 +155,11 @@ def get_tushare_api():
 
 
 # 获取日志文件打印输出对象
-def get_logger(log_name, file_name):
+def get_logger(log_name):
     cfg = get_cfg()
-    log_level = cfg['logging']['level']
-    backup_days = int(cfg['logging']['backupDays'])
+    log_level = cfg['forecasting-logging']['level']
+    file_name = cfg['forecasting-logging']['level']
+    backup_days = int(cfg['forecasting-logging']['backupDays'])
     logger = logging.getLogger(log_name)
     logging.getLogger('sqlalchemy.engine').setLevel(logging.ERROR)
     logger.setLevel(log_level)
@@ -496,7 +497,7 @@ def load_table(engine, db, table, symbol, start_date, end_date, logger):
     condition = get_query_condition(symbol, start_date, end_date)
     sql = f"SELECT * FROM {db}.{table} t WHERE {condition} ORDER BY symbol, trade_date"
     logger.info(f"Execute SQL  [{sql}]")
-    pd.read_sql(sql, engine)
+    return pd.read_sql(sql, engine)
 
 
 # def load_table(table_name, ts_code='', start_date='', end_date='', index_col=''):

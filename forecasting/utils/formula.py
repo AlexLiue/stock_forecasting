@@ -85,7 +85,10 @@ def STD(DF, N):
     return pd.Series.rolling(DF, N).std()
 
 
-def MACD(DF, FAST, SLOW, MID):
+def MACD(DF, FAST=12, SLOW=26, MID=9):
+    """
+    MACD平滑异同平均
+    """
     EMAFAST = EMA(DF, FAST)
     EMASLOW = EMA(DF, SLOW)
     DIFF = EMAFAST - EMASLOW
@@ -192,6 +195,14 @@ def MFI(DF, N):  # 资金指标
 
 
 def SKDJ(DF, N, M):
+    """
+    SKDJ 指标 (慢速随机指标)：通过差值平均过滤SKDJ指标的短期的波动，相比 KDJ 指标更可靠， SLOWKD参数通常设置为（36，5）
+    KDJ指标： 研究一段时间内的，最高价、最低价和收盘价之间的关系， K值变动会比D值快，所以K值又称快线，D值又称慢线
+    1.指标>80 时，回档机率大；指标<20 时，反弹机率大；
+    2.K在20左右向上交叉D时，视为买进信号；
+    3.K在80左右向下交叉D时，视为卖出信号；
+    4.SKDJ波动于50左右的任何讯号，其作用不大。
+    """
     CLOSE = DF['close']
     LOWV = LLV(DF['low'], N)
     HIGHV = HHV(DF['high'], N)
