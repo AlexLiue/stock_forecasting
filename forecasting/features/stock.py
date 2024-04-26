@@ -1,4 +1,5 @@
 import logging
+import time
 
 from forecasting.utils.utils import get_mock_connection, load_table, get_cfg, get_logger
 from forecasting.utils.formula import *
@@ -170,4 +171,7 @@ class Stock:
         )
 
         fig.show()
+
+
+        time.sleep(5)
 

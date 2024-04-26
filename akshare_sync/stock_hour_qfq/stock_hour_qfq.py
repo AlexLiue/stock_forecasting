@@ -21,11 +21,8 @@ import os
 import time
 
 import akshare as ak
-import numpy as np
 import pandas as pd
 from akshare_sync.util.tools import exec_create_table_script, get_mock_connection, get_logger, get_cfg
-
-pd.set_option('display.max_columns', None)
 
 
 def sync(drop_exist):
@@ -35,47 +32,39 @@ def sync(drop_exist):
     exec_create_table_script(dir_path, drop_exist, logger)
 
     engine = get_mock_connection()
-    query_sql = f"SELECT sbi.`symbol`, sbi.`name`, sbi.`exchange` " \
+    query_sql = f"SELECT sbi.`symbol`, sbi.`name` " \
                 f"FROM {cfg['mysql']['database']}.stock_basic_info sbi " \
-                "WHERE name not like 'ST%%' AND name not like '*ST%%'" \
-                f"ORDER BY sbi.`exchange` DESC, sbi.`symbol` ASC; "
+                "WHERE exchange!='HKSE' AND name not like 'ST%%' AND name not like '*ST%%'" \
+                f"ORDER BY sbi.`symbol` ASC; "
     logger.info(f"Execute SQL [{query_sql}]")
     basic_info = pd.read_sql(query_sql, engine)
 
     for index, row in basic_info.iterrows():
         symbol = row.iloc[0]
         name = row.iloc[1]
-        exchange = row.iloc[2]
 
-        query_start_date = "SELECT DATE_FORMAT(DATE_ADD(IFNULL(MAX(trade_date), DATE('1990-01-01')), INTERVAL 1 DAY),'%%Y%%m%%d') as trade_date " \
-                           f"FROM {cfg['mysql']['database']}.stock_daily_qfq WHERE symbol ='{symbol}';"
-        logger.info(f"Execute SQL  [{query_start_date}]")
-        start_date = pd.read_sql(query_start_date, engine).iloc[0, 0]
+        query_date = "SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(CAST(IFNULL(max(trade_date),19900101) AS CHAR)," \
+                     "'%%Y%%m%%d'), INTERVAL 1 DAY),'%%Y%%m%%d') as trade_date " \
+                     f"FROM {cfg['mysql']['database']}.stock_daily_qfq WHERE symbol ='{symbol}';"
+        logger.info(f"Execute SQL  [{query_date}]")
+        start_date = pd.read_sql(query_date, engine).iloc[0, 0]
         end_date = str(datetime.datetime.now().strftime('%Y%m%d'))
         if start_date <= end_date:
-            logger.info(f"Execute Sync [{index}/{basic_info.shape[0] - 1}] Symbol[{symbol}] Name[{name}] "
-                        f"Exchange[{exchange}] StartDate[{start_date}] EndDate[{end_date}]")
-
-            daily = None
-            if exchange == 'SSE' or exchange == 'SZSE' or exchange == 'BSE':
-                daily = ak.stock_zh_a_hist(symbol=symbol, period="daily",
-                                           start_date=start_date, end_date=end_date, adjust="qfq")
-            elif exchange == 'HKSE':
-                daily = ak.stock_hk_hist(symbol=symbol, period="daily",
-                                         start_date=start_date, end_date=end_date, adjust="qfq")
-
+            logger.info(f"Execute Sync [{index}/{basic_info.shape[0]-1}] Symbol[{symbol}] Name[{name}] "
+                        f"StartDate[{start_date}] EndDate[{end_date}]")
+            daily = ak.stock_zh_a_hist(symbol=symbol, period="daily",
+                                       start_date=start_date, end_date=end_date, adjust="qfq")
             if not daily.empty:
+                daily["日期"] = daily["日期"].apply(lambda x: str(x.strftime('%Y%m%d')))
                 daily["证券代码"] = symbol
-                daily["均价"] = daily["成交额"] / daily["成交量"] / 100
-                # 修复部分AVG数据存在异常(如停牌时vol=0), 替换为 forward 值
-                daily = daily[
-                    ["日期", "证券代码", "开盘", "收盘", "最高", "最低", "成交量", "成交额", "均价", "振幅", "涨跌幅",
-                     "涨跌额","换手率"]].replace([np.inf, -np.inf], np.nan).ffill()
-                daily.columns = ["trade_date", "symbol", "open", "close", "high", "low", "vol",
-                                 "amount", "avg", "amp", "pct_chg", "pct_amt", "tr"]
 
+                daily = daily[
+                    ["日期", "证券代码", "开盘", "收盘", "最高", "最低", "成交量", "成交额", "振幅", "涨跌幅", "涨跌额",
+                     "换手率"]]
+                daily.columns = ["trade_date", "symbol", "open", "close", "high", "low", "vol",
+                                 "amount", "amp", "pct_chg", "pct_amt", "tr"]
                 daily.to_sql("stock_daily_qfq", engine, index=False, if_exists='append', chunksize=5000)
-                logger.info(f"Execute Sync [{index}/{basic_info.shape[0] - 1}] Symbol[{symbol}] Name[{name}] "
+                logger.info(f"Execute Sync [{index}/{basic_info.shape[0]-1}] Symbol[{symbol}] Name[{name}] "
                             f"Write[{daily.shape[0]}] Records")
             if int(end_date) - int(start_date) > 30:
                 time.sleep(5)
