@@ -76,7 +76,7 @@ def sync(drop_exist):
     for index, row in trade_date.iterrows():
         trade_date = row.iloc[0]
         date = str(trade_date.strftime('%Y%m%d'))
-        logger.info(f"Execute Sync Exchange[SSE] TradeDate[{date}] By [stock_margin_detail_szse]")
+        logger.info(f"Execute Sync Exchange[SZSE] TradeDate[{date}] By [stock_margin_detail_szse]")
         margin = ak.stock_margin_detail_szse(date=date)
         if not margin.empty:
             margin["交易日期"] = trade_date
