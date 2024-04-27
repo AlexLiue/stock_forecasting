@@ -24,7 +24,7 @@ CREATE TABLE `stock_min30_qfq`
     KEY `stock_daily_qfq_trade_date` (`trade_date`,`symbol`) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci COMMENT ='小时行情-前复权'
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='30分行情-前复权'
     /*!50100 PARTITION BY RANGE (YEAR(`trade_date`))
     (PARTITION p1990 VALUES LESS THAN(1990) ENGINE = InnoDB,
     PARTITION p1991 VALUES LESS THAN(1991) ENGINE = InnoDB,

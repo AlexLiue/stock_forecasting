@@ -5,13 +5,10 @@
 # @Author  : PcLiu
 # @FileName: stock_margin.py
 ===========================
-
-历史行情数据-东财
+描述:融资融券明细
 目标表名:  stock_margin
-接口:
-
-
 """
+
 import datetime
 import os
 import akshare as ak
@@ -23,50 +20,73 @@ pd.set_option('display.max_columns', None)
 
 def sync(drop_exist):
     cfg = get_cfg()
+    db = cfg['mysql']['database']
     logger = get_logger('stock_margin', cfg['sync-logging']['filename'])
     dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
     exec_create_table_script(dir_path, drop_exist, logger)
-
     engine = get_mock_connection()
 
-    #  SSE
-    sse_start_date = "SELECT DATE_ADD(" \
-                     "IFNULL(MAX(trade_date), DATE('2024-01-01')), INTERVAL 1 DAY) as trade_date " \
-                     f"FROM {cfg['mysql']['database']}.stock_margin WHERE exchange ='SSE';"
-    sse_start = pd.read_sql(sse_start_date, engine).iloc[0, 0]
-    step = sse_start
-    while step < datetime.datetime.now().date():
-        date = str(step.strftime('%Y%m%d'))
+    # SSE 融资融券明细
+    # 查询交易日历
+    trade_date_sql = f"SELECT trade_date FROM {db}.stock_trade_date WHERE exchange ='SSE';"
+    logger.info(f"Execute SQL  [{trade_date_sql}]")
+    trade_date = pd.read_sql(trade_date_sql, engine)
+    # 查询历史最大同步时间
+    max_trade_date_sql = f"SELECT IFNULL(MAX(trade_date),DATE('1990-01-01')) as trade_date " \
+                         f"FROM {db}.stock_margin WHERE exchange ='SSE';"
+    logger.info(f"Execute SQL  [{max_trade_date_sql}]")
+    max_rade_date = pd.read_sql(max_trade_date_sql, engine).iloc[0, 0]
+
+    start_date = max(datetime.datetime.strptime("20150101", "%Y%m%d").date(), max_rade_date)
+    end_date = datetime.datetime.now().date()
+
+    trade_date = trade_date[(trade_date["trade_date"] > start_date) &
+                            (trade_date["trade_date"] < end_date)]
+
+    for index, row in trade_date.iterrows():
+        trade_date = row.iloc[0]
+        date = str(trade_date.strftime('%Y%m%d'))
+        logger.info(f"Execute Sync Exchange[SSE] TradeDate[{date}] By [stock_margin_detail_sse]")
         margin = ak.stock_margin_detail_sse(date=date)
-        margin["交易日期"] = step
-        margin = margin[["交易日期", "标的证券代码", "标的证券简称", "融资买入额", "融资余额", "融资偿还额",
-                         "融券卖出量", "融券余量", "融券偿还量", "融资融券余额"]]
-        margin.columns = ["trade_date", "symbol", "name", "buy_value", "buy_balance", "buy_return",
-                          "sell_value", "sell_balance_vol", "sell_return", "margin_balance"]
-        margin.to_sql("stock_min30_qfq", engine, index=False, if_exists='append', chunksize=5000)
-        logger.info(f"Execute Sync  TradeDate[{date}] Write[{margin.shape[0]}] Records")
+        if not margin.empty:
+            margin["交易日期"] = trade_date
+            margin["交易所"] = "SSE"
+            margin = margin[
+                ["交易日期", "标的证券代码", "标的证券简称", "交易所", "融资买入额", "融资余额", "融资偿还额",
+                 "融券卖出量", "融券余量", "融券偿还量"]]
+            margin.columns = ["trade_date", "symbol", "name", "exchange", "buy_value", "buy_balance", "buy_return",
+                              "sell_value", "sell_balance_vol", "sell_return"]
+            margin.to_sql("stock_margin", engine, index=False, if_exists='append', chunksize=5000)
+            logger.info(f"Execute Sync Exchange[SSE] TradeDate[{date}] Write[{margin.shape[0]}] Records")
 
-        # 更新下一次微批时间段
-        step = step + datetime.timedelta(days=1)
+    # SSE 融资融券明细
+    trade_date_sql = f"SELECT trade_date FROM {db}.stock_trade_date WHERE exchange ='SZSE';"
+    logger.info(f"Execute SQL  [{trade_date_sql}]")
+    trade_date = pd.read_sql(trade_date_sql, engine)
+    # 查询历史最大同步时间
+    max_trade_date_sql = f"SELECT IFNULL(MAX(trade_date),DATE('1990-01-01')) as trade_date " \
+                         f"FROM {db}.stock_margin WHERE exchange ='SZSE';"
+    logger.info(f"Execute SQL  [{max_trade_date_sql}]")
+    max_rade_date = pd.read_sql(max_trade_date_sql, engine).iloc[0, 0]
+    start_date = max(datetime.datetime.strptime("20150101", "%Y%m%d").date(), max_rade_date)
+    end_date = datetime.datetime.now().date()
+    trade_date = trade_date[(trade_date["trade_date"] > start_date) &
+                            (trade_date["trade_date"] < end_date)]
 
-    szse_start_date = "SELECT DATE_ADD(" \
-                      "IFNULL(MAX(trade_date), DATE('2024-01-01')), INTERVAL 1 DAY) as trade_date " \
-                      f"FROM {cfg['mysql']['database']}.stock_margin WHERE exchange ='SZSE';"
-    szse_start = pd.read_sql(szse_start_date, engine).iloc[0, 0]
-    step = szse_start
-    while szse_start < datetime.datetime.now().date():
-        date = str(step.strftime('%Y%m%d'))
+    for index, row in trade_date.iterrows():
+        trade_date = row.iloc[0]
+        date = str(trade_date.strftime('%Y%m%d'))
+        logger.info(f"Execute Sync Exchange[SSE] TradeDate[{date}] By [stock_margin_detail_szse]")
         margin = ak.stock_margin_detail_szse(date=date)
-        margin["交易日期"] = date
-        margin = margin[["交易日期", "证券代码", "证券简称", "融资买入额", "融资余额",
-                         "融券卖出量", "融券余量", "融券余额", "融资融券余额"]]
-        margin.columns = ["trade_date", "symbol", "name", "buy_value", "buy_balance",
-                          "sell_value", "sell_balance_vol", "sell_balance_val", "margin_balance"]
-        margin.to_sql("stock_min30_qfq", engine, index=False, if_exists='append', chunksize=5000)
-        logger.info(f"Execute Sync  TradeDate[{date}] Write[{margin.shape[0]}] Records")
-
-        # 更新下一次微批时间段
-        step = step + datetime.timedelta(days=1)
+        if not margin.empty:
+            margin["交易日期"] = trade_date
+            margin["交易所"] = "SZSE"
+            margin = margin[["交易日期", "证券代码", "证券简称", "交易所", "融资买入额", "融资余额",
+                             "融券卖出量", "融券余量", "融券余额", "融资融券余额"]]
+            margin.columns = ["trade_date", "symbol", "name", "exchange", "buy_value", "buy_balance",
+                              "sell_value", "sell_balance_vol", "sell_balance_val", "margin_balance"]
+            margin.to_sql("stock_margin", engine, index=False, if_exists='append', chunksize=5000)
+            logger.info(f"Execute Sync  TradeDate[{date}] Write[{margin.shape[0]}] Records")
 
 
 # 增量追加表数据, 股票列表不具备增量条件, 全量覆盖

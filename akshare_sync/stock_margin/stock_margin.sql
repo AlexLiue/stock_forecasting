@@ -18,11 +18,11 @@ CREATE TABLE `stock_margin`
     `margin_balance`      double         DEFAULT NULL COMMENT '融资融券余额',
     `created_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-    KEY `stock_daily_qfq_symbol` (`symbol`,`trade_date`) USING BTREE,
-    KEY `stock_daily_qfq_trade_date` (`trade_date`,`symbol`) USING BTREE
+    UNIQUE KEY `stock_daily_qfq_symbol` (`symbol`,`trade_date`) USING BTREE,
+    UNIQUE KEY `stock_daily_qfq_trade_date` (`trade_date`,`symbol`) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci COMMENT ='小时行情-前复权'
+  COLLATE = utf8mb4_0900_ai_ci COMMENT ='融资融券明细'
     /*!50100 PARTITION BY RANGE (YEAR(`trade_date`))
     (PARTITION p1990 VALUES LESS THAN(1990) ENGINE = InnoDB,
     PARTITION p1991 VALUES LESS THAN(1991) ENGINE = InnoDB,
