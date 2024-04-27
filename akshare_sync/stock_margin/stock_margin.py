@@ -86,7 +86,7 @@ def sync(drop_exist):
             margin.columns = ["trade_date", "symbol", "name", "exchange", "buy_value", "buy_balance",
                               "sell_value", "sell_balance_vol", "sell_balance_val", "margin_balance"]
             margin.to_sql("stock_margin", engine, index=False, if_exists='append', chunksize=5000)
-            logger.info(f"Execute Sync  TradeDate[{date}] Write[{margin.shape[0]}] Records")
+            logger.info(f"Execute Sync Exchange[SZSE] TradeDate[{date}] Write[{margin.shape[0]}] Records")
 
 
 # 增量追加表数据, 股票列表不具备增量条件, 全量覆盖
