@@ -86,11 +86,11 @@ trade_date|symbol|open |close|high |low  |vol      |amount       |avg           
 
 ## 同步表清单
 
-| MySQL表名                                                   | Akshare 接口名                                                                                 | 数据说明                                                       |  
-|:----------------------------------------------------------|:--------------------------------------------------------------------------------------------|:-----------------------------------------------------------|  
-| [stock_basic_info](stock_basic_info/stock_basic_info.sql) | stock_info_sh_name_code, stock_info_sz_name_code, stock_info_bj_name_code, stock_hk_spot_em | [股票基本信息](stock_basic_info/stock_basic_info.py)(每日全量覆盖)     |  
-| [stock_daily_qfq](stock_daily_qfq/stock_daily_qfq.sql)    | stock_zh_a_hist                                                                             | [股票日行情信息-前复权](stock_daily_qfq/stock_daily_qfq.py) (每日增量同步) |  
-| [stock_hour_qfq](stock_hour_qfq/stock_hour_qfq.sql)       | stock_zh_a_hist_min_em                                                                      | [股票小时行情信息-前复权](stock_hour_qfq/stock_hour_qfq.py) (每日增量同步)  |  
+| MySQL表名                                                   | Akshare 接口名                                                                                 | 数据说明                                                          |  
+|:----------------------------------------------------------|:--------------------------------------------------------------------------------------------|:--------------------------------------------------------------|  
+| [stock_basic_info](stock_basic_info/stock_basic_info.sql) | stock_info_sh_name_code, stock_info_sz_name_code, stock_info_bj_name_code, stock_hk_spot_em | [股票基本信息](stock_basic_info/stock_basic_info.py)(每日全量覆盖)        |  
+| [stock_daily_qfq](stock_daily_qfq/stock_daily_qfq.sql)    | stock_zh_a_hist, stock_hk_hist                                                              | [股票日行情信息-前复权](stock_daily_qfq/stock_daily_qfq.py) (每日增量同步)    |  
+| [stock_min30_qfq](stock_min30_qfq/stock_min30_qfq.sql)    | stock_zh_a_hist_min_em, stock_hk_hist_min_em                                                | [股票30分钟行情信息-前复权](stock_min30_qfq/stock_min30_qfq.py) (每日增量同步) |  
 
 
 ## 执行日志说明

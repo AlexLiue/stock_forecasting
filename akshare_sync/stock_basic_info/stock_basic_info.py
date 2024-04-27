@@ -27,31 +27,31 @@ def stock_info_code_name() -> pd.DataFrame:
     :return: 沪深京 A 股数据
     :rtype: pandas.DataFrame
     """
-    stock_sh_a = stock_info_sh_name_code(symbol="主板A股")
+    stock_sh_a = stock_info_sh_name_code(symbol="主板A股").dropna()
     stock_sh_a["交易所"] = "SSE"
     stock_sh_a["板块"] = "主板"
     stock_sh_a = stock_sh_a[["证券代码", "证券简称", "交易所", "板块", "上市日期"]]
     stock_sh_a.columns = ["symbol", "name", "exchange", "market", "list_date"]
 
-    stock_sh_kcb = stock_info_sh_name_code(symbol="科创板")
+    stock_sh_kcb = stock_info_sh_name_code(symbol="科创板").dropna()
     stock_sh_kcb["交易所"] = "SSE"
     stock_sh_kcb["板块"] = "科创板"
     stock_sh_kcb = stock_sh_kcb[["证券代码", "证券简称", "交易所", "板块", "上市日期"]]
     stock_sh_kcb.columns = ["symbol", "name", "exchange", "market", "list_date"]
 
-    stock_sz_a = stock_info_sz_name_code(symbol="A股列表")
+    stock_sz_a = stock_info_sz_name_code(symbol="A股列表").dropna()
     stock_sz_a["A股代码"] = stock_sz_a["A股代码"].astype(str).str.zfill(6)
     stock_sz_a["交易所"] = "SZSE"
     stock_sz_a = stock_sz_a[["A股代码", "A股简称", "交易所", "板块", "A股上市日期"]]
     stock_sz_a.columns = ["symbol", "name", "exchange", "market", "list_date"]
 
-    stock_bse = stock_info_bj_name_code()
+    stock_bse = stock_info_bj_name_code().dropna()
     stock_bse.loc[:, "交易所"] = "BSE"
     stock_bse["板块"] = "北交所"
     stock_bse = stock_bse[["证券代码", "证券简称", "交易所", "板块", "上市日期"]]
     stock_bse.columns = ["symbol", "name", "exchange", "market", "list_date"]
 
-    stock_hk = ak.stock_hk_spot_em()
+    stock_hk = ak.stock_hk_spot_em().dropna()
     stock_hk["交易所"] = "HKSE"
     stock_hk["上市日期"] = ""
     stock_hk["板块"] = "港交所"

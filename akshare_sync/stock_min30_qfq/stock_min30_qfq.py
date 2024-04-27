@@ -3,12 +3,12 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2024/04/22 21:33
 # @Author  : PcLiu
-# @FileName: stock_daily_qfq.py
+# @FileName: stock_min30_qfq.py
 ===========================
 
 历史行情数据-东财
-目标表名:  stock_daily_qfq
-接口: stock_zh_a_hist
+目标表名:  stock_min30_qfq
+接口: stock_zh_a_hist_min_em
 
 目标地址: https://quote.eastmoney.com/concept/sh603777.html?from=classic(示例)
 描述: 东方财富-沪深京 A 股日频率数据; 历史数据按日频率更新, 当日收盘价请在收盘后获取
@@ -30,12 +30,11 @@ pd.set_option('display.max_columns', None)
 
 def sync(drop_exist):
     cfg = get_cfg()
-    logger = get_logger('stock_daily_qfq', cfg['sync-logging']['filename'])
+    logger = get_logger('stock_min30_qfq', cfg['sync-logging']['filename'])
     dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
     exec_create_table_script(dir_path, drop_exist, logger)
 
     engine = get_mock_connection()
-
     query_sql = f"SELECT sbi.`symbol`, sbi.`name`, sbi.`exchange` " \
                 f"FROM {cfg['mysql']['database']}.stock_basic_info sbi " \
                 "WHERE name not like 'ST%%' AND name not like '*ST%%'" \
@@ -49,7 +48,7 @@ def sync(drop_exist):
         exchange = row.iloc[2]
 
         query_start_date = "SELECT DATE_ADD(IFNULL(MAX(trade_date),DATE('1990-01-01')),INTERVAL 1 DAY) as trade_date " \
-                           f"FROM {cfg['mysql']['database']}.stock_daily_qfq WHERE symbol ='{symbol}';"
+                           f"FROM {cfg['mysql']['database']}.stock_min30_qfq WHERE symbol ='{symbol}';"
         logger.info(f"Execute SQL  [{query_start_date}]")
         # 开始日期: 如果为周五，则日期+2 跳转下周一
         start_date = pd.read_sql(query_start_date, engine).iloc[0, 0]
@@ -62,35 +61,40 @@ def sync(drop_exist):
             logger.info(f"Execute Sync [{index}/{basic_info.shape[0] - 1}] Symbol[{symbol}] Name[{name}] "
                         f"Exchange[{exchange}] StartDate[{start_date}] EndDate[{end_date}]")
 
-            daily = None
+            minutes = None
             # 沪深京 A 股
             if exchange == 'SSE' or exchange == 'SZSE' or exchange == 'BSE':
-                daily = ak.stock_zh_a_hist(symbol=symbol, period="daily", adjust="qfq",
-                                           start_date=start_date, end_date=end_date)
+                minutes = ak.stock_zh_a_hist_min_em(symbol=symbol, period="30", adjust="qfq",
+                                                    start_date=f"{start_date} 00:00:00",
+                                                    end_date=f"{end_date} 23:59:59")
             # 港股 HK
             elif exchange == 'HKSE':
-                daily = ak.stock_hk_hist(symbol=symbol, period="daily", adjust="qfq",
-                                         start_date=start_date, end_date=end_date)
+                minutes = ak.stock_hk_hist_min_em(symbol=symbol, period="30", adjust="qfq",
+                                                  start_date=f"{start_date} 00:00:00",
+                                                  end_date=f"{end_date} 23:59:59")
 
-            if not daily.empty:
-                daily["证券代码"] = symbol
-                daily["均价"] = daily["成交额"] / daily["成交量"] / 100
-                daily["均价"] = daily["均价"].replace([np.inf, -np.inf], np.nan).ffill()
-
+            if not minutes.empty:
+                minutes["证券代码"] = symbol
                 # 修复部分AVG数据存在异常(如停牌时vol=0), 替换为 forward 值
-                daily = daily[
-                    ["日期", "证券代码", "开盘", "收盘", "最高", "最低", "成交量", "成交额", "均价", "振幅", "涨跌幅",
-                     "涨跌额", "换手率"]].replace([np.inf, -np.inf], np.nan).ffill()
-                daily.columns = ["trade_date", "symbol", "open", "close", "high", "low", "vol",
-                                 "amount", "avg", "amp", "pct_chg", "pct_amt", "tr"]
+                minutes["均价"] = minutes["成交额"] / minutes["成交量"] / 100
+                minutes["均价"] = minutes["均价"].replace([np.inf, -np.inf], np.nan).ffill()
+                # 计算交易日期、交易时间
+                minutes["时间"] = pd.to_datetime(minutes["时间"], format='%Y-%m-%d %H:%M:%S', errors="coerce")
+                minutes["日期"] = minutes["时间"].dt.date
+                minutes["时间"] = minutes["时间"].dt.time
 
-                daily.to_sql("stock_daily_qfq", engine, index=False, if_exists='append', chunksize=5000)
+                minutes = minutes[["日期", "证券代码", "时间", "开盘", "收盘", "最高", "最低", "成交量", "成交额",
+                                   "均价", "振幅", "涨跌幅", "涨跌额", "换手率"]]
+                minutes.columns = ["trade_date", "symbol", "trade_time", "open", "close", "high", "low", "vol",
+                                   "amount", "avg", "amp", "pct_chg", "pct_amt", "tr"]
+
+                minutes.to_sql("stock_min30_qfq", engine, index=False, if_exists='append', chunksize=5000)
                 logger.info(f"Execute Sync [{index}/{basic_info.shape[0] - 1}] Symbol[{symbol}] Name[{name}] "
-                            f"Write[{daily.shape[0]}] Records")
+                            f"Write[{minutes.shape[0]}] Records")
             if int(end_date) - int(start_date) > 30:
                 time.sleep(1)
             else:
-                time.sleep(0.1)
+                time.sleep(0.5)
 
         else:
             logger.info(f"Execute Sync [{index}/{basic_info.shape[0]}] Symbol[{symbol}] Name[{name}] "
