@@ -20,6 +20,13 @@ import logging
 import time
 
 
+def timedelta_to_str(t):
+    seconds = int(t.total_seconds())
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+
 def query_last_sync_date(sql):
     """
     查询历史同步数据的最大日期
