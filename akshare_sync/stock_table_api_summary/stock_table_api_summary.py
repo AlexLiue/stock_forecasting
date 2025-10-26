@@ -21,7 +21,10 @@ from bs4 import BeautifulSoup
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
 pd.set_option('display.max_columns', None)
-
+pd.set_option('display.max_rows', None)
+pd.set_option('display.width', None)
+pd.set_option('display.max_colwidth', None)
+pd.set_option('display.float_format', lambda x: '%.2f' % x) #
 
 def get_content():
     url = "https://akshare.akfamily.xyz/data/stock/stock.html"
@@ -40,7 +43,6 @@ def get_content():
     for section in sections:
         tags = section.find_all()
         if len(tags) > 6 and tags[2].text.startswith('接口: stock') and tags[3].text.startswith('目标地址: '):
-            print(section.text)
             name = tags[2].text.split("接口: ")[-1]
             addr = tags[3].text.split("目标地址: ")[-1]
             desc = tags[4].text.split("描述: ")[-1]
@@ -58,6 +60,7 @@ def sync(drop_exist):
     engine = get_engine()
 
     table_summary = get_content()
+    print(table_summary)
 
     table_summary.to_sql("stock_table_api_summary", engine, index=False, if_exists='append', chunksize=5000)
     logger.info(f"Execute Sync stock_table_api_summary " + f"Write[{table_summary.shape[0]}] Records")

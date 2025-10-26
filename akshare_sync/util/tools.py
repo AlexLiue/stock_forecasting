@@ -31,33 +31,6 @@ def get_cfg():
     return cfg
 
 
-# 获取 MySQL Connection 对象
-def get_engine():
-    cfg = get_cfg()
-    lib_dir = cfg['oracle']['client']
-    try:
-        cx_Oracle.init_oracle_client(lib_dir=lib_dir)
-    except Exception as err:
-        print("Error connecting: cx_Oracle.init_oracle_client()")
-        print(err)
-        sys.exit(1)
-
-    username = cfg['oracle']['user']
-    password = cfg['oracle']['password']
-    host = cfg['oracle']['host']
-    port = cfg['oracle']['port']
-    service_name = cfg['oracle']['service_name']
-    dsn = f"oracle+cx_oracle://{username}:{password}@{host}:{port}/?service_name={service_name}"
-    return create_engine(dsn)
-
-# 获取 Oracle Connection 对象
-def get_connection():
-    cfg = get_cfg()
-    params = oracledb.ConnectParams(host=cfg['oracle']['host'], port=int(cfg['oracle']['port']), service_name=cfg['oracle']['service_name'])
-    return  oracledb.connect(user=cfg['oracle']['user'], password=cfg['oracle']['password'], params=params)
-
-
-
 # 获取日志文件打印输出对象
 def get_logger(log_name, file_name):
     cfg = get_cfg()
@@ -81,15 +54,67 @@ def get_logger(log_name, file_name):
         file_fmt = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s - %(name)s ] %(message)s '
         formatter = logging.Formatter(file_fmt)
         file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
 
         console_fmt = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s - %(name)s ] %(message)s '
         console_handler = logging.StreamHandler(stream=sys.stdout)
         console_handler.setFormatter(logging.Formatter(fmt=console_fmt))
-        if not logger.handlers:
+
+        if len(logger.handlers) < 2:
+            logger.addHandler(file_handler)
             logger.addHandler(console_handler)
 
+        # if not logger.handlers:
+        #     logger.addHandler(console_handler)
+
     return logger
+
+
+def once_init_decorator(func):
+    cfg = get_cfg()
+    logger = get_logger('tools', cfg['sync-logging']['filename'])
+    called = False
+    def wrapper(*args, **kwargs):
+        nonlocal called
+        if not called:
+            called = True
+            return func(*args, **kwargs)
+        else:
+            logger.info("Oracle Client has already been inited.")
+            return None
+    return wrapper
+
+@once_init_decorator
+def init_oracle_client():
+    cfg = get_cfg()
+    lib_dir = cfg['oracle']['client']
+    try:
+        cx_Oracle.init_oracle_client(lib_dir=lib_dir)
+    except Exception as err:
+        print("Error connecting: cx_Oracle.init_oracle_client()")
+        print(err)
+        sys.exit(1)
+
+
+# 获取 MySQL Connection 对象
+def get_engine():
+    cfg = get_cfg()
+    init_oracle_client()
+    username = cfg['oracle']['user']
+    password = cfg['oracle']['password']
+    host = cfg['oracle']['host']
+    port = cfg['oracle']['port']
+    service_name = cfg['oracle']['service_name']
+    dsn = f"oracle+cx_oracle://{username}:{password}@{host}:{port}/?service_name={service_name}"
+    return create_engine(dsn)
+
+# 获取 Oracle Connection 对象
+def get_connection():
+    cfg = get_cfg()
+    params = oracledb.ConnectParams(host=cfg['oracle']['host'], port=int(cfg['oracle']['port']), service_name=cfg['oracle']['service_name'])
+    return  oracledb.connect(user=cfg['oracle']['user'], password=cfg['oracle']['password'], params=params)
+
+
+
 
 
 def exec_sql(sql):
@@ -142,8 +167,9 @@ def exec_create_table_script(script_dir, drop_exist, logger):
     table_name = Path(script_dir).name
     table_exist = query_table_is_exist(table_name)
     if (not table_exist) | (table_exist & drop_exist):
-        db = get_connection()
-        cursor = db.cursor()
+        conn = get_connection()
+        cursor = conn.cursor()
+
         count = 0
         flt_cnt = 0
         suc_cnt = 0
@@ -162,7 +188,7 @@ def exec_create_table_script(script_dir, drop_exist, logger):
                                     command = command[:-1]
                                 logger.info('Execute SQL [%s]' % command)
                                 cursor.execute(command)
-                                db.commit()
+                                conn.commit()
                                 count = count + 1
                                 suc_cnt = suc_cnt + 1
                             except Exception as e:
@@ -172,8 +198,15 @@ def exec_create_table_script(script_dir, drop_exist, logger):
                                 logger.info('Execute Failed. ')
                                 pass
         logger.info('Execute result: Total [%s], Succeed [%s] , Failed [%s] ' % (count, suc_cnt, flt_cnt))
+
+        # 清理 LOGS 表的记录
+        clean_logs_sql = f"DELETE FROM SYNC_LOGS WHERE \"接口名\"='{table_name}'"
+        logger.info(f"Execute SQL  [{clean_logs_sql}]")
+        cursor.execute(clean_logs_sql)
+        conn.commit()
+
         cursor.close()
-        db.close()
+        conn.close()
         if flt_cnt > 0:
             raise Exception('Execute SQL script [%s] failed. ' % script_dir)
 
@@ -184,6 +217,8 @@ def query_table_is_exist(table_name):
     cursor = conn.cursor()
     cursor.execute(sql)
     count = cursor.fetchall()[0][0]
+    cursor.close()
+    conn.close()
     if int(count) > 0:
         return True
     else:
