@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2024/04/22 21:33
 # @Author  : PcLiu
-# @FileName: stock_min30_qfq.py
+# @FileName: stock_table_api_summary.py
 ===========================
 描述: 30分行情-前复权
 目标表名:  stock_min30_qfq
@@ -16,7 +16,7 @@ import time
 import akshare as ak
 import numpy as np
 import pandas as pd
-from akshare_sync.util.tools import exec_create_table_script, get_mock_connection, get_logger, get_cfg
+from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
 pd.set_option('display.max_columns', None)
 
@@ -27,7 +27,7 @@ def sync(drop_exist):
     dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
     exec_create_table_script(dir_path, drop_exist, logger)
 
-    engine = get_mock_connection()
+    engine = get_engine()
     query_sql = f"SELECT sbi.`symbol`, sbi.`name`, sbi.`exchange` " \
                 f"FROM {cfg['mysql']['database']}.stock_basic_info sbi " \
                 "WHERE name not like 'ST%%' AND name not like '*ST%%'" \

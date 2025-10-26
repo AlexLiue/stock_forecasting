@@ -14,13 +14,13 @@ import os
 import akshare as ak
 import pandas as pd
 
-from akshare_sync.util.tools import exec_create_table_script, get_mock_connection, get_logger, get_cfg
+from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
 
 # 全量初始化表数据
 def sync(drop_exist):
     cfg = get_cfg()
-    engine = get_mock_connection()
+    engine = get_engine()
     logger = get_logger('stock_trade_date', cfg['sync-logging']['filename'])
     dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
     exec_create_table_script(dir_path, drop_exist, logger)

@@ -17,8 +17,8 @@ import akshare as ak
 import pandas as pd
 from akshare import stock_info_sh_name_code, stock_info_sz_name_code, stock_info_bj_name_code
 
-from akshare_sync.util.tools import exec_create_table_script, get_mock_connection, get_logger, get_cfg, \
-    exec_mysql_sql
+from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, \
+    exec_sql
 
 
 def stock_info_code_name() -> pd.DataFrame:
@@ -74,12 +74,12 @@ def sync(drop_exist):
     # 清理历史数据
     clean_sql = f"TRUNCATE TABLE  {cfg['mysql']['database']}.stock_basic_info"
     logger.info('Execute Clean SQL [%s]' % clean_sql)
-    counts = exec_mysql_sql(clean_sql)
+    counts = exec_sql(clean_sql)
     logger.info("Execute Clean SQL Affect [%d] records" % counts)
 
     data = stock_info_code_name()
 
-    connection = get_mock_connection()
+    connection = get_engine()
     logger.info(f'Write [{data.shape[0]}] records into table [stock_basic_info] with [{connection.engine}]')
     data.to_sql('stock_basic_info', connection, index=False, if_exists='append', chunksize=5000)
 

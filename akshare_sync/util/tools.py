@@ -9,11 +9,16 @@ import configparser
 import datetime
 import logging
 import os
+import re
 import sys
 import time
+from pathlib import Path
 
+import cx_Oracle
+import oracledb
 import pandas as pd
 import pymysql
+import sqlparse
 import tushare as ts
 from sqlalchemy import create_engine
 
@@ -27,32 +32,30 @@ def get_cfg():
 
 
 # 获取 MySQL Connection 对象
-def get_mock_connection():
+def get_engine():
     cfg = get_cfg()
-    db_host = cfg['mysql']['host']
-    db_user = cfg['mysql']['user']
-    db_password = cfg['mysql']['password']
-    db_port = cfg['mysql']['port']
-    db_database = cfg['mysql']['database']
-    db_url = 'mysql://%s:%s@%s:%s/%s?charset=utf8&use_unicode=1' % (db_user, db_password, db_host, db_port, db_database)
-    return create_engine(db_url)
+    lib_dir = cfg['oracle']['client']
+    try:
+        cx_Oracle.init_oracle_client(lib_dir=lib_dir)
+    except Exception as err:
+        print("Error connecting: cx_Oracle.init_oracle_client()")
+        print(err)
+        sys.exit(1)
 
+    username = cfg['oracle']['user']
+    password = cfg['oracle']['password']
+    host = cfg['oracle']['host']
+    port = cfg['oracle']['port']
+    service_name = cfg['oracle']['service_name']
+    dsn = f"oracle+cx_oracle://{username}:{password}@{host}:{port}/?service_name={service_name}"
+    return create_engine(dsn)
 
-def get_mysql_connection():
+# 获取 Oracle Connection 对象
+def get_connection():
     cfg = get_cfg()
-    return pymysql.connect(host=cfg['mysql']['host'],
-                           port=int(cfg['mysql']['port']),
-                           user=cfg['mysql']['user'],
-                           passwd=cfg['mysql']['password'],
-                           db=cfg['mysql']['database'],
-                           charset='utf8')
+    params = oracledb.ConnectParams(host=cfg['oracle']['host'], port=int(cfg['oracle']['port']), service_name=cfg['oracle']['service_name'])
+    return  oracledb.connect(user=cfg['oracle']['user'], password=cfg['oracle']['password'], params=params)
 
-
-# 构建 Tushare 查询 API 接口对象
-def get_tushare_api():
-    cfg = get_cfg()
-    token = cfg['tushare']['token']
-    return ts.pro_api(token=token, timeout=300)
 
 
 # 获取日志文件打印输出对象
@@ -83,18 +86,49 @@ def get_logger(log_name, file_name):
         console_fmt = '[%(asctime)s] [%(levelname)s] [ %(filename)s:%(lineno)s - %(name)s ] %(message)s '
         console_handler = logging.StreamHandler(stream=sys.stdout)
         console_handler.setFormatter(logging.Formatter(fmt=console_fmt))
-        logger.addHandler(console_handler)
+        if not logger.handlers:
+            logger.addHandler(console_handler)
+
     return logger
 
 
-def exec_mysql_sql(sql):
-    conn = get_mysql_connection()
+def exec_sql(sql):
+    conn = get_connection()
     cursor = conn.cursor()
-    counts = cursor.execute(sql + ';')
+    cursor.execute(sql)
     conn.commit()
     cursor.close()
     conn.close()
-    return counts
+
+
+
+def load_sql_script(path):
+    file = open(path, 'r', encoding='UTF-8')
+    sql_script = file.read().upper()
+    stats = sqlparse.split(sql_script)
+    res = []
+    i = 0
+    session_flag = False
+    for item in stats:
+        format_item = item.strip()
+        if format_item.startswith("BEGIN"):
+            res.append(format_item)
+            session_flag = True
+        elif session_flag == False:
+             res.append(format_item)
+             i += 1
+        else:
+            res[i] = res[i] + "\n" + format_item
+
+        if format_item.endswith("END") or format_item.endswith("END;"):
+            session_flag = False
+            i += 1
+    file.close()
+
+    for i in range(len(res)):
+        res[i] = re.sub(r'\s+', ' ', res[i].replace("\n",""))
+
+    return res
 
 
 def exec_create_table_script(script_dir, drop_exist, logger):
@@ -105,10 +139,10 @@ def exec_create_table_script(script_dir, drop_exist, logger):
     :param logger: 日志类
     :return:
     """
-    table_name = str(script_dir).split('/')[-1]
+    table_name = Path(script_dir).name
     table_exist = query_table_is_exist(table_name)
     if (not table_exist) | (table_exist & drop_exist):
-        db = get_mysql_connection()
+        db = get_connection()
         cursor = db.cursor()
         count = 0
         flt_cnt = 0
@@ -119,24 +153,24 @@ def exec_create_table_script(script_dir, drop_exist, logger):
                 if filename.endswith('.sql'):
                     dir_name = os.path.dirname(os.path.abspath(__file__))
                     full_name = os.path.join(dir_name, script_dir, filename)
-                    file_object = open(full_name)
-                    for line in file_object:
-                        if not line.startswith("--") and not line.startswith('/*'):  # 处理注释
-                            str1 = str1 + ' ' + ' '.join(line.strip().split())  # pymysql一次只能执行一条sql语句
-                    file_object.close()  # 循环读取文件时关闭文件很重要，否则会引起bug
-        for commandSQL in str1.split(';'):
-            command = commandSQL.strip()
-            if command != '':
-                try:
-                    logger.info('Execute SQL [%s]' % command.strip())
-                    cursor.execute(command.strip() + ';')
-                    count = count + 1
-                    suc_cnt = suc_cnt + 1
-                except db.DatabaseError as e:
-                    print(e)
-                    print(command)
-                    flt_cnt = flt_cnt + 1
-                    pass
+                    sql_list = load_sql_script(full_name)
+                    for commandSQL in sql_list:
+                        command = commandSQL.strip()
+                        if command != '':
+                            try:
+                                if not command.startswith("BEGIN"):
+                                    command = command[:-1]
+                                logger.info('Execute SQL [%s]' % command)
+                                cursor.execute(command)
+                                db.commit()
+                                count = count + 1
+                                suc_cnt = suc_cnt + 1
+                            except Exception as e:
+                                print(e)
+                                print(command)
+                                flt_cnt = flt_cnt + 1
+                                logger.info('Execute Failed. ')
+                                pass
         logger.info('Execute result: Total [%s], Succeed [%s] , Failed [%s] ' % (count, suc_cnt, flt_cnt))
         cursor.close()
         db.close()
@@ -145,10 +179,10 @@ def exec_create_table_script(script_dir, drop_exist, logger):
 
 
 def query_table_is_exist(table_name):
-    sql = "SELECT count(1) from information_schema.TABLES t WHERE t.TABLE_NAME ='%s'" % table_name
-    conn = get_mysql_connection()
+    sql = "SELECT count(1) from USER_TABLES t WHERE t.TABLE_NAME ='%s'" % table_name.upper()
+    conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute(sql + ';')
+    cursor.execute(sql)
     count = cursor.fetchall()[0][0]
     if int(count) > 0:
         return True
@@ -162,7 +196,7 @@ def query_last_sync_date(sql):
     :param sql: 执行查询的SQL
     :return: 查询结果
     """
-    conn = get_mysql_connection()
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(sql + ';')
     result = cursor.fetchall()

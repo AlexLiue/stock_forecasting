@@ -19,7 +19,7 @@ import datetime
 import os
 import akshare as ak
 import pandas as pd
-from akshare_sync.util.tools import exec_create_table_script, get_mock_connection, get_logger, get_cfg
+from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
 pd.set_option('display.max_columns', None)
 
@@ -30,7 +30,7 @@ def sync(drop_exist):
     logger = get_logger('stock_margin', cfg['sync-logging']['filename'])
     dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
     exec_create_table_script(dir_path, drop_exist, logger)
-    engine = get_mock_connection()
+    engine = get_engine()
 
     # SSE 融资融券明细
     # 查询交易日历
