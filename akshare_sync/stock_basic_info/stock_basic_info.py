@@ -15,7 +15,7 @@
 import os
 import akshare as ak
 import pandas as pd
-from akshare import stock_info_sh_name_code, stock_info_sz_name_code, stock_info_bj_name_code
+from akshare import stock_info_sh_name_code, stock_info_sz_name_code, stock_info_bj_name_code, stock_hk_spot_em
 
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, \
     exec_sql
@@ -29,9 +29,15 @@ def stock_info_code_name() -> pd.DataFrame:
     """
     stock_sh_a = stock_info_sh_name_code(symbol="主板A股").dropna()
     stock_sh_a["交易所"] = "SSE"
-    stock_sh_a["板块"] = "主板"
+    stock_sh_a["板块"] = "主板A股"
     stock_sh_a = stock_sh_a[["证券代码", "证券简称", "交易所", "板块", "上市日期"]]
     stock_sh_a.columns = ["symbol", "name", "exchange", "market", "list_date"]
+
+    stock_sh_b = stock_info_sh_name_code(symbol="主板A股").dropna()
+    stock_sh_b["交易所"] = "SSE"
+    stock_sh_b["板块"] = "主板B股"
+    stock_sh_b = stock_sh_b[["证券代码", "证券简称", "交易所", "板块", "上市日期"]]
+    stock_sh_b.columns = ["symbol", "name", "exchange", "market", "list_date"]
 
     stock_sh_kcb = stock_info_sh_name_code(symbol="科创板").dropna()
     stock_sh_kcb["交易所"] = "SSE"
@@ -45,21 +51,28 @@ def stock_info_code_name() -> pd.DataFrame:
     stock_sz_a = stock_sz_a[["A股代码", "A股简称", "交易所", "板块", "A股上市日期"]]
     stock_sz_a.columns = ["symbol", "name", "exchange", "market", "list_date"]
 
+    stock_sz_b = stock_info_sz_name_code(symbol="B股列表").dropna()
+    stock_sz_b["B股代码"] = stock_sz_b["B股代码"].astype(str).str.zfill(6)
+    stock_sz_b["交易所"] = "SZSE"
+    stock_sz_b = stock_sz_b[["B股代码", "B股简称", "交易所", "板块", "B股上市日期"]]
+    stock_sz_b.columns = ["symbol", "name", "exchange", "market", "list_date"]
+
+
     stock_bse = stock_info_bj_name_code().dropna()
     stock_bse.loc[:, "交易所"] = "BSE"
     stock_bse["板块"] = "北交所"
     stock_bse = stock_bse[["证券代码", "证券简称", "交易所", "板块", "上市日期"]]
     stock_bse.columns = ["symbol", "name", "exchange", "market", "list_date"]
 
-    stock_hk = ak.stock_hk_spot_em().dropna()
+    stock_hk = stock_hk_spot_em().dropna()
     stock_hk["交易所"] = "HKSE"
     stock_hk["上市日期"] = ""
     stock_hk["板块"] = "港交所"
     stock_hk = stock_hk[["代码", "名称", "交易所", "板块", "上市日期"]]
     stock_hk.columns = ["symbol", "name", "exchange", "market", "list_date"]
 
-    big_df = pd.concat([stock_sh_a, stock_sh_kcb, stock_sz_a, stock_bse, stock_hk], ignore_index=True)
-    big_df.columns = ["symbol", "name", "exchange", "market", "list_date"]
+    big_df = pd.concat([stock_sh_a, stock_sh_kcb, stock_sz_a, stock_sz_b, stock_bse, stock_hk], ignore_index=True)
+    big_df.columns = ["证券代码", "证券简称", "交易所", "板块", "上市日期"]
     return big_df
 
 
@@ -72,10 +85,9 @@ def sync(drop_exist):
     exec_create_table_script(dir_path, drop_exist, logger)
 
     # 清理历史数据
-    clean_sql = f"TRUNCATE TABLE  {cfg['mysql']['database']}.stock_basic_info"
+    clean_sql = f"TRUNCATE TABLE STOCK_BASIC_INFO"
     logger.info('Execute Clean SQL [%s]' % clean_sql)
-    counts = exec_sql(clean_sql)
-    logger.info("Execute Clean SQL Affect [%d] records" % counts)
+    exec_sql(clean_sql)
 
     data = stock_info_code_name()
 
@@ -86,4 +98,4 @@ def sync(drop_exist):
 
 # 增量追加表数据, 股票列表不具备增量条件, 全量覆盖
 if __name__ == '__main__':
-    sync(False)
+    sync(True)

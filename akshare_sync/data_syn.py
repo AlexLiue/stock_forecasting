@@ -12,6 +12,7 @@ from akshare_sync.stock_szse_sector_summary import stock_szse_sector_summary
 from akshare_sync.stock_szse_summary import stock_szse_summary
 from akshare_sync.stock_sse_summary import stock_sse_summary
 from akshare_sync.stock_table_api_summary import stock_table_api_summary
+from akshare_sync.stock_zh_a_hist import stock_zh_a_hist
 from akshare_sync.util.tools import get_cfg
 
 
@@ -22,8 +23,10 @@ def sync(drop_exist, max_retry, retry_interval):
     stock_szse_summary.sync(drop_exist, max_retry, retry_interval)
     stock_szse_area_summary.sync(drop_exist, max_retry, retry_interval)
     stock_szse_sector_summary.sync(drop_exist, max_retry, retry_interval)
-    stock_sse_deal_daily.sync(drop_exist, max_retry, retry_interval)
-    
+    stock_sse_deal_daily.sync(drop_exist, max_retry, retry_interval) #上海证券交易所-数据-股票数据-成交概况-股票成交概况-每日股票情况
+    stock_zh_a_hist.sync(drop_exist, max_retry, retry_interval) # 东方财富-沪深京 A 股日频率数据;
+
+
 
 
 
