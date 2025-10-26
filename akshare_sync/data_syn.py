@@ -5,15 +5,25 @@ import argparse
 
 import cx_Oracle
 import sys
+
+from akshare_sync.stock_sse_deal_daily import stock_sse_deal_daily
+from akshare_sync.stock_szse_area_summary import stock_szse_area_summary
+from akshare_sync.stock_szse_sector_summary import stock_szse_sector_summary
 from akshare_sync.stock_szse_summary import stock_szse_summary
 from akshare_sync.stock_sse_summary import stock_sse_summary
+from akshare_sync.stock_table_api_summary import stock_table_api_summary
 from akshare_sync.util.tools import get_cfg
 
 
 # 全量历史初始化
 def sync(drop_exist, max_retry, retry_interval):
+    stock_table_api_summary.sync(False)
     stock_sse_summary.sync(drop_exist, max_retry, retry_interval)
     stock_szse_summary.sync(drop_exist, max_retry, retry_interval)
+    stock_szse_area_summary.sync(drop_exist, max_retry, retry_interval)
+    stock_szse_sector_summary.sync(drop_exist, max_retry, retry_interval)
+    stock_sse_deal_daily.sync(drop_exist, max_retry, retry_interval)
+    
 
 
 

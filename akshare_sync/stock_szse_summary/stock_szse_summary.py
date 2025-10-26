@@ -20,6 +20,7 @@ import akshare as ak
 import numpy as np
 import pandas as pd
 
+from akshare_sync.global_data.global_data import GlobalData
 from akshare_sync.sync_logs.sync_logs import query_api_sync_date, update_api_sync_date
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
@@ -37,28 +38,27 @@ def sync(drop_exist, max_retry, retry_interval):
     exec_create_table_script(dir_path, drop_exist, logger)
     engine = get_engine()
 
+    # 查询交易日历
+    global_data = GlobalData()
+    trade_date_set = global_data.trade_date_a
+    engine = get_engine()
     query_start_date = query_api_sync_date('stock_szse_summary', 'stock_szse_summary')
     start_date = str(max(query_start_date, '20100101'))
-    logger.info(f"Execute Sync stock_sse_summary Date[{start_date}]")
-
     end_date = str(datetime.datetime.now().strftime('%Y%m%d'))
-    start = datetime.datetime.strptime(start_date, '%Y%m%d') + datetime.timedelta(days=1)
-    end = datetime.datetime.strptime(end_date, '%Y%m%d')
-    step = start  # 微批开始时间
-    while step <= end:
+    date_list = [date for date in trade_date_set if start_date <= date <= end_date]
+    logger.info(f"Execute Sync stock_szse_summary From Date[{start_date}] to Date[{end_date}]")
+
+    for step_date in date_list:
         cur_retry = 1
         while cur_retry <= max_retry:
             try:
-                step_date = str(step.strftime('%Y%m%d'))
                 logger.info(f"Execute Sync stock_szse_summary Date[{step_date}]")
                 df = ak.stock_szse_summary(date=step_date)
                 df["日期"] = step_date
                 df = df[["日期", "证券类别", "数量", "成交金额", "总市值", "流通市值"]]
                 df.to_sql("stock_szse_summary", engine, index=False, if_exists='append', chunksize=5000)
                 logger.info(f"Execute Sync stock_szse_summary Date[{step_date}]" + f"Write[{df.shape[0]}] Records")
-                step = step + datetime.timedelta(days=1)
-                update_api_sync_date('stock_sse_summary', 'stock_sse_summary', f'{step_date}')
-
+                update_api_sync_date('stock_szse_summary', 'stock_szse_summary', f'{step_date}')
                 break
             except Exception as e:
                 if cur_retry + 1 <= max_retry:
@@ -68,6 +68,7 @@ def sync(drop_exist, max_retry, retry_interval):
                     cur_retry += 1
                 else:
                     return -1
+    return None
 
 
 # 增量追加表数据, 股票列表不具备增量条件, 全量覆盖

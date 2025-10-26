@@ -14,6 +14,7 @@ import sys
 import time
 from pathlib import Path
 
+import akshare as ak
 import cx_Oracle
 import oracledb
 import pandas as pd
@@ -69,19 +70,22 @@ def get_logger(log_name, file_name):
     return logger
 
 
+
 def once_init_decorator(func):
     cfg = get_cfg()
     logger = get_logger('tools', cfg['sync-logging']['filename'])
     called = False
+
     def wrapper(*args, **kwargs):
         nonlocal called
         if not called:
             called = True
             return func(*args, **kwargs)
         else:
-            logger.info("Oracle Client has already been inited.")
             return None
+
     return wrapper
+
 
 @once_init_decorator
 def init_oracle_client():
@@ -107,14 +111,13 @@ def get_engine():
     dsn = f"oracle+cx_oracle://{username}:{password}@{host}:{port}/?service_name={service_name}"
     return create_engine(dsn)
 
+
 # 获取 Oracle Connection 对象
 def get_connection():
     cfg = get_cfg()
-    params = oracledb.ConnectParams(host=cfg['oracle']['host'], port=int(cfg['oracle']['port']), service_name=cfg['oracle']['service_name'])
-    return  oracledb.connect(user=cfg['oracle']['user'], password=cfg['oracle']['password'], params=params)
-
-
-
+    params = oracledb.ConnectParams(host=cfg['oracle']['host'], port=int(cfg['oracle']['port']),
+                                    service_name=cfg['oracle']['service_name'])
+    return oracledb.connect(user=cfg['oracle']['user'], password=cfg['oracle']['password'], params=params)
 
 
 def exec_sql(sql):
@@ -124,7 +127,6 @@ def exec_sql(sql):
     conn.commit()
     cursor.close()
     conn.close()
-
 
 
 def load_sql_script(path):
@@ -140,8 +142,8 @@ def load_sql_script(path):
             res.append(format_item)
             session_flag = True
         elif session_flag == False:
-             res.append(format_item)
-             i += 1
+            res.append(format_item)
+            i += 1
         else:
             res[i] = res[i] + "\n" + format_item
 
@@ -151,7 +153,7 @@ def load_sql_script(path):
     file.close()
 
     for i in range(len(res)):
-        res[i] = re.sub(r'\s+', ' ', res[i].replace("\n",""))
+        res[i] = re.sub(r'\s+', ' ', res[i].replace("\n", ""))
 
     return res
 
