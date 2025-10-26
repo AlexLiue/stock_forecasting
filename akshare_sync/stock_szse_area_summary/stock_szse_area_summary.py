@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2025/10/22 21:33
 # @Author  : PcLiu
-# @FileName: stock_szse_area_summary.py
+# @FileName: stock_sse_deal_daily.py
 ===========================
 描述: 深圳证券交易所-市场总貌-地区交易排序
 
