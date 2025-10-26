@@ -36,8 +36,8 @@ GRANT ALL PRIVILEGES TO akshare;
 [oracle]
 host=localhost
 port=11521
-user=tushare
-password=Tushare009
+user=akshare
+password=Akshare009
 service_name=STOCK
 client=C:\Apps\OracleClient\instantclient_19_28
 
