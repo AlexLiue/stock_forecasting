@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
-from akshare_sync.sync_logs.sync_logs import query_api_sync_date, update_api_sync_date
+from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
 pd.set_option('display.max_columns', None)
@@ -41,7 +41,7 @@ def sync(drop_exist, max_retry, retry_interval):
     exec_create_table_script(dir_path, drop_exist, logger)
     engine = get_engine()
 
-    query_start_date = query_api_sync_date('stock_szse_sector_summary', 'stock_szse_sector_summary')
+    query_start_date = query_last_api_sync_date('stock_szse_sector_summary', 'stock_szse_sector_summary')
     start_date = str(max(query_start_date, '20181201'))
     logger.info(f"Execute Sync stock_szse_sector_summary Date[{start_date}]")
 
@@ -61,7 +61,7 @@ def sync(drop_exist, max_retry, retry_interval):
                 df = df[["日期", "项目名称", "项目名称-英文", "交易天数", "成交金额-人民币元", "成交金额-占总计", "成交股数-股数", "成交股数-占总计", "成交笔数-笔", "成交笔数-占总计"]]
                 df.columns = ["日期", "名称", "名称英文", "交易天数", "成交金额", "成交金额占比", "成交股数", "成交股数占比", "交笔数", "成交笔数占比"]
                 df.to_sql("stock_szse_sector_summary", engine, index=False, if_exists='append', chunksize=5000)
-                logger.info(f"Execute Sync stock_szse_sector_summary Date[{step_date}]" + f"Write[{df.shape[0]}] Records")
+                logger.info(f"Execute Sync stock_szse_sector_summary Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
                 step = step + relativedelta(months=1)
                 update_api_sync_date('stock_szse_sector_summary', 'stock_szse_sector_summary', f'{str(step.strftime('%Y%m%d'))}')
                 break

@@ -18,7 +18,7 @@ import time
 import akshare as ak
 import pandas as pd
 
-from akshare_sync.sync_logs.sync_logs import query_api_sync_date, update_api_sync_date
+from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
 pd.set_option('display.max_columns', None)
@@ -28,54 +28,47 @@ pd.set_option('display.max_colwidth', None)
 pd.set_option('display.float_format', lambda x: '%.2f' % x) #
 
 
-def sync(drop_exist, max_retry, retry_interval):
+
+# 全量初始化表数据
+def sync(drop_exist):
     cfg = get_cfg()
     logger = get_logger('stock_sse_summary', cfg['sync-logging']['filename'])
-    dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
-    exec_create_table_script(dir_path, drop_exist, logger)
-    engine = get_engine()
 
-    query_start_date = query_api_sync_date('stock_sse_summary', 'stock_sse_summary')
-    start_date = str(max(query_start_date, '19900101'))
-    logger.info(f"Execute Sync stock_sse_summary Date[{start_date}]")
+    try:
+        start_date = query_last_api_sync_date('stock_sse_summary', 'stock_sse_summary')
+        if start_date < str(datetime.datetime.now().strftime('%Y%m%d')):
+            dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+            exec_create_table_script(dir_path, drop_exist, logger)
 
-    cur_retry = 1
-    while cur_retry <= max_retry:
-        try:
+            # 获取数据
             stock_sse_summary_df = ak.stock_sse_summary()
             stock_sse_summary_df = stock_sse_summary_df.set_index("项目")
 
-            summary = stock_sse_summary_df.T
-            summary["项目"] = summary.axes[0]
+            data = stock_sse_summary_df.T
+            data["项目"] = data.axes[0]
 
-            summary = summary[["报告时间", "项目", "上市股票", "总股本", "流通股本", "总市值", "流通市值", "平均市盈率"]]
-            summary.columns = ["日期", "项目", "上市股票", "总股本", "流通股本", "总市值", "流通市值", "平均市盈率"]
-            summary = summary.reset_index(drop=True)
+            data = data[
+                ["报告时间", "项目", "上市股票", "总股本", "流通股本", "总市值", "流通市值", "平均市盈率"]]
+            data.columns = ["日期", "项目", "上市股票", "总股本", "流通股本", "总市值", "流通市值", "平均市盈率"]
+            data = data.reset_index(drop=True)
 
             logger.info(f"Execute Filter : 日期 > %s", start_date)
-            summary = summary[summary["日期"] > start_date]
+            data = data[data["日期"] > start_date]
 
-            summary.to_sql("stock_sse_summary", engine, index=False, if_exists='append', chunksize=5000)
-            logger.info(f"Execute Sync stock_sse_summary " + f"Write[{summary.shape[0]}] Records")
+            # 写入数据库
+            connection = get_engine()
+            logger.info(f'Write [{data.shape[0]}] records into table [stock_sse_summary] with [{connection.engine}]')
+            data.to_sql('stock_sse_summary', connection, index=False, if_exists='append', chunksize=5000)
 
-            # 跳出
-            break
+            update_api_sync_date('stock_sse_summary', 'stock_sse_summary', f'{str(data["日期"].max())}')
 
-        except Exception as e:
-            if cur_retry + 1 <= max_retry:
-                logger.error("Get Exception[%s]" % e.__cause__)
-                logger.error(f"Retry[{cur_retry}] Failed, Exec Retry After [{cur_retry * retry_interval}] Second")
-                time.sleep(cur_retry * retry_interval)
-                cur_retry += 1
-            else:
-                raise e
-
-    cur_date = str(datetime.datetime.now().strftime('%Y%m%d'))
-    update_api_sync_date('stock_sse_summary', 'stock_sse_summary', f'{cur_date}')
-
+        else:
+            logger.info("Table [stock_sse_summary] Early Synced, Skip ...")
+    except Exception as e:
+        logger.error(f"Table [stock_sse_summary] Sync Failed Cause By [{e.__cause__}] Traceback[{e.__traceback__}]")
 
 
 # 增量追加表数据, 股票列表不具备增量条件, 全量覆盖
 if __name__ == '__main__':
-    sync(False, 3, 10)
+    sync(False)
 

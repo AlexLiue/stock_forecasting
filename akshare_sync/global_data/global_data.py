@@ -1,15 +1,38 @@
 import akshare as ak
+import pandas as pd
 
-from akshare_sync.util.tools import get_cfg
+from akshare_sync.util.tools import get_cfg, get_engine
 from akshare_sync.util.tools import get_logger
+
+"""
+交易所 |板块  |
+----+----+
+SZSE|主板  |  
+SZSE|创业板 |
+SSE |主板A股|
+SSE |科创板 |
+HKSE|港交所 |
+BSE |北交所 |
+
+"""
+
 class GlobalData:
 
     cfg = get_cfg()
     logger = get_logger('global_data', cfg['sync-logging']['filename'])
     logger.info("Exec Init Global Shared Data...")
 
+    engine = get_engine()
+    query_sql = f"SELECT \"证券代码\", \"证券简称\", \"交易所\" ,\"板块\"" \
+                f"FROM STOCK_BASIC_INFO sbi " \
+                "WHERE \"证券代码\" not like 'ST%%' AND \"证券代码\" not like '*ST%%'" \
+                f"ORDER BY \"交易所\" DESC, \"证券代码\" ASC"
+    logger.info(f"Execute SQL [{query_sql}]")
+    basic_info = pd.read_sql(query_sql, engine)
+
     trade_date_a = list(ak.tool_trade_date_hist_sina()['trade_date'].apply(lambda d: d.strftime('%Y%m%d')))
     trade_code_a = list(ak.stock_info_a_code_name()['code'])
+
     trade_code_sh_a = list(ak.stock_info_sh_name_code(symbol="主板A股")['证券代码'])
     trade_code_sh_b = list(ak.stock_info_sh_name_code(symbol="主板B股")['证券代码'])
     trade_code_sh_kcb = list(ak.stock_info_sh_name_code(symbol="科创板")['证券代码'])

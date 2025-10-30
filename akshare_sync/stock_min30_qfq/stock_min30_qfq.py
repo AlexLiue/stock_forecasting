@@ -83,7 +83,7 @@ def sync(drop_exist):
 
                 minutes.to_sql("stock_min30_qfq", engine, index=False, if_exists='append', chunksize=5000)
                 logger.info(f"Execute Sync [{index}/{basic_info.shape[0] - 1}] Symbol[{symbol}] Name[{name}] "
-                            f"Write[{minutes.shape[0]}] Records")
+                            f" Write[{minutes.shape[0]}] Records")
             if int(end_date) - int(start_date) > 30:
                 time.sleep(1)
             else:

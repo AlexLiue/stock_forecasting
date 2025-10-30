@@ -21,7 +21,7 @@ import akshare as ak
 import pandas as pd
 
 from akshare_sync.global_data.global_data import GlobalData
-from akshare_sync.sync_logs.sync_logs import query_api_sync_date, update_api_sync_date
+from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
 from akshare_sync.util import tools
@@ -43,7 +43,7 @@ def sync(drop_exist, max_retry, retry_interval):
     global_data = GlobalData()
     trade_date_set = set(global_data.trade_date_a)
     engine = get_engine()
-    query_start_date = query_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_daily')
+    query_start_date = query_last_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_daily')
     start_date = str(max(query_start_date, '20211231'))
     end_date = str(datetime.datetime.now().strftime('%Y%m%d'))
     date_list = [date for date in trade_date_set if start_date <= date <= end_date]
@@ -74,7 +74,7 @@ def sync(drop_exist, max_retry, retry_interval):
 
                     df.to_sql("stock_zh_a_hist_daily", engine, index=False, if_exists='append', chunksize=5000)
                     logger.info(
-                        f"Execute Sync stock_zh_a_hist_daily Date[{step_date}]" + f"Write[{df.shape[0]}] Records")
+                        f"Execute Sync stock_zh_a_hist_daily Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
 
                     update_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_daily',
                                          f'{str(step.strftime('%Y%m%d'))}')

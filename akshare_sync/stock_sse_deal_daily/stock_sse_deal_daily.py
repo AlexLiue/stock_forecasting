@@ -21,7 +21,7 @@ import time
 import akshare as ak
 import pandas as pd
 
-from akshare_sync.sync_logs.sync_logs import query_api_sync_date, update_api_sync_date
+from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
 pd.set_option('display.max_columns', None)
@@ -42,7 +42,7 @@ def sync(drop_exist, max_retry, retry_interval):
     trade_date_set = set(trade_date_df['trade_date'].apply(lambda d: d.strftime('%Y%m%d')))
 
     engine = get_engine()
-    query_start_date = query_api_sync_date('stock_sse_deal_daily', 'stock_sse_deal_daily')
+    query_start_date = query_last_api_sync_date('stock_sse_deal_daily', 'stock_sse_deal_daily')
     start_date = str(max(query_start_date, '20211231'))
     logger.info(f"Execute Sync stock_sse_deal_daily Date[{start_date}]")
 
@@ -69,7 +69,7 @@ def sync(drop_exist, max_retry, retry_interval):
 
                     df.to_sql("stock_sse_deal_daily", engine, index=False, if_exists='append', chunksize=5000)
                     logger.info(
-                        f"Execute Sync stock_sse_deal_daily Date[{step_date}]" + f"Write[{df.shape[0]}] Records")
+                        f"Execute Sync stock_sse_deal_daily Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
 
                     update_api_sync_date('stock_sse_deal_daily', 'stock_sse_deal_daily',
                                          f'{str(step.strftime('%Y%m%d'))}')
