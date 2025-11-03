@@ -12,6 +12,8 @@ import os
 import re
 import sys
 import time
+import platform
+
 from pathlib import Path
 
 import akshare as ak
@@ -90,7 +92,7 @@ def once_init_decorator(func):
 @once_init_decorator
 def init_oracle_client():
     cfg = get_cfg()
-    lib_dir = cfg['oracle']['client']
+    lib_dir = cfg['oracle']['client_macos'] if platform.system() == 'Darwin' else cfg['oracle']['client_win']
     try:
         cx_Oracle.init_oracle_client(lib_dir=lib_dir)
     except Exception as err:
