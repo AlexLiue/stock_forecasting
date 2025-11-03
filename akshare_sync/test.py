@@ -24,9 +24,7 @@ import akshare as ak
 
 import akshare as ak
 
-stock_hk = stock_hk_spot_em().dropna()
-stock_hk["交易所"] = "HKSE"
-stock_hk["上市日期"] = ""
-stock_hk["板块"] = "港交所"
-stock_hk = stock_hk[["代码", "名称", "交易所", "板块", "上市日期"]]
-stock_hk.columns = ["symbol", "name", "exchange", "market", "list_date"]
+import akshare as ak
+
+stock_zh_a_hist_df = ak.stock_zh_a_hist(symbol="000001", period="daily", start_date="19900101", end_date='20260528', adjust="hfq")
+print(stock_zh_a_hist_df)

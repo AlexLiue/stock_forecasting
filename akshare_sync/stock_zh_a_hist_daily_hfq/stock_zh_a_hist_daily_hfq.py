@@ -3,9 +3,9 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2025/10/22 21:33
 # @Author  : PcLiu
-# @FileName: stock_zh_a_hist_daily.py
+# @FileName: stock_zh_a_hist_daily_hfq.py
 ===========================
-接口: stock_zh_a_hist_daily
+接口: stock_zh_a_hist_daily_hfq
 
 目标地址: https://quote.eastmoney.com/concept/sh603777.html?from=classic(示例)
 
@@ -33,9 +33,9 @@ pd.set_option('display.max_colwidth', None)
 pd.set_option('display.float_format', lambda x: '%.2f' % x) #
 
 
-def sync(drop_exist, max_retry, retry_interval):
+def sync(drop_exist):
     cfg = get_cfg()
-    logger = get_logger('stock_zh_a_hist_daily', cfg['sync-logging']['filename'])
+    logger = get_logger('stock_zh_a_hist_daily_hfq', cfg['sync-logging']['filename'])
     dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
     exec_create_table_script(dir_path, drop_exist, logger)
 
@@ -43,11 +43,11 @@ def sync(drop_exist, max_retry, retry_interval):
     global_data = GlobalData()
     trade_date_set = set(global_data.trade_date_a)
     engine = get_engine()
-    query_start_date = query_last_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_daily')
+    query_start_date = query_last_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_daily_hfq')
     start_date = str(max(query_start_date, '20211231'))
     end_date = str(datetime.datetime.now().strftime('%Y%m%d'))
     date_list = [date for date in trade_date_set if start_date <= date <= end_date]
-    logger.info(f"Execute Sync stock_zh_a_hist_daily From Date[{start_date}] to Date[{end_date}]")
+    logger.info(f"Execute Sync stock_zh_a_hist_daily_hfq From Date[{start_date}] to Date[{end_date}]")
 
 
     start = datetime.datetime.strptime(start_date, '%Y%m%d') + relativedelta(days=1)
@@ -61,8 +61,8 @@ def sync(drop_exist, max_retry, retry_interval):
 
             while cur_retry <= max_retry:
                 try:
-                    logger.info(f"Execute Sync stock_zh_a_hist_daily Date[{step_date}]")
-                    df = ak.stock_zh_a_hist_daily(date=step_date)
+                    logger.info(f"Execute Sync stock_zh_a_hist_daily_hfq Date[{step_date}]")
+                    df = ak.stock_zh_a_hist(date=step_date)
                     df = df.set_index("单日情况")
                     df = df.T
                     df["日期"] = step_date
@@ -72,11 +72,11 @@ def sync(drop_exist, max_retry, retry_interval):
                         ["日期", "板块", "挂牌数", "市价总值", "流通市值", "成交金额", "成交量", "平均市盈率", "换手率",
                          "流通换手率"]]
 
-                    df.to_sql("stock_zh_a_hist_daily", engine, index=False, if_exists='append', chunksize=5000)
+                    df.to_sql("stock_zh_a_hist_daily_hfq", engine, index=False, if_exists='append', chunksize=5000)
                     logger.info(
-                        f"Execute Sync stock_zh_a_hist_daily Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
+                        f"Execute Sync stock_zh_a_hist_daily_hfq Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
 
-                    update_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_daily',
+                    update_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_daily_hfq',
                                          f'{str(step.strftime('%Y%m%d'))}')
                     break
                 except Exception as e:

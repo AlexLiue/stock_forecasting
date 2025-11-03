@@ -78,6 +78,7 @@ def get_stock_short_sale_hk_report(url):
     df["Date"] = df["Date"].apply(lambda d: d.replace('/', ''))
     df["Stock Code"] = df["Stock Code"].apply(lambda d: f"{d:05d}")
     df.columns = ["日期", "证券代码", "证券简称", "淡仓股数", "淡仓金额"]
+    df = df[df["淡仓股数"]>0]
     return df
 
 
@@ -107,6 +108,7 @@ def sync(drop_exist):
                 data = get_stock_short_sale_hk_report(row_url)
 
                 data["日期"]=pd.to_datetime(data['日期'], format='%d%m%Y').dt.strftime('%Y%m%d')
+
                 # 写入数据库
                 connection = get_engine()
                 logger.info(f'Write [{data.shape[0]}] records into table [stock_short_sale_hk] with [{connection.engine}]')
