@@ -27,6 +27,7 @@ import pandas as pd
 from akshare_sync.global_data.global_data import GlobalData
 from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
+import traceback
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -63,7 +64,8 @@ def sync(drop_exist):
                 logger.info(f"Execute Sync stock_szse_summary Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
                 update_api_sync_date('stock_szse_summary', 'stock_szse_summary', f'{step_date}')
     except Exception as e:
-        logger.error(f"Table [stock_szse_summary] Sync Failed Cause By [{e.__cause__}] Traceback[{e.__traceback__.__str__()}]")
+        stack_str = ''.join(traceback.format_stack())
+        logger.error(f"Table [stock_szse_summary] Sync Failed Cause By [{e.__cause__}] Stack[{stack_str}]")
 
 
 
