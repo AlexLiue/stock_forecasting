@@ -18,9 +18,12 @@ python data_sun.py
 考虑查询计算性能, 采用 Oracle 数据库进行存储, Docker 模式安装 Oracle 19C, 并创建数据库表空间和用户
 ```
 ## Oracle 数据库安装
-docker run -d --name ORACLE19C -p 11521:1521 -p 15500:5500 -e ORACLE_SID=STOCK -e ORACLE_PDB=STOCK1 -e ORACLE_PWD=Alex#009 -e ORACLE_EDITION=enterprise -e ORACLE_CHARACTERSET=AL32UTF8 -v oracle_data:/opt/oracle/oradata registry.cn-hangzhou.aliyuncs.com/laowu/oracle:19c
+### Windows 平台 X86
+docker run -d --name ORACLE19C -p 11521:1521 -p 15500:5500 -e ORACLE_SID=STOCK -e ORACLE_PDB=STOCK1 -e ORACLE_PWD=Stock#123 -e ORACLE_EDITION=standard -e ORACLE_CHARACTERSET=AL32UTF8 -v oracle_data:/opt/oracle/oradata registry.cn-hangzhou.aliyuncs.com/laowu/oracle:19c
 
-docker run -d --name ORACLE19C -p 11521:1521 -p 15500:5500 -e ORACLE_SID=STOCK -e ORACLE_PDB=STOCK1 -e ORACLE_PWD=Alex009-e ORACLE_EDITION=enterprise -e ORACLE_CHARACTERSET=AL32UTF8 -v oracle_data:/opt/oracle/oradata registry.cn-hangzhou.aliyuncs.com/laowu/oracle:19c
+
+### MacOS 平台 ARM64
+docker run --name ORACLE19C -d -p 11521:1521 -p 15500:5500 -p 12484:2484 -e ORACLE_SID=STOCK -e ORACLE_PDB=STOCK1 -e ORACLE_PWD=Oracle#123 -v oracle_data:/opt/oracle/oradata codeassertion/oracledb-arm64-standalone:19.3.0-enterprise
 
 ## 创建数据库
 CREATE TABLESPACE  akshare DATAFILE '/opt/oracle/oradata/STOCK/STOCK1/akshare.dbf' SIZE 4G AUTOEXTEND ON NEXT 1G MAXSIZE UNLIMITED;
