@@ -1,6 +1,6 @@
 # Sync Akshare Data to Oracle - 股票数据获取
 
-- 同步 [Akshare](https://akshare.akfamily.xyz/data/stock/stock.html) 的股票交易数据到本地 MySQL 进行存储
+- 同步 [Akshare](https://akshare.akfamily.xyz/data/stock/stock.html) 的股票交易数据到本地 Oracle 进行存储
 - 首先从 Akshare 拉取全量历史数据
 - 然后每日下午 从 Akshare 拉取当日增量数据
 - 数据包含: A股、港股、日线、周线、月线等
@@ -18,8 +18,9 @@ python data_sun.py
 考虑查询计算性能, 采用 Oracle 数据库进行存储, Docker 模式安装 Oracle 19C, 并创建数据库表空间和用户
 ```
 ## Oracle 数据库安装
-docker run -d --name ORACLE19C -p 11521:1521 -p 15500:5500 -e ORACLE_SID=STOCK -e ORACLE_PDB=STOCK1 -e ORACLE_PWD=Alex#009224 -e ORACLE_EDITION=enterprise -e ORACLE_CHARACTERSET=AL32UTF8 -v oracle_data:/opt/oracle/oradata registry.cn-hangzhou.aliyuncs.com/laowu/oracle:19c
+docker run -d --name ORACLE19C -p 11521:1521 -p 15500:5500 -e ORACLE_SID=STOCK -e ORACLE_PDB=STOCK1 -e ORACLE_PWD=Alex#009 -e ORACLE_EDITION=enterprise -e ORACLE_CHARACTERSET=AL32UTF8 -v oracle_data:/opt/oracle/oradata registry.cn-hangzhou.aliyuncs.com/laowu/oracle:19c
 
+docker run -d --name ORACLE19C -p 11521:1521 -p 15500:5500 -e ORACLE_SID=STOCK -e ORACLE_PDB=STOCK1 -e ORACLE_PWD=Alex009-e ORACLE_EDITION=enterprise -e ORACLE_CHARACTERSET=AL32UTF8 -v oracle_data:/opt/oracle/oradata registry.cn-hangzhou.aliyuncs.com/laowu/oracle:19c
 
 ## 创建数据库
 CREATE TABLESPACE  akshare DATAFILE '/opt/oracle/oradata/STOCK/STOCK1/akshare.dbf' SIZE 4G AUTOEXTEND ON NEXT 1G MAXSIZE UNLIMITED;
