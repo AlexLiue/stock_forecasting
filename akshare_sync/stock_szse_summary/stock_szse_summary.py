@@ -5,11 +5,15 @@
 # @Author  : PcLiu
 # @FileName: stock_szse_summary.py
 ===========================
-描述: 上海证券交易所-股票数据总貌
-限量: 单次返回最近交易日的股票数据总貌(当前交易日的数据需要交易所收盘后统计)
+
+接口: stock_szse_summary
 
 目标地址: http://www.szse.cn/market/overview/index.html
-目标表名:  stock_szse_summary
+
+描述: 深圳证券交易所-市场总貌-证券类别统计
+
+限量: 单次返回指定 date 的市场总貌数据-证券类别统计(当前交易日的数据需要交易所收盘后统计)
+
 
 """
 import datetime
