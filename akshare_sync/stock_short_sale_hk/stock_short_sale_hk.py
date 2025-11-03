@@ -19,11 +19,10 @@ import re
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-import csv
 from io import StringIO
 
-from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date
-from akshare_sync.util.tools import get_cfg, get_logger, exec_create_table_script
+from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
+from akshare_sync.util.tools import get_cfg, get_logger, exec_create_table_script, get_engine
 
 headers = {
     'Accept': '*/*',
@@ -50,7 +49,9 @@ def convert_date(str_date):
 
 
 
-
+"""
+获取港股证监会卖空报告列表: 报告日期、报告CSV文件地址
+"""
 def get_stock_short_sale_report_list():
     # 获取转换比例数据
     root_url = "https://sc.sfc.hk/TuniS/www.sfc.hk/TC/Regulatory-functions/Market/Short-position-reporting/Aggregated-reportable-short-positions-of-specified-shares"
@@ -67,69 +68,56 @@ def get_stock_short_sale_report_list():
     return pd.DataFrame(rows, columns=["报告日期", "文件地址"])
 
 
-
-
-    soup.get("")
-    print(soup)
-
-
-
-    row = rows[0]
-
-    for row in rows:
-        items = row.find_all("td")
-        if (len(items) == 3):
-            csv_name = items[0]
-            csv_url = items[2].find("a").get("href")
-            csv_text = requests.get(csv_url, headers=headers).text
-            df = pd.read_csv(StringIO(csv_text))
-            df["Date"] = df["Date"].apply(lambda d: d.replace('/', ''))
-            df["Stock Code"] = df["Stock Code"].apply(lambda d: f"{d:05d}")
-            df.columns = ["日期", "证券代码", "证券简称", "淡仓股数", "淡仓金额"]
-
-    soup.get("")
-    print(soup)
+"""
+根据获取港股证监会卖空CSV文件地址，获取港股证监会卖空报告内容
+"""
+def get_stock_short_sale_report(url):
+    csv_text = requests.get(url, headers=headers).text
+    df = pd.read_csv(StringIO(csv_text))
+    df["Date"] = df["Date"].apply(lambda d: d.replace('/', ''))
+    df["Stock Code"] = df["Stock Code"].apply(lambda d: f"{d:05d}")
+    df.columns = ["日期", "证券代码", "证券简称", "淡仓股数", "淡仓金额"]
+    return df
 
 
 
-# 全量初始化表数据
+"""
+执行数据下载同步
+"""
 def sync(drop_exist):
     cfg = get_cfg()
-    logger = get_logger('stock_basic_info', cfg['sync-logging']['filename'])
+    logger = get_logger('stock_short_sale', cfg['sync-logging']['filename'])
 
     try:
-        start_date = query_last_api_sync_date('stock_basic_info', 'stock_basic_info')
+        start_date = query_last_api_sync_date('stock_short_sale', 'stock_short_sale')
         if start_date < str(datetime.datetime.now().strftime('%Y%m%d')):
             dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
             exec_create_table_script(dir_path, drop_exist, logger)
 
-            # 获取数据
+            # 获取报告日期列表，过滤已经同步的数据内容
             report_list = get_stock_short_sale_report_list()
+            report_list = report_list[report_list["日期"]>start_date]
 
+            # 读取卖空报告并存储
+            for index, row in report_list.iterrows():
+                row_date = row[0]
+                row_url = row[1]
+                logger.info(f"Table [stock_short_sale] Execute Sync Date: [{row_date}] Url [{row_url}] to Database")
+                data = get_stock_short_sale_report(row_url)
 
-
-
-            # # 清理历史数据
-            # clean_sql = f"TRUNCATE TABLE STOCK_BASIC_INFO"
-            # logger.info('Execute Clean SQL [%s]' % clean_sql)
-            # exec_sql(clean_sql)
-            #
-            # # 写入数据库
-            # connection = get_engine()
-            # logger.info(f'Write [{data.shape[0]}] records into table [stock_basic_info] with [{connection.engine}]')
-            # data.to_sql('stock_basic_info', connection, index=False, if_exists='append', chunksize=5000)
-            #
-            # update_api_sync_date('stock_basic_info', 'stock_basic_info',
-            #                      f'{str(datetime.datetime.now().strftime('%Y%m%d'))}')
-
+                # 写入数据库
+                connection = get_engine()
+                logger.info(f'Write [{data.shape[0]}] records into table [stock_short_sale] with [{connection.engine}]')
+                data.to_sql('stock_short_sale', connection, index=False, if_exists='append', chunksize=5000)
+                update_api_sync_date('stock_short_sale', 'stock_short_sale', f'{str(row_date)}')
         else:
-            logger.info("Table [stock_basic_info] Early Synced, Skip ...")
+            logger.info("Table [stock_short_sale] Early Synced, Skip ...")
     except Exception as e:
-        logger.error(f"Table [stock_basic_info] Sync Failed Cause By [{e.__cause__}] Traceback[{e.__traceback__}]")
+        logger.error(f"Table [stock_short_sale] Sync Failed Cause By [{e.__cause__}] Traceback[{e.__traceback__}]")
 
 
 
-# 增量追加表数据, 股票列表不具备增量条件, 全量覆盖
+
 if __name__ == '__main__':
     sync(False)
 
