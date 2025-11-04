@@ -45,13 +45,7 @@ def get_last_month_date():
     如果当前日期小于星期五的16:30:00分，则取上周五的日期，否则取这周五的日期
     """
     today = datetime.date.today()
-    weekday = today.weekday()
-    if weekday < 5 or (weekday == 5 and today.strftime('%H:%M:%S')<'16:30:00'):
-        return (today - datetime.timedelta(days=weekday + 3)).strftime('%Y%m%d')
-    else:
-        return (today - datetime.timedelta(days=weekday - 4)).strftime('%Y%m%d')
-
-
+    return (today - datetime.timedelta(days=today.day)).strftime('%Y%m%d')
 
 def sync(drop_exist=False):
     cfg = get_cfg()
@@ -65,7 +59,7 @@ def sync(drop_exist=False):
         global_data = GlobalData()
         trade_code_list = global_data.trade_code_a
         # 结束日期: 最近的周五日期
-        end_date = get_last_friday_date()
+        end_date = get_last_month_date()
 
         engine = get_engine()
         for row_idx in range(trade_code_list.shape[0]):
@@ -73,11 +67,11 @@ def sync(drop_exist=False):
             trade_code = row.iloc[0]
             trade_name = row.iloc[1]
             last_sync_date = query_last_sync_date(trade_code, engine, logger)
-            start_date =  (datetime.datetime.strptime(last_sync_date, '%Y%m%d') + relativedelta(weeks=1)).strftime('%Y%m%d')
+            start_date =  (datetime.datetime.strptime(last_sync_date, '%Y%m%d') + relativedelta(days=1)).strftime('%Y%m%d')
 
-            if start_date < end_date:
+            if start_date <= end_date:
                 logger.info(f"Execute Sync stock_zh_a_hist  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}]")
-                df = stock_zh_a_hist(symbol=trade_code, period="weekly", start_date=start_date, end_date=end_date, adjust="hfq", timeout=20)
+                df = stock_zh_a_hist(symbol=trade_code, period="monthly", start_date=start_date, end_date=end_date, adjust="hfq", timeout=20)
                 if not df.empty:
                     df["日期"] = df["日期"].apply(lambda x: x.strftime('%Y%m%d'))
                     df.to_sql("stock_zh_a_hist_monthly_hfq", engine, index=False, if_exists='append', chunksize=5000)
@@ -90,10 +84,7 @@ def sync(drop_exist=False):
         update_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_monthly_hfq', f'{str(end_date)}')
 
     except Exception as e:
-
         logger.error(f"Table [stock_zh_a_hist_monthly_hfq] Sync  Failed", exc_info=True)
-
-
 
 
 
