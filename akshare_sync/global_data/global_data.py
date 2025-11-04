@@ -41,14 +41,14 @@ class GlobalData:
     query_sql = f"SELECT \"证券代码\", \"证券简称\", \"交易所\" ,\"板块\"" \
                 f"FROM STOCK_BASIC_INFO sbi " \
                 "WHERE \"证券代码\" not like 'ST%%' AND \"证券代码\" not like '*ST%%'" \
-                f"ORDER BY \"交易所\" DESC, \"证券代码\" ASC"
+                f"ORDER BY \"证券代码\" ASC"
     logger.info(f"Execute SQL [{query_sql}]")
     basic_info = pd.read_sql(query_sql, engine)
 
     trade_date_a = list(ak.tool_trade_date_hist_sina()['trade_date'].apply(lambda d: d.strftime('%Y%m%d')))
     trade_date_a.sort()
 
-    trade_code_a = basic_info.loc[(["交易所"]=='SZSE') | (basic_info["交易所"]=='SSE') | (basic_info["交易所"]=='BSE')]
+    trade_code_a = basic_info[basic_info['交易所'].isin(['SZSE', 'SSE', 'BSE'])]
 
     # trade_code_sh_a = list(ak.stock_info_sh_name_code(symbol="主板A股")['证券代码'])
     # trade_code_sh_b = list(ak.stock_info_sh_name_code(symbol="主板B股")['证券代码'])
