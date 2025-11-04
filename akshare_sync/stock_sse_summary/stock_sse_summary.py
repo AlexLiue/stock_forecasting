@@ -65,7 +65,7 @@ def sync(drop_exist):
         else:
             logger.info("Table [stock_sse_summary] Early Synced, Skip ...")
     except Exception as e:
-        logger.error(f"Table [stock_sse_summary] Sync Failed Cause By [{e.__cause__}] Traceback[{e.__traceback__}]")
+        logger.error(f"Table [stock_sse_summary] SyncFailed", exc_info=True)
 
 
 

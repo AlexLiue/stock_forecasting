@@ -156,7 +156,7 @@ def sync(drop_exist):
             last_sync_date = query_last_sync_date(trade_code, engine, logger)
             start_date =  (datetime.datetime.strptime(last_sync_date, '%Y%m%d') + relativedelta(days=1)).strftime('%Y%m%d')
 
-            if start_date < end_date:
+            if start_date <= end_date:
                 logger.info(
                     f"Execute Sync stock_zh_a_hist  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}]")
                 df = stock_zh_a_hist(symbol=trade_code, period="daily", start_date=start_date, end_date=end_date,
@@ -166,7 +166,6 @@ def sync(drop_exist):
                     df.to_sql("stock_zh_a_hist_daily_hfq", engine, index=False, if_exists='append', chunksize=5000)
                     logger.info(
                         f"Execute Sync stock_zh_a_hist_daily_hfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
-                time.sleep(0.3)
             else:
                 logger.info(
                     f"Execute Sync stock_zh_a_hist  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")

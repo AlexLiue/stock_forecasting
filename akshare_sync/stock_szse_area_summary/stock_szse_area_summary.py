@@ -59,7 +59,7 @@ def sync(drop_exist):
             update_api_sync_date('stock_szse_area_summary', 'stock_szse_area_summary',
                                  f'{str(step.strftime('%Y%m%d'))}')
     except Exception as e:
-        logger.error(f"Table [stock_szse_area_summary] Sync Failed Cause By [{e.__cause__}] Traceback[{e.__traceback__}]")
+        logger.error(f"Table [stock_szse_area_summary] SyncFailed", exc_info=True)
 
 
 

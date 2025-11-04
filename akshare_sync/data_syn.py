@@ -15,11 +15,12 @@ from akshare_sync.stock_szse_summary import stock_szse_summary
 from akshare_sync.stock_sse_summary import stock_sse_summary
 from akshare_sync.stock_table_api_summary import stock_table_api_summary
 from akshare_sync.stock_zh_a_hist_daily_hfq import stock_zh_a_hist_daily_hfq
+from akshare_sync.stock_zh_a_hist_weekly_hfq import stock_zh_a_hist_weekly_hfq
 from akshare_sync.util.tools import get_cfg
 
 
 # 全量历史初始化
-def sync(drop_exist, max_retry, retry_interval):
+def sync(drop_exist):
     stock_table_api_summary.sync(False)  # 表 API 接口信息
     stock_basic_info.sync(False) # 股票基本信息: 股票代码、股票名称、交易所、板块
     stock_basic_info.sync(False) # 股票基本信息: 股票代码、股票名称、交易所、板块
@@ -30,6 +31,7 @@ def sync(drop_exist, max_retry, retry_interval):
     stock_szse_sector_summary.sync(drop_exist)
     stock_sse_deal_daily.sync(drop_exist) #上海证券交易所-数据-股票数据-成交概况-股票成交概况-每日股票情况
     stock_zh_a_hist_daily_hfq.sync(drop_exist) #东方财富-沪深京 A 股日频率数据 - 后复权
+    stock_zh_a_hist_weekly_hfq.sync(drop_exist)  # 东方财富-沪深京 A 股周频率数据 - 后复权
     # stock_zh_a_hist_daily_hfq.sync(drop_exist, max_retry, retry_interval) # 东方财富-沪深京 A 股日频率数据;
 
 
@@ -50,7 +52,7 @@ if __name__ == '__main__':
     print(f'Exec With Args:--drop_exist [{dropExist}]')
 
 
-    sync(dropExist, 3, 5)
+    sync(dropExist)
 
 
 

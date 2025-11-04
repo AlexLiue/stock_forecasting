@@ -180,7 +180,6 @@ def sync(drop_exist):
                     df.to_sql("stock_zh_a_hist_weekly_hfq", engine, index=False, if_exists='append', chunksize=5000)
                     logger.info(
                         f"Execute Sync stock_zh_a_hist_weekly_hfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
-                time.sleep(0.3)
             else:
                 logger.info(f"Execute Sync stock_zh_a_hist  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
 
