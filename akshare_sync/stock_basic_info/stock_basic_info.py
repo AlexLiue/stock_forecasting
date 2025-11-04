@@ -90,7 +90,7 @@ def stock_info_code_name() -> pd.DataFrame:
 
 
 # 全量初始化表数据
-def sync(drop_exist):
+def sync(drop_exist=False):
     cfg = get_cfg()
     logger = get_logger('stock_basic_info', cfg['sync-logging']['filename'])
 

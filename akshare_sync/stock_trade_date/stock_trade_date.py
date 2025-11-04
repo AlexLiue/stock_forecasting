@@ -18,7 +18,7 @@ from akshare_sync.util.tools import exec_create_table_script, get_engine, get_lo
 
 
 # 全量初始化表数据
-def sync(drop_exist):
+def sync(drop_exist=False):
     cfg = get_cfg()
     engine = get_engine()
     logger = get_logger('stock_trade_date', cfg['sync-logging']['filename'])

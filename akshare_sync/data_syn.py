@@ -17,7 +17,7 @@ from akshare_sync.stock_zh_a_hist_weekly_hfq import stock_zh_a_hist_weekly_hfq
 
 
 # 全量历史初始化
-def sync(drop_exist):
+def sync(drop_exist=False):
     stock_table_api_summary.sync(False)  # 表 API 接口信息
     stock_basic_info.sync(False) # 股票基本信息: 股票代码、股票名称、交易所、板块
     stock_basic_info.sync(False) # 股票基本信息: 股票代码、股票名称、交易所、板块

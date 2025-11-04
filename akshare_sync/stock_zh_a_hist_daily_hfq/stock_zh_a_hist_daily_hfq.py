@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2025/10/22 21:33
 # @Author  : PcLiu
-# @FileName: stock_zh_a_hist_weekly_hfq.py
+# @FileName: stock_zh_a_hist_monthly_hfq.py
 ===========================
 接口: stock_zh_a_hist
 
@@ -44,7 +44,7 @@ def query_last_sync_date(trade_code, engine, logger):
     return str(pd.read_sql(query_start_date, engine).iloc[0, 0])
 
 
-def sync(drop_exist):
+def sync(drop_exist=False):
     cfg = get_cfg()
     logger = get_logger('stock_zh_a_hist_daily_hfq', cfg['sync-logging']['filename'])
 

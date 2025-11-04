@@ -37,7 +37,7 @@ from tables.weekly import weekly
 
 
 # 全量历史初始化
-def sync(drop_exist):
+def sync(drop_exist=False):
     # stock_basic.sync(drop_exist)  # 沪深股票-基础信息-股票列表
     # trade_cal.sync(drop_exist)  # 沪深股票-基础信息-交易日历
     # name_change.sync(drop_exist)  # 沪深股票-基础信息-股票曾用名

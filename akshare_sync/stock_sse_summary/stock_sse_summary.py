@@ -31,7 +31,7 @@ pd.set_option('display.float_format', lambda x: '%.2f' % x) #
 
 
 # 全量初始化表数据
-def sync(drop_exist):
+def sync(drop_exist=False):
     cfg = get_cfg()
     logger = get_logger('stock_sse_summary', cfg['sync-logging']['filename'])
 

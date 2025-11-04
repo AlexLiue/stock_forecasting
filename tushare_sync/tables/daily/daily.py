@@ -45,7 +45,7 @@ def exec_sync(start_date, end_date):
 
 
 # 全量初始化表数据
-def sync(drop_exist):
+def sync(drop_exist=False):
     # 创建表
     dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
     exec_create_table_script(dir_path, drop_exist)

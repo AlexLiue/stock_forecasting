@@ -21,7 +21,7 @@ from akshare_sync.util.tools import exec_create_table_script, get_engine, get_lo
 pd.set_option('display.max_columns', None)
 
 
-def sync(drop_exist):
+def sync(drop_exist=False):
     cfg = get_cfg()
     logger = get_logger('stock_min30_qfq', cfg['sync-logging']['filename'])
     dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))

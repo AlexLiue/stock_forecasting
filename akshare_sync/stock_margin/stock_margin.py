@@ -24,7 +24,7 @@ from akshare_sync.util.tools import exec_create_table_script, get_engine, get_lo
 pd.set_option('display.max_columns', None)
 
 
-def sync(drop_exist):
+def sync(drop_exist=False):
     cfg = get_cfg()
     db = cfg['mysql']['database']
     logger = get_logger('stock_margin', cfg['sync-logging']['filename'])

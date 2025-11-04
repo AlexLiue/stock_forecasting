@@ -53,7 +53,7 @@ def get_table_api_content():
 
 
 
-def sync(drop_exist):
+def sync(drop_exist=False):
     cfg = get_cfg()
     logger = get_logger('stock_table_api_summary', cfg['sync-logging']['filename'])
 

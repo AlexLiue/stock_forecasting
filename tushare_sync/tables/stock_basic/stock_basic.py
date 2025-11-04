@@ -18,7 +18,7 @@ from tushare_sync.utils.utils import exec_create_table_script, get_tushare_api, 
 
 
 # 全量初始化表数据
-def sync(drop_exist):
+def sync(drop_exist=False):
     dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
     exec_create_table_script(dir_path, True)
 

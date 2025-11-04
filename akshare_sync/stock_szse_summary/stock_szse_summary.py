@@ -37,7 +37,7 @@ pd.set_option('display.max_colwidth', None)
 pd.set_option('display.float_format', lambda x: '%.2f' % x) #
 
 
-def sync(drop_exist):
+def sync(drop_exist=False):
     cfg = get_cfg()
     logger = get_logger('stock_szse_summary', cfg['sync-logging']['filename'])
     try:

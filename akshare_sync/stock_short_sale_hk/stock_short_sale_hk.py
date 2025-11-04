@@ -86,7 +86,7 @@ def get_stock_short_sale_hk_report(url):
 """
 执行数据下载同步
 """
-def sync(drop_exist):
+def sync(drop_exist=False):
     cfg = get_cfg()
     logger = get_logger('stock_short_sale_hk', cfg['sync-logging']['filename'])
 

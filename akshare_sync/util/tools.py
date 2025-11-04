@@ -42,7 +42,7 @@ def get_logger(log_name, file_name):
     logger = logging.getLogger(log_name)
     logger.setLevel(log_level)
     log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../..', 'logs')
-    log_file = os.path.join(log_dir, '%s.%s' % (file_name, str(datetime.datetime.now().strftime('%Y-%m-%d'))))
+    log_file = os.path.join(log_dir, '%s.%s.%s' % (str(datetime.datetime.now().strftime('%Y-%m-%d')), file_name, log_name))
     if file_name != '':
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)

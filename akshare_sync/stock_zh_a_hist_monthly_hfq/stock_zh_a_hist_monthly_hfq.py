@@ -34,7 +34,7 @@ pd.set_option('display.float_format', lambda x: '%.2f' % x) #
 
 
 def query_last_sync_date(trade_code, engine, logger):
-    query_start_date = f"SELECT NVL(MAX(\"日期\"), 19900101) as max_date FROM stock_zh_a_hist_weekly_hfq WHERE \"股票代码\"='{trade_code}'"
+    query_start_date = f"SELECT NVL(MAX(\"日期\"), 19900101) as max_date FROM stock_zh_a_hist_monthly_hfq WHERE \"股票代码\"='{trade_code}'"
     logger.info(f"Execute Query SQL  [{query_start_date}]")
     return str(pd.read_sql(query_start_date, engine).iloc[0, 0])
 
@@ -55,7 +55,7 @@ def get_last_friday_date():
 
 def sync(drop_exist=False):
     cfg = get_cfg()
-    logger = get_logger('stock_zh_a_hist_weekly_hfq', cfg['sync-logging']['filename'])
+    logger = get_logger('stock_zh_a_hist_monthly_hfq', cfg['sync-logging']['filename'])
 
     try:
         dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
@@ -80,18 +80,18 @@ def sync(drop_exist=False):
                 df = stock_zh_a_hist(symbol=trade_code, period="weekly", start_date=start_date, end_date=end_date, adjust="hfq", timeout=20)
                 if not df.empty:
                     df["日期"] = df["日期"].apply(lambda x: x.strftime('%Y%m%d'))
-                    df.to_sql("stock_zh_a_hist_weekly_hfq", engine, index=False, if_exists='append', chunksize=5000)
+                    df.to_sql("stock_zh_a_hist_monthly_hfq", engine, index=False, if_exists='append', chunksize=5000)
                     logger.info(
-                        f"Execute Sync stock_zh_a_hist_weekly_hfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
+                        f"Execute Sync stock_zh_a_hist_monthly_hfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
             else:
                 logger.info(f"Execute Sync stock_zh_a_hist  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
 
         engine.close()
-        update_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_weekly_hfq', f'{str(end_date)}')
+        update_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_monthly_hfq', f'{str(end_date)}')
 
     except Exception as e:
 
-        logger.error(f"Table [stock_zh_a_hist_weekly_hfq] Sync Failed Cause By [{e.__cause__}] Stack[{traceback.format_exc()}]")
+        logger.error(f"Table [stock_zh_a_hist_monthly_hfq] Sync Failed Cause By [{e.__cause__}] Stack[{traceback.format_exc()}]")
 
 
 

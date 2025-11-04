@@ -16,6 +16,7 @@
 """
 import datetime
 import os
+import traceback
 
 import pandas as pd
 from dateutil.relativedelta import relativedelta
@@ -31,7 +32,7 @@ pd.set_option('display.max_colwidth', None)
 pd.set_option('display.float_format', lambda x: '%.2f' % x) #
 
 
-def sync(drop_exist):
+def sync(drop_exist=False):
     cfg = get_cfg()
     logger = get_logger('stock_szse_sector_summary', cfg['sync-logging']['filename'])
     try:
@@ -43,11 +44,11 @@ def sync(drop_exist):
         start_date = str(max(query_start_date, '20181201'))
         logger.info(f"Execute Sync stock_szse_sector_summary Date[{start_date}]")
 
-        end_date = str(datetime.datetime.now().strftime('%Y%m%d'))
-        start = datetime.datetime.strptime(start_date, '%Y%m%d') + relativedelta(months=1)
-        end = datetime.datetime.strptime(end_date, '%Y%m%d') + relativedelta(months=-1)
+        end_date = str(datetime.datetime.now().strftime('%Y%m'))
+        start = datetime.datetime.strptime(start_date, '%Y%m') + relativedelta(months=1)
+        end = datetime.datetime.strptime(end_date, '%Y%m') + relativedelta(months=-1)
         step = start  # 微批开始时间
-        while str(step.strftime('%Y%m%d')) <= str(end.strftime('%Y%m%d')):
+        while str(step.strftime('%Y%m')) <= str(end.strftime('%Y%m')):
             step_date = str(step.strftime('%Y%m'))
             logger.info(f"Execute Sync stock_szse_sector_summary Date[{step_date}]")
             df = stock_szse_sector_summary(symbol="当月", date=f'{step_date}')
@@ -57,16 +58,12 @@ def sync(drop_exist):
             df.columns = ["日期", "名称", "名称英文", "交易天数", "成交金额", "成交金额占比", "成交股数",
                           "成交股数占比", "交笔数", "成交笔数占比"]
             df.to_sql("stock_szse_sector_summary", engine, index=False, if_exists='append', chunksize=5000)
-            logger.info(
-                f"Execute Sync stock_szse_sector_summary Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
+            logger.info( f"Execute Sync stock_szse_sector_summary Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
             step = step + relativedelta(months=1)
             update_api_sync_date('stock_szse_sector_summary', 'stock_szse_sector_summary',
                                  f'{str(df["日期"].max())}')
     except Exception as e:
-        logger.error(f"Table [stock_szse_sector_summary] Sync Failed Cause By [{e.__cause__}] Traceback[{e.__traceback__.__str__()}]")
-
-
-
+        logger.error( f"Table [stock_zh_a_hist_monthly_hfq] Sync Failed Cause By [{e.__cause__}] Stack[{traceback.format_exc()}]")
 
 
 #
