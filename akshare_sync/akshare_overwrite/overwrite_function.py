@@ -372,6 +372,7 @@ def stock_szse_sector_summary(
         )
     )
     date_format = "-".join([date[:4], date[4:]])
+    if not date_url_dict.__contains__(date_format): return pd.DataFrame()
     url = f"https://www.szse.cn/market/periodical/month/{date_url_dict[date_format]}"
     r = request_get(url)
     r.encoding = "utf8"

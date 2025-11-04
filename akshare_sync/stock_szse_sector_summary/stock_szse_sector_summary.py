@@ -52,16 +52,20 @@ def sync(drop_exist=False):
             step_date = str(step.strftime('%Y%m'))
             logger.info(f"Execute Sync stock_szse_sector_summary Date[{step_date}]")
             df = stock_szse_sector_summary(symbol="当月", date=f'{step_date}')
-            df["日期"] = step_date
-            df = df[["日期", "项目名称", "项目名称-英文", "交易天数", "成交金额-人民币元", "成交金额-占总计",
-                     "成交股数-股数", "成交股数-占总计", "成交笔数-笔", "成交笔数-占总计"]]
-            df.columns = ["日期", "名称", "名称英文", "交易天数", "成交金额", "成交金额占比", "成交股数",
-                          "成交股数占比", "交笔数", "成交笔数占比"]
-            df.to_sql("stock_szse_sector_summary", engine, index=False, if_exists='append', chunksize=5000)
-            logger.info( f"Execute Sync stock_szse_sector_summary Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
-            step = step + relativedelta(months=1)
-            update_api_sync_date('stock_szse_sector_summary', 'stock_szse_sector_summary',
-                                 f'{str(df["日期"].max())}')
+            if not df.empty:
+                df["日期"] = step_date
+                df = df[["日期", "项目名称", "项目名称-英文", "交易天数", "成交金额-人民币元", "成交金额-占总计",
+                    "成交股数-股数", "成交股数-占总计", "成交笔数-笔", "成交笔数-占总计"]]
+                df.columns = ["日期", "名称", "名称英文", "交易天数", "成交金额", "成交金额占比", "成交股数",
+                    "成交股数占比", "交笔数", "成交笔数占比"]
+                df.to_sql("stock_szse_sector_summary", engine, index=False, if_exists='append', chunksize=5000)
+                logger.info(
+                    f"Execute Sync stock_szse_sector_summary Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
+                step = step + relativedelta(months=1)
+                update_api_sync_date('stock_szse_sector_summary', 'stock_szse_sector_summary',f'{str(df["日期"].max())}')
+            else:
+                break
+
     except Exception as e:
         logger.error( f"Table [stock_zh_a_hist_monthly_hfq] Sync Failed", exc_info=True)
 

@@ -20,6 +20,9 @@ from io import StringIO
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 class ProcessPool:
+    """
+    线程池类, 并发同步多个表的数据, 单表不同股票、日期的数据串行处理
+    """
     def __init__(self, max_processes: int):
         self.tasklist = []
         self.process_pool = ProcessPoolExecutor(max_processes)
@@ -38,6 +41,7 @@ class ProcessPool:
 
 # 全量历史初始化
 def sync(max_processes):
+    """ 同步的函数列表 """
     functions = [
         stock_table_api_summary.sync,  # 表 API 接口信息
         stock_table_api_summary.sync,  # 表 API 接口信息
@@ -53,6 +57,7 @@ def sync(max_processes):
         stock_zh_a_hist_weekly_hfq.sync  # 东方财富-沪深京 A 股周频率数据 - 后复权
     ]
 
+    """ 创建执行的线程池对象, 并指定线程池大小, 并提交数据同步task任务  """
     pool = ProcessPool(max_processes=max_processes)
     for func in functions:
         pool.submit_task(func)
@@ -62,21 +67,17 @@ def sync(max_processes):
 
 
 def use_age():
-    print('Useage: python data_syn.py --mode [init | append | init_spc | append_spc] [--drop_exist]')
+    print('Useage: python data_syn.py [--pool_size 4]')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='sync mode args')
-
-    parser.add_argument('--drop_exist', action='store_true',
-                        help='初始化建表过程如果表已存在 Drop 后再建')
-
+    parser.add_argument('--pool_size',default=4, type=int, help='同步并发线程池大小')
     args = parser.parse_args()
-    dropExist = args.drop_exist
-    print(f'Exec With Args:--drop_exist [{dropExist}]')
+    pool_size = args.pool_size
+    print(f'Exec With Args:--pool_size [{pool_size}]')
 
-
-    sync(max_processes=4)
+    sync(pool_size)
 
 
 
