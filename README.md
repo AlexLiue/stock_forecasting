@@ -9,10 +9,10 @@
 ## 项目文件说明
 ### Python 包结构说明
 
-| 项目包名          | 包路径                            | 包说明                |  
-|:--------------|:-------------------------------|:-------------------|  
-| akshare_sync  | [akshare_sync](akshare_sync)   | 原始 MySQL 数据读取以及粗加工 |
-| forecasting   | [forecasting](forecasting)     | 根据特征信息进行模型预测       |  
+| 项目包名          | 包路径                            | 包说明               |  
+|:--------------|:-------------------------------|:------------------|  
+| akshare_sync  | [akshare_sync](akshare_sync)   | 原始数据读取以及粗加工       |
+| forecasting   | [forecasting](forecasting)     | 根据特征信息进行模型预测      |  
 
 ## 使用手册
 
