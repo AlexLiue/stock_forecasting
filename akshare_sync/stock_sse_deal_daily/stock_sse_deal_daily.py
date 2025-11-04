@@ -72,7 +72,7 @@ def sync(drop_exist=False):
 
 
     except Exception as e:
-        logger.error(f"Table [stock_sse_deal_daily] Sync Failed Cause By [{e.__cause__}] Traceback[{e.__traceback__.__str__()}]")
+        logger.error(f"Table [stock_sse_deal_daily] Sync Failed", exc_info=True)
 
 
 

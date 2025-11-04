@@ -26,7 +26,6 @@ class ProcessPool:
 
     def submit_task(self, task, *args):
         """提交任务到进程池"""
-        print("EXEC:" + task.__class__.__name__)
         self.tasklist.append(self.process_pool.submit(task, *args))
 
     def get_results(self):

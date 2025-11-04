@@ -63,7 +63,7 @@ def sync(drop_exist=False):
             update_api_sync_date('stock_szse_sector_summary', 'stock_szse_sector_summary',
                                  f'{str(df["日期"].max())}')
     except Exception as e:
-        logger.error( f"Table [stock_zh_a_hist_monthly_hfq] Sync Failed Cause By [{e.__cause__}] Stack[{traceback.format_exc()}]")
+        logger.error( f"Table [stock_zh_a_hist_monthly_hfq] Sync Failed", exc_info=True)
 
 
 #

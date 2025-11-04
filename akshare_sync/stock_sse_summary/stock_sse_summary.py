@@ -37,7 +37,8 @@ def sync(drop_exist=False):
 
     try:
         start_date = query_last_api_sync_date('stock_sse_summary', 'stock_sse_summary')
-        if start_date < str(datetime.datetime.now().strftime('%Y%m%d')):
+        end_date = str(datetime.datetime.now().strftime('%Y%m%d'))
+        if start_date < end_date:
             dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
             exec_create_table_script(dir_path, drop_exist, logger)
 
@@ -64,7 +65,7 @@ def sync(drop_exist=False):
             update_api_sync_date('stock_sse_summary', 'stock_sse_summary', f'{str(data["日期"].max())}')
 
         else:
-            logger.info("Table [stock_sse_summary] Early Synced, Skip ...")
+            logger.info(f"Table [stock_sse_summary] Early Synced start_date[{start_date}] end_date[{end_date}], Skip ...")
     except Exception as e:
         logger.error(f"Table [stock_sse_summary] SyncFailed", exc_info=True)
 

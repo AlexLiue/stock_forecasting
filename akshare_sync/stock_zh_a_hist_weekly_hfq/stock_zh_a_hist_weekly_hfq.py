@@ -91,7 +91,7 @@ def sync(drop_exist=False):
 
     except Exception as e:
 
-        logger.error(f"Table [stock_zh_a_hist_weekly_hfq] Sync Failed Cause By [{e.__cause__}] Stack[{traceback.format_exc()}]")
+        logger.error(f"Table [stock_zh_a_hist_weekly_hfq] Sync  Failed", exc_info=True)
 
 
 
