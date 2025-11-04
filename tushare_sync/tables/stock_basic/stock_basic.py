@@ -38,6 +38,6 @@ def sync(drop_exist):
     data.to_sql('stock_basic', connection, index=False, if_exists='append', chunksize=5000)
 
 
-# 增量追加表数据, 股票列表不具备增量条件, 全量覆盖
+
 if __name__ == '__main__':
     sync(True)

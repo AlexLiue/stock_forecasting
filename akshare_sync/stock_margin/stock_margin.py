@@ -95,6 +95,6 @@ def sync(drop_exist):
             logger.info(f"Execute Sync Exchange[SZSE] TradeDate[{date}] Write[{margin.shape[0]}] Records")
 
 
-# 增量追加表数据, 股票列表不具备增量条件, 全量覆盖
+
 if __name__ == '__main__':
     sync(False)

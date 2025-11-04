@@ -14,38 +14,6 @@ pip install akshare --upgrade -i https://pypi.org/simple
 ```shell
 python data_sun.py
 ```
-#### Oracle 数据库环境准备
-考虑查询计算性能, 采用 Oracle 数据库进行存储, Docker 模式安装 Oracle 19C, 并创建数据库表空间和用户
-```
-## Oracle 数据库安装
-### Windows 平台 X86
-docker run -d --name ORACLE19C -p 11521:1521 -p 15500:5500 -e ORACLE_SID=STOCK -e ORACLE_PDB=STOCK1 -e ORACLE_PWD=Stock#123 -e ORACLE_EDITION=standard -e ORACLE_CHARACTERSET=AL32UTF8 -v oracle_data:/opt/oracle/oradata registry.cn-hangzhou.aliyuncs.com/laowu/oracle:19c
-
-
-### MacOS 平台 ARM64
-docker run --name ORACLE19C -d -p 11521:1521 -p 15500:5500 -p 12484:2484 -e ORACLE_SID=STOCK -e ORACLE_PDB=STOCK1 -e ORACLE_PWD=Oracle#123 -v oracle_data:/opt/oracle/oradata codeassertion/oracledb-arm64-standalone:19.3.0-enterprise
-
-## 创建数据库
-CREATE TABLESPACE  akshare DATAFILE '/opt/oracle/oradata/STOCK/STOCK1/akshare.dbf' SIZE 4G AUTOEXTEND ON NEXT 1G MAXSIZE UNLIMITED;
-alter session set "_ORACLE_SCRIPT"=true;
-CREATE USER akshare IDENTIFIED BY Akshare009  DEFAULT TABLESPACE akshare;
-GRANT ALL PRIVILEGES TO akshare;
-```
-
-
-####  修改配置文件信息(本地数据库地址信息)
-
-编辑 application.ini 修改本地数据库的地址用户密码
-```
-
-[oracle]
-host=localhost
-port=11521
-user=akshare
-password=Akshare009
-service_name=STOCK
-client_win=C:\Apps\OracleClient\instantclient_19_28
-client_macos=/opt/instantclient_23_3
 
 ```
 ## IP 代理池搭建 
@@ -57,7 +25,7 @@ docker run --env DB_CONN=redis://:password@ip:port/0 -p 5010:5010 jhao104/proxy_
 
 
 ```
-## 收费代理池
+## 收费IP代理池
 
 [https://cheapproxy.net/](https://cheapproxy.net/)
 

@@ -24,14 +24,11 @@ import akshare as ak
 import pandas as pd
 
 from akshare_sync.global_data.global_data import GlobalData
-from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
+from akshare_sync.sync_logs.sync_logs import update_api_sync_date
 
 
-from akshare_sync.util.agent_proxy import headers, user_agent, proxies
 from akshare_sync.util.requests_tool import request_get
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
-
-from akshare_sync.util import tools
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -197,7 +194,7 @@ def sync(drop_exist):
 
 
 
-# 增量追加表数据, 股票列表不具备增量条件, 全量覆盖
+
 if __name__ == '__main__':
     sync(False)
 

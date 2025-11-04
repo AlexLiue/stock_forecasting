@@ -10,9 +10,26 @@ import time
 import traceback
 
 import requests
+from fake_useragent import UserAgent
 from requests import exceptions
 
-from akshare_sync.util.agent_proxy import user_agent, proxies
+
+from akshare_sync.util.tools import get_cfg
+
+cfg = get_cfg()
+proxies = {
+    "http": cfg['proxies']['http'],
+    "https": cfg['proxies']['https']
+}
+
+user_agent = UserAgent(os=["Windows", "Linux", "Ubuntu", "Mac OS X"])
+
+headers = {
+    "User-Agent": user_agent.random,
+    "Connection": "close",
+    "Accept": "text/html,application/xhtml+xml,application/xml",
+    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"
+}
 
 
 def request_get(url, params=None, timeout=20):

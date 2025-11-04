@@ -64,7 +64,7 @@ def update_api_sync_date(api_name, table_name, date):
     cursor.close()
     conn.close()
 
-# 增量追加表数据, 股票列表不具备增量条件, 全量覆盖
+
 if __name__ == '__main__':
     date = query_last_api_sync_date('stock_sse_summary', 'stock_sse_summary')
     update_api_sync_date('stock_sse_summary', 'stock_sse_summary', 20251024)
