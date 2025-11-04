@@ -3,8 +3,6 @@
 """
 import argparse
 
-import cx_Oracle
-import sys
 
 from akshare_sync.stock_basic_info import stock_basic_info
 from akshare_sync.stock_short_sale_hk import stock_short_sale_hk
@@ -16,7 +14,6 @@ from akshare_sync.stock_sse_summary import stock_sse_summary
 from akshare_sync.stock_table_api_summary import stock_table_api_summary
 from akshare_sync.stock_zh_a_hist_daily_hfq import stock_zh_a_hist_daily_hfq
 from akshare_sync.stock_zh_a_hist_weekly_hfq import stock_zh_a_hist_weekly_hfq
-from akshare_sync.util.tools import get_cfg
 
 
 # 全量历史初始化

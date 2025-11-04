@@ -24,6 +24,7 @@ import akshare as ak
 import numpy as np
 import pandas as pd
 
+from akshare_sync.akshare_overwrite.overwrite_function import stock_szse_summary
 from akshare_sync.global_data.global_data import GlobalData
 from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
@@ -42,7 +43,6 @@ def sync(drop_exist):
     try:
         dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
         exec_create_table_script(dir_path, drop_exist, logger)
-        engine = get_engine()
 
         # 查询交易日历
         global_data = GlobalData()
@@ -56,7 +56,7 @@ def sync(drop_exist):
 
         for step_date in date_list:
             logger.info(f"Execute Sync stock_szse_summary Date[{step_date}]")
-            df = ak.stock_szse_summary(date=step_date)
+            df = stock_szse_summary(date=step_date)
             if not df.empty:
                 df["日期"] = step_date
                 df = df[["日期", "证券类别", "数量", "成交金额", "总市值", "流通市值"]]
@@ -64,11 +64,8 @@ def sync(drop_exist):
                 logger.info(f"Execute Sync stock_szse_summary Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
                 update_api_sync_date('stock_szse_summary', 'stock_szse_summary', f'{step_date}')
     except Exception as e:
-        stack_str = ''.join(traceback.format_stack())
-        logger.error(f"Table [stock_szse_summary] Sync Failed Cause By [{e.__cause__}] Stack[{stack_str}]")
-
-
-
+        logger.error(
+            f"Table [stock_zh_a_hist_weekly_hfq] Sync Failed Cause By [{e.__cause__}] Stack[{traceback.format_exc()}]")
 
 
 if __name__ == '__main__':

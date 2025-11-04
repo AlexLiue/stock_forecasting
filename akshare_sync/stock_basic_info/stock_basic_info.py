@@ -12,13 +12,11 @@
 限量: 单次获取所有 A 股股票代码和简称数据
 """
 import datetime
-import logging
 import os
-import akshare as ak
 import pandas as pd
-from akshare import stock_info_sh_name_code, stock_info_sz_name_code, stock_info_bj_name_code, stock_hk_spot_em, \
-    stock_hk_spot
+from akshare import stock_info_sh_name_code, stock_info_bj_name_code, stock_hk_spot
 
+from akshare_sync.akshare_overwrite.overwrite_function import stock_info_sz_name_code
 from akshare_sync.sync_logs.sync_logs import update_api_sync_date, query_last_api_sync_date
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, \
     exec_sql

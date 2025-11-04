@@ -18,6 +18,7 @@ import time
 import akshare as ak
 import pandas as pd
 
+from akshare_sync.akshare_overwrite.overwrite_function import stock_sse_summary
 from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
@@ -41,7 +42,7 @@ def sync(drop_exist):
             exec_create_table_script(dir_path, drop_exist, logger)
 
             # 获取数据
-            stock_sse_summary_df = ak.stock_sse_summary()
+            stock_sse_summary_df = stock_sse_summary()
             stock_sse_summary_df = stock_sse_summary_df.set_index("项目")
 
             data = stock_sse_summary_df.T

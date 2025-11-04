@@ -50,7 +50,6 @@ def update_api_sync_date(api_name, table_name, date):
     cursor = conn.cursor()
 
     query_exits = f"SELECT COUNT(1) as cnt FROM sync_logs WHERE \"接口名\"='{api_name}' AND \"表名\"='{table_name}'"
-    logger.info(f"Execute SQL  [{query_exits}]")
     if int(pd.read_sql(query_exits, engine).iloc[0, 0]) == 0:
         insert_sql = f"INSERT INTO SYNC_LOGS (\"接口名\", \"表名\",\"日期\") VALUES ('{api_name}', '{table_name}', '{date}')"
         logger.info(f"Execute SQL  [{insert_sql}]")

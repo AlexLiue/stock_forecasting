@@ -20,7 +20,7 @@
 Python 版本 >= 3.8.x ， 安装依赖包 [requirements.txt](requirements.txt)
 ```shell
 # 股票源
-pip install akshare --upgrade
+pip install akshare_overwrite --upgrade
 ```
 
 ### 配置 Oracle 环境  

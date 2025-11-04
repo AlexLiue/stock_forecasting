@@ -20,7 +20,7 @@ from dateutil.relativedelta import relativedelta
 import os
 import pandas as pd
 
-from akshare_sync.akshare.overwrite_function import stock_zh_a_hist
+from akshare_sync.akshare_overwrite.overwrite_function import stock_zh_a_hist
 from akshare_sync.global_data.global_data import GlobalData
 from akshare_sync.sync_logs.sync_logs import update_api_sync_date
 

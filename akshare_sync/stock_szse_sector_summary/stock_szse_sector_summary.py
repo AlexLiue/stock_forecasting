@@ -16,14 +16,11 @@
 """
 import datetime
 import os
-import time
-import traceback
 
-import akshare as ak
-import numpy as np
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
+from akshare_sync.akshare_overwrite.overwrite_function import stock_szse_sector_summary
 from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
@@ -53,7 +50,7 @@ def sync(drop_exist):
         while str(step.strftime('%Y%m%d')) <= str(end.strftime('%Y%m%d')):
             step_date = str(step.strftime('%Y%m'))
             logger.info(f"Execute Sync stock_szse_sector_summary Date[{step_date}]")
-            df = ak.stock_szse_sector_summary(symbol="当月", date=f'{step_date}')
+            df = stock_szse_sector_summary(symbol="当月", date=f'{step_date}')
             df["日期"] = step_date
             df = df[["日期", "项目名称", "项目名称-英文", "交易天数", "成交金额-人民币元", "成交金额-占总计",
                      "成交股数-股数", "成交股数-占总计", "成交笔数-笔", "成交笔数-占总计"]]
