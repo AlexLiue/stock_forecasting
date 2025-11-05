@@ -16,9 +16,12 @@ from akshare_sync.stock_trade_date import stock_trade_date
 from akshare_sync.stock_zh_a_hist_30min_hfq import stock_zh_a_hist_30min_hfq
 from akshare_sync.stock_zh_a_hist_30min_qfq import stock_zh_a_hist_30min_qfq
 from akshare_sync.stock_zh_a_hist_daily_hfq import stock_zh_a_hist_daily_hfq
+from akshare_sync.stock_zh_a_hist_daily_qfq import stock_zh_a_hist_daily_qfq
 from akshare_sync.stock_zh_a_hist_monthly_hfq import stock_zh_a_hist_monthly_hfq
 from akshare_sync.stock_zh_a_hist_monthly_qfq import stock_zh_a_hist_monthly_qfq
 from akshare_sync.stock_zh_a_hist_weekly_hfq import stock_zh_a_hist_weekly_hfq
+from akshare_sync.stock_zh_a_hist_weekly_qfq import stock_zh_a_hist_weekly_qfq
+
 
 # 全量历史初始化
 def sync(processes_size):
@@ -33,7 +36,9 @@ def sync(processes_size):
         stock_szse_area_summary.sync,
         stock_szse_sector_summary.sync,
         stock_sse_deal_daily.sync,  # 上海证券交易所-数据-股票数据-成交概况-股票成交概况-每日股票情况
+        stock_zh_a_hist_daily_qfq.sync,  # 东方财富-沪深京 A 股日频率数据 - 前复权
         stock_zh_a_hist_daily_hfq.sync,  # 东方财富-沪深京 A 股日频率数据 - 后复权
+        stock_zh_a_hist_weekly_qfq.sync,  # 东方财富-沪深京 A 股周频率数据 - 前复权
         stock_zh_a_hist_weekly_hfq.sync,  # 东方财富-沪深京 A 股周频率数据 - 后复权
         stock_zh_a_hist_monthly_qfq.sync,  # 东方财富-沪深京 A 股月频率数据 - 前复权
         stock_zh_a_hist_monthly_hfq.sync,  # 东方财富-沪深京 A 股月频率数据 - 后复权

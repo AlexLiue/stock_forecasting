@@ -124,7 +124,6 @@ def sync(drop_exist=False):
         logger.error(f"Table [stock_zh_a_hist_weekly_qfq] Sync  Failed", exc_info=True)
 
 
-
 if __name__ == '__main__':
     sync(False)
 
