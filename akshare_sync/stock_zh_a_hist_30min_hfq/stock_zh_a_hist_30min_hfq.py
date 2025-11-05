@@ -77,10 +77,10 @@ def sync(drop_exist=False):
                 logger.info(f"Execute Sync stock_zh_a_hist  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
 
         engine.close()
-        update_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_30min_hfq', f'{str(end_date)}')
+        update_api_sync_date('stock_zh_a_hist_min_em', 'stock_zh_a_hist_30min_hfq', f'{str(end_date)}')
 
     except Exception as e:
-        logger.error(f"Table [stock_szse_summary] Sync  Failed", exc_info=True)
+        logger.error(f"Table [stock_zh_a_hist_30min_hfq] Sync  Failed", exc_info=True)
 
 
 

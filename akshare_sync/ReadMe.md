@@ -15,7 +15,7 @@ pip install akshare --upgrade -i https://pypi.org/simple
 python data_sun.py
 ```
 
-```
+
 ## IP 代理池搭建 
 由于高频访问会会服务器封IP地址本地搭建 IP 代理池信息，获取免费的 IP 代理池, 发送请求 [https://github.com/jhao104/proxy_pool](https://github.com/jhao104/proxy_pool)
 ```
@@ -33,7 +33,7 @@ docker run --env DB_CONN=redis://:password@ip:port/0 -p 5010:5010 jhao104/proxy_
 ##  执行同步
 
 ```shell
-python data_sun.py
+python data_syn.py --processes 4
 ```
 
 ## Oracle 结果数据示列
