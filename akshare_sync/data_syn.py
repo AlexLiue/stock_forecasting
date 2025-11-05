@@ -18,32 +18,8 @@ from akshare_sync.stock_zh_a_hist_daily_hfq import stock_zh_a_hist_daily_hfq
 from akshare_sync.stock_zh_a_hist_monthly_hfq import stock_zh_a_hist_monthly_hfq
 from akshare_sync.stock_zh_a_hist_weekly_hfq import stock_zh_a_hist_weekly_hfq
 
-import math
-from io import StringIO
-from concurrent.futures import ProcessPoolExecutor, as_completed
-
-class ProcessPool:
-    """
-    线程池类, 并发同步多个表的数据, 单表不同股票、日期的数据串行处理
-    """
-    def __init__(self, max_processes: int):
-        self.tasklist = []
-        self.process_pool = ProcessPoolExecutor(max_processes)
-
-    def submit_task(self, task, *args):
-        """提交任务到进程池"""
-        self.tasklist.append(self.process_pool.submit(task, *args))
-
-    def get_results(self):
-        """获取所有已完成任务的结果，并清除已处理的任务列表"""
-        process_results = [task.result() for task in as_completed(self.tasklist)]
-        self.tasklist.clear()
-        return process_results
-
-
-
 # 全量历史初始化
-def sync(processes):
+def sync(processes_size):
     """ 同步的函数列表 """
     functions = [
         stock_trade_date.sync, #交易日历
@@ -62,7 +38,7 @@ def sync(processes):
     ]
 
     """ 创建执行的线程池对象, 并指定线程池大小, 并提交数据同步task任务  """
-    pool = multiprocessing.Pool(processes=processes)
+    pool = multiprocessing.Pool(processes=processes_size)
 
     results = [pool.apply_async(function, args=(False,)) for function in functions]
 
