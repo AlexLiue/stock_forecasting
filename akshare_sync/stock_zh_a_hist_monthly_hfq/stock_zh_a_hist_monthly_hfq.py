@@ -41,8 +41,7 @@ def query_last_sync_date(trade_code, engine, logger):
 
 def get_last_month_date():
     """
-    获取当前时间的上一个星期五的日期，作为数据的最后周日期
-    如果当前日期小于星期五的16:30:00分，则取上周五的日期，否则取这周五的日期
+    获取当前时间的上一月的最后一天作为数据同步的截止时间
     """
     today = datetime.date.today()
     return (today - datetime.timedelta(days=today.day)).strftime('%Y%m%d')

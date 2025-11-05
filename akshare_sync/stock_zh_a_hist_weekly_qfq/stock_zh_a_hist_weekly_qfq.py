@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2025/10/22 21:33
 # @Author  : PcLiu
-# @FileName: stock_zh_a_hist_monthly_qfq.py
+# @FileName: stock_zh_a_hist_weekly_qfq.py
 ===========================
 接口: stock_zh_a_hist
 
@@ -39,32 +39,38 @@ def query_last_sync_info(trade_code, engine, logger):
     查询上次同步数据的结果数据，检测数据是否发生变动，来判断是否需要重新同步前复权数据
     """
     result = []
-    query_last_date = f"SELECT NVL(MAX(\"日期\"), 19700101) as max_date FROM STOCK_ZH_A_HIST_MONTHLY_QFQ WHERE \"股票代码\"='{trade_code}'"
+    query_last_date = f"SELECT NVL(MAX(\"日期\"), 19700101) as max_date FROM STOCK_ZH_A_HIST_WEEKLY_QFQ WHERE \"股票代码\"='{trade_code}'"
     logger.info(f"Execute Query SQL  [{query_last_date}]")
     last_date = str(pd.read_sql(query_last_date, engine).iloc[0, 0])
     result.append(last_date)
 
-    query_last_close = f"SELECT \"收盘\" FROM STOCK_ZH_A_HIST_MONTHLY_QFQ WHERE \"股票代码\"='{trade_code}' AND \"日期\"='{last_date}'"
+    query_last_close = f"SELECT \"收盘\" FROM STOCK_ZH_A_HIST_WEEKLY_QFQ WHERE \"股票代码\"='{trade_code}' AND \"日期\"='{last_date}'"
     logger.info(f"Execute Query SQL  [{query_last_close}]")
     last_close = pd.read_sql(query_last_close, engine)
     if last_close.shape[0] > 0:
        result.append(last_close.iloc[0,0])
     else:
        result.append(None)
-
     return result
 
 
-def get_last_month_date():
+def get_last_week_date():
     """
-    获取当前时间的上一月的最后一天作为数据同步的截止时间
+    获取当前时间的上一个星期五的日期，作为数据的最后周日期
+    如果当前日期小于星期五的16:30:00分，则取上周五的日期，否则取这周五的日期
     """
     today = datetime.date.today()
-    return (today - datetime.timedelta(days=today.day)).strftime('%Y%m%d')
+    weekday = today.weekday()
+    if weekday < 5 or (weekday == 5 and today.strftime('%H:%M:%S')<'16:30:00'):
+        return (today - datetime.timedelta(days=weekday + 3)).strftime('%Y%m%d')
+    else:
+        return (today - datetime.timedelta(days=weekday - 4)).strftime('%Y%m%d')
+
+
 
 def sync(drop_exist=False):
     cfg = get_cfg()
-    logger = get_logger('stock_zh_a_hist_monthly_qfq', cfg['sync-logging']['filename'])
+    logger = get_logger('stock_zh_a_hist_weekly_qfq', cfg['sync-logging']['filename'])
 
     try:
         dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
@@ -74,7 +80,7 @@ def sync(drop_exist=False):
         global_data = GlobalData()
         trade_code_list = global_data.trade_code_a
         # 结束日期: 最近的周五日期
-        end_date = get_last_month_date()
+        end_date = get_last_week_date()
 
         engine = get_engine()
         for row_idx in range(trade_code_list.shape[0]):
@@ -87,35 +93,35 @@ def sync(drop_exist=False):
             start_date = last_sync_date
 
             if start_date < end_date:
-                logger.info(f"Execute Sync stock_zh_a_hist_monthly_qfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}]")
-                df = stock_zh_a_hist(symbol=trade_code, period="monthly", start_date=start_date, end_date=end_date, adjust="qfq", timeout=20)
+                logger.info(f"Execute Sync stock_zh_a_hist_weekly_qfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}]")
+                df = stock_zh_a_hist(symbol=trade_code, period="weekly", start_date=start_date, end_date=end_date, adjust="qfq", timeout=20)
                 if not df.empty:
                     df["日期"] = df["日期"].apply(lambda x: x.strftime('%Y%m%d'))
                     """ 判断前复权的数据是否发生变动 """
                     if last_sync_close is None or df.loc[df["日期"]==start_date, "收盘"][0] == last_sync_close:
                         df = df.loc[df["日期"]!=start_date]
-                        df.to_sql("stock_zh_a_hist_monthly_qfq", engine, index=False, if_exists='append', chunksize=20000)
-                        logger.info(f"Execute Sync stock_zh_a_hist_monthly_qfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
+                        df.to_sql("stock_zh_a_hist_weekly_qfq", engine, index=False, if_exists='append', chunksize=20000)
+                        logger.info(f"Execute Sync stock_zh_a_hist_weekly_qfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
                     else:
-                        clean_sql = f"DELETE FROM stock_zh_a_hist_monthly_qfq WHERE \"股票代码\"='{trade_code}'"
-                        logger.info(f"Execute Sync stock_zh_a_hist_monthly_qfq, Detect QFQ data updated, Clean History Data With SQL [{clean_sql}], Recall Sync")
+                        clean_sql = f"DELETE FROM STOCK_ZH_A_HIST_WEEKLY_QFQ WHERE \"股票代码\"='{trade_code}'"
+                        logger.info(f"Execute Sync stock_zh_a_hist_weekly_qfq, Detect QFQ data updated, Clean History Data With SQL [{clean_sql}], Recall Sync")
                         exec_sql(clean_sql)
 
                         last_sync_info = query_last_sync_info(trade_code, engine, logger)
                         last_sync_date = last_sync_info[0]
                         start_date = last_sync_date
-                        df = stock_zh_a_hist(symbol=trade_code,  period="monthly", start_date=start_date, end_date=end_date, adjust="qfq", timeout=20)
+                        df = stock_zh_a_hist(symbol=trade_code,  period="weekly", start_date=start_date, end_date=end_date, adjust="qfq", timeout=20)
                         if not df.empty:
                             df["日期"] = df["日期"].apply(lambda x: x.strftime('%Y%m%d'))
-                            df.to_sql("stock_zh_a_hist_monthly_qfq", engine, index=False, if_exists='append', chunksize=20000)
-                            logger.info(f"Execute Sync stock_zh_a_hist_monthly_qfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
+                            df.to_sql("stock_zh_a_hist_weekly_qfq", engine, index=False, if_exists='append', chunksize=20000)
+                            logger.info(f"Execute Sync stock_zh_a_hist_weekly_qfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
             else:
-                logger.info(f"Execute Sync stock_zh_a_hist_monthly_qfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
+                logger.info(f"Execute Sync stock_zh_a_hist_weekly_qfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
 
-        update_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_monthly_qfq', f'{str(end_date)}')
+        update_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_weekly_qfq', f'{str(end_date)}')
 
     except Exception as e:
-        logger.error(f"Table [stock_zh_a_hist_monthly_qfq] Sync  Failed", exc_info=True)
+        logger.error(f"Table [stock_zh_a_hist_weekly_qfq] Sync  Failed", exc_info=True)
 
 
 
