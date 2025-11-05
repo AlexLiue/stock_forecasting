@@ -44,12 +44,12 @@ def get_last_friday_date():
     获取当前时间的上一个星期五的日期，作为数据的最后周日期
     如果当前日期小于星期五的16:30:00分，则取上周五的日期，否则取这周五的日期
     """
-    today = datetime.date.today()
-    weekday = today.weekday()
-    if weekday < 5 or (weekday == 5 and today.strftime('%H:%M:%S')<'16:30:00'):
-        return (today - datetime.timedelta(days=weekday + 3)).strftime('%Y%m%d')
+    now = datetime.datetime.now()
+    weekday = now.weekday()
+    if weekday < 5 or (weekday == 5 and now.strftime('%H:%M:%S')<'16:30:00'):
+        return (now - datetime.timedelta(days=weekday + 3)).strftime('%Y%m%d')
     else:
-        return (today - datetime.timedelta(days=weekday - 4)).strftime('%Y%m%d')
+        return (now - datetime.timedelta(days=weekday - 4)).strftime('%Y%m%d')
 
 
 
