@@ -79,7 +79,7 @@ def sync(drop_exist=False):
                         f"Execute Sync stock_zh_a_hist_daily_hfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
             else:
                 logger.info(
-                    f"Execute Sync stock_zh_a_hist  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
+                    f"Execute Sync stock_zh_a_hist_daily_hfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
 
         engine.close()
         update_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_daily_hfq', f'{str(end_date)}')

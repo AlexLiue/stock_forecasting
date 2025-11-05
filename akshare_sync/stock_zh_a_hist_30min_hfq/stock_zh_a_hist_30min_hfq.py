@@ -121,7 +121,7 @@ def sync(drop_exist=False):
                             df.to_sql("stock_zh_a_hist_30min_hfq", engine, index=False, if_exists='append',  chunksize=20000)
                             logger.info(  f"Execute Sync stock_zh_a_hist_30min_hfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
             else:
-                logger.info(f"Execute Sync stock_zh_a_hist  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
+                logger.info(f"Execute Sync stock_zh_a_hist_30min_hfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
 
         engine.close()
         update_api_sync_date('stock_zh_a_hist_min_em', 'stock_zh_a_hist_30min_hfq', f'{str(end_date)}')
