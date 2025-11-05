@@ -14,8 +14,8 @@
 限量: 单次返回指定上市公司最近 5 个交易日分钟数据, 注意港股有延时
 
 """
-import datetime
 
+import datetime
 
 import os
 import pandas as pd
@@ -120,10 +120,6 @@ def sync(drop_exist=False):
                             df["时间"] = pd.to_datetime(df['时间'])
                             df.to_sql("stock_zh_a_hist_30min_qfq", engine, index=False, if_exists='append',  chunksize=20000)
                             logger.info(  f"Execute Sync stock_zh_a_hist_30min_qfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
-
-
-
-
             else:
                 logger.info(f"Execute Sync stock_zh_a_hist  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
 
