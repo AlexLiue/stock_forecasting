@@ -36,14 +36,15 @@ def sync(processes_size):
         stock_szse_area_summary.sync,
         stock_szse_sector_summary.sync,
         stock_sse_deal_daily.sync,  # 上海证券交易所-数据-股票数据-成交概况-股票成交概况-每日股票情况
+        stock_zh_a_hist_30min_qfq.sync,  # 东方财富网-行情首页-港股-每日分时行情-30分钟-前复权
+        stock_zh_a_hist_30min_hfq.sync,  # 东方财富网-行情首页-港股-每日分时行情-30分钟-后复权
         stock_zh_a_hist_daily_qfq.sync,  # 东方财富-沪深京 A 股日频率数据 - 前复权
         stock_zh_a_hist_daily_hfq.sync,  # 东方财富-沪深京 A 股日频率数据 - 后复权
         stock_zh_a_hist_weekly_qfq.sync,  # 东方财富-沪深京 A 股周频率数据 - 前复权
         stock_zh_a_hist_weekly_hfq.sync,  # 东方财富-沪深京 A 股周频率数据 - 后复权
         stock_zh_a_hist_monthly_qfq.sync,  # 东方财富-沪深京 A 股月频率数据 - 前复权
-        stock_zh_a_hist_monthly_hfq.sync,  # 东方财富-沪深京 A 股月频率数据 - 后复权
-        stock_zh_a_hist_30min_qfq.sync,  # 东方财富网-行情首页-港股-每日分时行情-30分钟-前复权
-        stock_zh_a_hist_30min_hfq.sync   # 东方财富网-行情首页-港股-每日分时行情-30分钟-后复权
+        stock_zh_a_hist_monthly_hfq.sync  # 东方财富-沪深京 A 股月频率数据 - 后复权
+
     ]
 
     """ 创建执行的线程池对象, 并指定线程池大小, 并提交数据同步task任务  """
