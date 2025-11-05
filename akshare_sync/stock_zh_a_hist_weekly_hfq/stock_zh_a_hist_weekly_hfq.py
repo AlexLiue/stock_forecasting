@@ -22,7 +22,7 @@ import pandas as pd
 
 from akshare_sync.akshare_overwrite.overwrite_function import stock_zh_a_hist
 from akshare_sync.global_data.global_data import GlobalData
-from akshare_sync.sync_logs.sync_logs import update_api_sync_date
+from akshare_sync.sync_logs.sync_logs import update_sync_log_date, update_sync_log_state_to_failed
 
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
@@ -87,14 +87,11 @@ def sync(drop_exist=False):
                 logger.info(f"Execute Sync stock_zh_a_hist_weekly_hfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
 
         engine.close()
-        update_api_sync_date('stock_zh_a_hist', 'stock_zh_a_hist_weekly_hfq', f'{str(end_date)}')
+        update_sync_log_date('stock_zh_a_hist', 'stock_zh_a_hist_weekly_hfq', f'{str(end_date)}')
 
     except Exception as e:
-
         logger.error(f"Table [stock_zh_a_hist_weekly_hfq] Sync  Failed", exc_info=True)
-
-
-
+        update_sync_log_state_to_failed('stock_zh_a_hist', 'stock_zh_a_hist_weekly_hfq')
 
 
 if __name__ == '__main__':

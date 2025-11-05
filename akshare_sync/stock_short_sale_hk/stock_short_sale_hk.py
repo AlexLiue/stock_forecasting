@@ -21,7 +21,8 @@ import requests
 from bs4 import BeautifulSoup
 from io import StringIO
 
-from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
+from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
+    update_sync_log_state_to_failed
 from akshare_sync.util.tools import get_cfg, get_logger, exec_create_table_script, get_engine
 
 headers = {
@@ -113,11 +114,12 @@ def sync(drop_exist=False):
                 connection = get_engine()
                 logger.info(f'Write [{data.shape[0]}] records into table [stock_short_sale_hk] with [{connection.engine}]')
                 data.to_sql('stock_short_sale_hk', connection, index=False, if_exists='append', chunksize=20000)
-                update_api_sync_date('stock_short_sale_hk', 'stock_short_sale_hk', f'{str(row_date)}')
+                update_sync_log_date('stock_short_sale_hk', 'stock_short_sale_hk', f'{str(row_date)}')
         else:
             logger.info("Table [stock_short_sale_hk] Early Synced, Skip ...")
     except Exception as e:
         logger.error(f"Table [stock_short_sale_hk] SyncFailed", exc_info=True)
+        update_sync_log_state_to_failed('stock_short_sale_hk', 'stock_short_sale_hk')
 
 
 

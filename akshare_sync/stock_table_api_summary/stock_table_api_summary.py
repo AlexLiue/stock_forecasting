@@ -18,7 +18,8 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
+from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
+    update_sync_log_state_to_failed
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, exec_sql
 
 pd.set_option('display.max_columns', None)
@@ -77,14 +78,14 @@ def sync(drop_exist=False):
                 f'Write [{data.shape[0]}] records into table [stock_table_api_summary] with [{connection.engine}]')
             data.to_sql('stock_table_api_summary', connection, index=False, if_exists='append', chunksize=20000)
 
-            update_api_sync_date('stock_table_api_summary', 'stock_table_api_summary',
+            update_sync_log_date('stock_table_api_summary', 'stock_table_api_summary',
                                  f'{str(datetime.datetime.now().strftime('%Y%m%d'))}')
 
         else:
             logger.info("Table [stock_table_api_summary] Early Synced, Skip ...")
     except Exception as e:
         logger.error(f"Table [stock_table_api_summary] SyncFailed", exc_info=True)
-
+        update_sync_log_state_to_failed('stock_table_api_summary', 'stock_table_api_summary')
 
 
 if __name__ == '__main__':

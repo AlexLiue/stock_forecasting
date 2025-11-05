@@ -22,7 +22,8 @@ import pandas as pd
 from dateutil.relativedelta import relativedelta
 
 from akshare_sync.akshare_overwrite.overwrite_function import stock_szse_sector_summary
-from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
+from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
+    update_sync_log_state_to_failed
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
 pd.set_option('display.max_columns', None)
@@ -62,12 +63,13 @@ def sync(drop_exist=False):
                 logger.info(
                     f"Execute Sync stock_szse_sector_summary Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
                 step = step + relativedelta(months=1)
-                update_api_sync_date('stock_szse_sector_summary', 'stock_szse_sector_summary',f'{str(df["日期"].max())}')
+                update_sync_log_date('stock_szse_sector_summary', 'stock_szse_sector_summary', f'{str(df["日期"].max())}')
             else:
                 break
 
     except Exception as e:
         logger.error( f"Table [stock_zh_a_hist_monthly_hfq] Sync Failed", exc_info=True)
+        update_sync_log_state_to_failed('stock_szse_sector_summary', 'stock_szse_sector_summary')
 
 
 #

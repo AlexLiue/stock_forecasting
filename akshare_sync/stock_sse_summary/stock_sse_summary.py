@@ -19,7 +19,8 @@ import akshare as ak
 import pandas as pd
 
 from akshare_sync.akshare_overwrite.overwrite_function import stock_sse_summary
-from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
+from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
+    update_sync_log_state_to_failed
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
 pd.set_option('display.max_columns', None)
@@ -62,13 +63,13 @@ def sync(drop_exist=False):
             logger.info(f'Write [{data.shape[0]}] records into table [stock_sse_summary] with [{connection.engine}]')
             data.to_sql('stock_sse_summary', connection, index=False, if_exists='append', chunksize=20000)
 
-            update_api_sync_date('stock_sse_summary', 'stock_sse_summary', f'{str(data["日期"].max())}')
+            update_sync_log_date('stock_sse_summary', 'stock_sse_summary', f'{str(data["日期"].max())}')
 
         else:
             logger.info(f"Table [stock_sse_summary] Early Synced start_date[{start_date}] end_date[{end_date}], Skip ...")
     except Exception as e:
         logger.error(f"Table [stock_sse_summary] SyncFailed", exc_info=True)
-
+        update_sync_log_state_to_failed('stock_sse_summary', 'stock_sse_summary')
 
 
 if __name__ == '__main__':

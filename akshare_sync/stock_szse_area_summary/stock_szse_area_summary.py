@@ -20,7 +20,8 @@ import time
 import akshare as ak
 import pandas as pd
 
-from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
+from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
+    update_sync_log_state_to_failed
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
 pd.set_option('display.max_columns', None)
@@ -56,11 +57,11 @@ def sync(drop_exist=False):
             logger.info(
                 f"Execute Sync stock_szse_area_summary Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
             step = step + relativedelta(months=1)
-            update_api_sync_date('stock_szse_area_summary', 'stock_szse_area_summary',
+            update_sync_log_date('stock_szse_area_summary', 'stock_szse_area_summary',
                                  f'{str(step.strftime('%Y%m%d'))}')
     except Exception as e:
         logger.error(f"Table [stock_szse_area_summary] SyncFailed", exc_info=True)
-
+        update_sync_log_state_to_failed('stock_szse_area_summary', 'stock_szse_area_summary')
 
 
 if __name__ == '__main__':

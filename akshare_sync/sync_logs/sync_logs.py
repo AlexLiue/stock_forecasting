@@ -42,7 +42,10 @@ def str_date_day_add(str_date, days):
 
 
 
-def update_api_sync_date(api_name, table_name, date):
+def update_sync_log_date(api_name, table_name, date):
+    """
+    执行成功后，更新 SYNC_LOGS 表的同步日期和状态
+    """
     cfg = get_cfg()
     logger = get_logger('sync_logs', cfg['sync-logging']['filename'])
     engine = get_engine()
@@ -51,12 +54,11 @@ def update_api_sync_date(api_name, table_name, date):
 
     query_exits = f"SELECT COUNT(1) as cnt FROM sync_logs WHERE \"接口名\"='{api_name}' AND \"表名\"='{table_name}'"
     if int(pd.read_sql(query_exits, engine).iloc[0, 0]) == 0:
-        insert_sql = f"INSERT INTO SYNC_LOGS (\"接口名\", \"表名\",\"日期\") VALUES ('{api_name}', '{table_name}', '{date}')"
+        insert_sql = f"INSERT INTO SYNC_LOGS (\"接口名\", \"表名\",\"日期\",\"状态\") VALUES ('{api_name}', '{table_name}', '{date}', '成功')"
         logger.info(f"Execute SQL  [{insert_sql}]")
         cursor.execute(insert_sql)
-
     else:
-        update_sql =  f"UPDATE SYNC_LOGS SET \"日期\"='{date}' WHERE \"接口名\"='{api_name}' AND \"表名\"='{table_name}'"
+        update_sql =  f"UPDATE SYNC_LOGS SET \"日期\"='{date}',\"状态\"='成功' WHERE \"接口名\"='{api_name}' AND \"表名\"='{table_name}'"
         logger.info(f"Execute SQL  [{update_sql}]")
         cursor.execute(update_sql)
     conn.commit()
@@ -64,7 +66,31 @@ def update_api_sync_date(api_name, table_name, date):
     conn.close()
 
 
+def update_sync_log_state_to_failed(api_name, table_name):
+    cfg = get_cfg()
+    logger = get_logger('sync_logs', cfg['sync-logging']['filename'])
+    engine = get_engine()
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    query_exits = f"SELECT COUNT(1) as cnt FROM sync_logs WHERE \"接口名\"='{api_name}' AND \"表名\"='{table_name}'"
+    if int(pd.read_sql(query_exits, engine).iloc[0, 0]) == 0:
+        insert_sql = f"INSERT INTO SYNC_LOGS (\"接口名\", \"表名\",\"日期\",\"状态\") VALUES ('{api_name}', '{table_name}', '19700101', '失败')"
+        logger.info(f"Execute SQL  [{insert_sql}]")
+        cursor.execute(insert_sql)
+    else:
+        update_sql =  f"UPDATE SYNC_LOGS SET \"状态\"='失败' WHERE \"接口名\"='{api_name}' AND \"表名\"='{table_name}'"
+        logger.info(f"Execute SQL  [{update_sql}]")
+        cursor.execute(update_sql)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+
+
+
 if __name__ == '__main__':
     date = query_last_api_sync_date('stock_sse_summary', 'stock_sse_summary')
-    update_api_sync_date('stock_sse_summary', 'stock_sse_summary', 20251024)
+    update_sync_log_date('stock_sse_summary', 'stock_sse_summary', 20251024)
 

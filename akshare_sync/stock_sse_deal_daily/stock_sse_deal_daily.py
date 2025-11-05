@@ -22,7 +22,8 @@ import akshare as ak
 import pandas as pd
 
 from akshare_sync.global_data.global_data import GlobalData
-from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
+from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
+    update_sync_log_state_to_failed
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
 pd.set_option('display.max_columns', None)
@@ -64,14 +65,12 @@ def sync(drop_exist=False):
                             "流通换手率"]]
                     df.to_sql("stock_sse_deal_daily", engine, index=False, if_exists='append', chunksize=20000)
                     logger.info(  f"Execute Sync stock_sse_deal_daily Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
-                    update_api_sync_date('stock_sse_deal_daily', 'stock_sse_deal_daily', f'{str(step_date)}')
+                    update_sync_log_date('stock_sse_deal_daily', 'stock_sse_deal_daily', f'{str(step_date)}')
         else:
             logger.info(  f"Execute Sync stock_szse_summary  Range: ({start_date},{end_date}] , Skip Sync ... ")
     except Exception as e:
         logger.error(f"Table [stock_sse_deal_daily] Sync Failed", exc_info=True)
-
-
-
+        update_sync_log_state_to_failed('stock_sse_deal_daily', 'stock_sse_deal_daily')
 
 
 if __name__ == '__main__':

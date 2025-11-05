@@ -26,7 +26,8 @@ import pandas as pd
 
 from akshare_sync.akshare_overwrite.overwrite_function import stock_szse_summary
 from akshare_sync.global_data.global_data import GlobalData
-from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
+from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
+    update_sync_log_state_to_failed
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 import traceback
 
@@ -62,10 +63,11 @@ def sync(drop_exist=False):
                 df = df[["日期", "证券类别", "数量", "成交金额", "总市值", "流通市值"]]
                 df.to_sql("stock_szse_summary", engine, index=False, if_exists='append', chunksize=20000)
                 logger.info(f"Execute Sync stock_szse_summary Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
-                update_api_sync_date('stock_szse_summary', 'stock_szse_summary', f'{step_date}')
+                update_sync_log_date('stock_szse_summary', 'stock_szse_summary', f'{step_date}')
     except Exception as e:
         logger.error(
             f"Table [stock_zh_a_hist_weekly_hfq] Sync Failed Cause By [{e.__cause__}] Stack[{traceback.format_exc()}]")
+        update_sync_log_state_to_failed('stock_szse_summary', 'stock_szse_summary')
 
 
 if __name__ == '__main__':

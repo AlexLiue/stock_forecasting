@@ -16,7 +16,8 @@ import traceback
 import akshare as ak
 import pandas as pd
 
-from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_api_sync_date
+from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
+    update_sync_log_state_to_failed
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
 
 
@@ -43,10 +44,12 @@ def sync(drop_exist=False):
             trade_data_a.columns = ["交易所", "交易日期"]
             trade_data_a.to_sql("stock_trade_date", engine, index=False, if_exists='append', chunksize=20000)
             logger.info(f"Execute Sync stock_trade_date Date[{cur_date}]" + f" Write[{trade_data_a.shape[0]}] Records")
-            update_api_sync_date('tool_trade_date_hist_sina', 'stock_trade_date', f'{cur_date}')
+            update_sync_log_date('tool_trade_date_hist_sina', 'stock_trade_date', f'{cur_date}')
 
     except Exception as e:
         logger.error(f"Table [stock_zh_a_hist_weekly_hfq] Sync Failed Cause By [{e.__cause__}] Stack[{traceback.format_exc()}]")
+        update_sync_log_state_to_failed('tool_trade_date_hist_sina', 'stock_trade_date')
+
 
 if __name__ == '__main__':
     sync(False)
