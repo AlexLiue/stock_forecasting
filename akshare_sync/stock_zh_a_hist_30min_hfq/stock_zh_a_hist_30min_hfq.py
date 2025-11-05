@@ -97,7 +97,7 @@ def sync(drop_exist=False):
 
             if start_date < end_date:
                 logger.info( f"Execute Sync stock_zh_a_hist_30min_hfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}]")
-                df = stock_zh_a_hist_min_em(symbol=trade_code, start_date=start_date, end_date=end_date, period="30", adjust="qfq")
+                df = stock_zh_a_hist_min_em(symbol=trade_code, start_date=start_date, end_date=end_date, period="30", adjust="hfq")
                 if not df.empty:
                     df["股票代码"] = trade_code
                     df["时间"] = pd.to_datetime(df['时间'])
