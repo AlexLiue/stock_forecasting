@@ -101,7 +101,7 @@ def sync(drop_exist=False):
                 if not df.empty:
                     df["股票代码"] = trade_code
                     df["时间"] = pd.to_datetime(df['时间'])
-                    """ 判断前复权的数据是否发生变动 """
+                    """ 判断复权的数据是否发生变动 """
                     if last_sync_close is None or df.loc[df["时间"]==start_date, "收盘"][0] == last_sync_close:
                         df = df.loc[df["时间"]!=start_date]
                         df.to_sql("stock_zh_a_hist_30min_hfq", engine, index=False, if_exists='append', chunksize=20000)
