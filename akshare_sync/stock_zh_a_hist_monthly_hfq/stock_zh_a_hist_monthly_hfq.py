@@ -70,7 +70,7 @@ def sync(drop_exist=False):
             start_date =  (datetime.datetime.strptime(last_sync_date, '%Y%m%d') + relativedelta(days=1)).strftime('%Y%m%d')
 
             if start_date <= end_date:
-                logger.info(f"Execute Sync stock_zh_a_hist  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}]")
+                logger.info(f"Execute Sync stock_zh_a_hist_monthly_hfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}]")
                 df = stock_zh_a_hist(symbol=trade_code, period="monthly", start_date=start_date, end_date=end_date, adjust="hfq", timeout=20)
                 if not df.empty:
                     df["日期"] = df["日期"].apply(lambda x: x.strftime('%Y%m%d'))
