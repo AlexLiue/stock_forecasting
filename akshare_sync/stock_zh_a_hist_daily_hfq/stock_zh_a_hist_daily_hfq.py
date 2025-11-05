@@ -74,7 +74,7 @@ def sync(drop_exist=False):
                                         adjust="hfq", timeout=20)
                 if not df.empty:
                     df["日期"] = df["日期"].apply(lambda x: x.strftime('%Y%m%d'))
-                    df.to_sql("stock_zh_a_hist_daily_hfq", engine, index=False, if_exists='append', chunksize=5000)
+                    df.to_sql("stock_zh_a_hist_daily_hfq", engine, index=False, if_exists='append', chunksize=20000)
                     logger.info(
                         f"Execute Sync stock_zh_a_hist_daily_hfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
             else:

@@ -31,22 +31,22 @@ def sync(drop_exist=False):
     data = ts_api.hs_const(hs_type='SZ', is_new='0', fields=fields)
     logger.info('Write [%d] records into table [stock_basic] with [%s], where condition[hs_type=SZ, is_new=0]'
                 % (data.last_valid_index() + 1, connection.engine))
-    data.to_sql('hs_const', connection, index=False, if_exists='append', chunksize=5000)
+    data.to_sql('hs_const', connection, index=False, if_exists='append', chunksize=20000)
 
     data = ts_api.hs_const(hs_type='SZ', is_new='1', fields=fields)
     logger.info('Write [%d] records into table [stock_basic] with [%s], where condition[hs_type=SZ, is_new=1]'
                 % (data.last_valid_index() + 1, connection.engine))
-    data.to_sql('hs_const', connection, index=False, if_exists='append', chunksize=5000)
+    data.to_sql('hs_const', connection, index=False, if_exists='append', chunksize=20000)
 
     data = ts_api.hs_const(hs_type='SH', is_new='0', fields=fields)
     logger.info('Write [%d] records into table [stock_basic] with [%s], where condition[hs_type=SH, is_new=0]'
                 % (data.last_valid_index() + 1, connection.engine))
-    data.to_sql('hs_const', connection, index=False, if_exists='append', chunksize=5000)
+    data.to_sql('hs_const', connection, index=False, if_exists='append', chunksize=20000)
 
     data = ts_api.hs_const(hs_type='SH', is_new='1', fields=fields)
     logger.info('Write [%d] records into table [stock_basic] with [%s], where condition[hs_type=SH, is_new=1]'
                 % (data.last_valid_index() + 1, connection.engine))
-    data.to_sql('hs_const', connection, index=False, if_exists='append', chunksize=5000)
+    data.to_sql('hs_const', connection, index=False, if_exists='append', chunksize=20000)
 
 
 if __name__ == '__main__':

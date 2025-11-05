@@ -63,7 +63,7 @@ def sync(drop_exist=False):
                     ["日期", "板块", "挂牌数", "市价总值", "流通市值", "成交金额", "成交量", "平均市盈率", "换手率",
                      "流通换手率"]]
 
-                df.to_sql("stock_sse_deal_daily", engine, index=False, if_exists='append', chunksize=5000)
+                df.to_sql("stock_sse_deal_daily", engine, index=False, if_exists='append', chunksize=20000)
                 logger.info(
                     f"Execute Sync stock_sse_deal_daily Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
 

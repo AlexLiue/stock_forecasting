@@ -62,7 +62,7 @@ def sync(drop_exist=False):
                  "融券卖出量", "融券余量", "融券偿还量"]]
             margin.columns = ["trade_date", "symbol", "name", "exchange", "buy_value", "buy_balance", "buy_return",
                               "sell_value", "sell_balance_vol", "sell_return"]
-            margin.to_sql("stock_margin", engine, index=False, if_exists='append', chunksize=5000)
+            margin.to_sql("stock_margin", engine, index=False, if_exists='append', chunksize=20000)
             logger.info(f"Execute Sync Exchange[SSE] TradeDate[{date}] Write[{margin.shape[0]}] Records")
 
     # SSE 融资融券明细
@@ -91,7 +91,7 @@ def sync(drop_exist=False):
                              "融券卖出量", "融券余量", "融券余额", "融资融券余额"]]
             margin.columns = ["trade_date", "symbol", "name", "exchange", "buy_value", "buy_balance",
                               "sell_value", "sell_balance_vol", "sell_balance_val", "margin_balance"]
-            margin.to_sql("stock_margin", engine, index=False, if_exists='append', chunksize=5000)
+            margin.to_sql("stock_margin", engine, index=False, if_exists='append', chunksize=20000)
             logger.info(f"Execute Sync Exchange[SZSE] TradeDate[{date}] Write[{margin.shape[0]}] Records")
 
 

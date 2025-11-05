@@ -81,7 +81,7 @@ def sync(drop_exist=False):
                 minutes.columns = ["trade_date", "symbol", "trade_time", "open", "close", "high", "low", "vol",
                                    "amount", "avg", "amp", "pct_chg", "pct_amt", "tr"]
 
-                minutes.to_sql("stock_min30_qfq", engine, index=False, if_exists='append', chunksize=5000)
+                minutes.to_sql("stock_min30_qfq", engine, index=False, if_exists='append', chunksize=20000)
                 logger.info(f"Execute Sync [{index}/{basic_info.shape[0] - 1}] Symbol[{symbol}] Name[{name}] "
                             f" Write[{minutes.shape[0]}] Records")
             if int(end_date) - int(start_date) > 30:

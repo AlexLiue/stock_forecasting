@@ -58,7 +58,7 @@ def sync(drop_exist=False):
                     "成交股数-股数", "成交股数-占总计", "成交笔数-笔", "成交笔数-占总计"]]
                 df.columns = ["日期", "名称", "名称英文", "交易天数", "成交金额", "成交金额占比", "成交股数",
                     "成交股数占比", "交笔数", "成交笔数占比"]
-                df.to_sql("stock_szse_sector_summary", engine, index=False, if_exists='append', chunksize=5000)
+                df.to_sql("stock_szse_sector_summary", engine, index=False, if_exists='append', chunksize=20000)
                 logger.info(
                     f"Execute Sync stock_szse_sector_summary Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
                 step = step + relativedelta(months=1)

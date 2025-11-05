@@ -33,7 +33,7 @@ def sync(drop_exist=False):
 
     logger.info(
         'Write [%d] records into table [stock_basic] with [%s]' % (data.last_valid_index() + 1, connection.engine))
-    data.to_sql('name_change', connection, index=False, if_exists='append', chunksize=5000)
+    data.to_sql('name_change', connection, index=False, if_exists='append', chunksize=20000)
 
 
 if __name__ == '__main__':

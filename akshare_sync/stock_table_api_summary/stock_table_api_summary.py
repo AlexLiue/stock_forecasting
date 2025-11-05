@@ -75,7 +75,7 @@ def sync(drop_exist=False):
             connection = get_engine()
             logger.info(
                 f'Write [{data.shape[0]}] records into table [stock_table_api_summary] with [{connection.engine}]')
-            data.to_sql('stock_table_api_summary', connection, index=False, if_exists='append', chunksize=5000)
+            data.to_sql('stock_table_api_summary', connection, index=False, if_exists='append', chunksize=20000)
 
             update_api_sync_date('stock_table_api_summary', 'stock_table_api_summary',
                                  f'{str(datetime.datetime.now().strftime('%Y%m%d'))}')

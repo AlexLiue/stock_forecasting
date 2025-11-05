@@ -60,7 +60,7 @@ def sync(drop_exist=False):
             if not df.empty:
                 df["日期"] = step_date
                 df = df[["日期", "证券类别", "数量", "成交金额", "总市值", "流通市值"]]
-                df.to_sql("stock_szse_summary", engine, index=False, if_exists='append', chunksize=5000)
+                df.to_sql("stock_szse_summary", engine, index=False, if_exists='append', chunksize=20000)
                 logger.info(f"Execute Sync stock_szse_summary Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
                 update_api_sync_date('stock_szse_summary', 'stock_szse_summary', f'{step_date}')
     except Exception as e:

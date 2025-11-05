@@ -60,7 +60,7 @@ def sync(drop_exist=False):
             # 写入数据库
             connection = get_engine()
             logger.info(f'Write [{data.shape[0]}] records into table [stock_sse_summary] with [{connection.engine}]')
-            data.to_sql('stock_sse_summary', connection, index=False, if_exists='append', chunksize=5000)
+            data.to_sql('stock_sse_summary', connection, index=False, if_exists='append', chunksize=20000)
 
             update_api_sync_date('stock_sse_summary', 'stock_sse_summary', f'{str(data["日期"].max())}')
 

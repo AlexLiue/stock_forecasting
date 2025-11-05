@@ -112,7 +112,7 @@ def sync(drop_exist=False):
                 # 写入数据库
                 connection = get_engine()
                 logger.info(f'Write [{data.shape[0]}] records into table [stock_short_sale_hk] with [{connection.engine}]')
-                data.to_sql('stock_short_sale_hk', connection, index=False, if_exists='append', chunksize=5000)
+                data.to_sql('stock_short_sale_hk', connection, index=False, if_exists='append', chunksize=20000)
                 update_api_sync_date('stock_short_sale_hk', 'stock_short_sale_hk', f'{str(row_date)}')
         else:
             logger.info("Table [stock_short_sale_hk] Early Synced, Skip ...")

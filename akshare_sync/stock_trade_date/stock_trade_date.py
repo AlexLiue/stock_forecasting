@@ -41,7 +41,7 @@ def sync(drop_exist=False):
             bse = pd.DataFrame({"exchange": "BSE", "trade_date": trade_date["trade_date"]})
             trade_data_a = pd.concat([sse, szse, bse])
             trade_data_a.columns = ["交易所", "交易日期"]
-            trade_data_a.to_sql("stock_trade_date", engine, index=False, if_exists='append', chunksize=5000)
+            trade_data_a.to_sql("stock_trade_date", engine, index=False, if_exists='append', chunksize=20000)
             logger.info(f"Execute Sync stock_trade_date Date[{cur_date}]" + f" Write[{trade_data_a.shape[0]}] Records")
             update_api_sync_date('tool_trade_date_hist_sina', 'stock_trade_date', f'{cur_date}')
 

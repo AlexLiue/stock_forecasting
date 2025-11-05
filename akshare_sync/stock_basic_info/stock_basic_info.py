@@ -111,7 +111,7 @@ def sync(drop_exist=False):
             # 写入数据库
             connection = get_engine()
             logger.info(f'Write [{data.shape[0]}] records into table [stock_basic_info] with [{connection.engine}]')
-            data.to_sql('stock_basic_info', connection, index=False, if_exists='append', chunksize=5000)
+            data.to_sql('stock_basic_info', connection, index=False, if_exists='append', chunksize=20000)
 
             update_api_sync_date('stock_basic_info', 'stock_basic_info',
                                  f'{str(datetime.datetime.now().strftime('%Y%m%d'))}')

@@ -41,7 +41,7 @@ def sync(drop_exist=True):
     ])
     size = data.last_valid_index() + 1
     logger.info('Write [%d] records into table [%s] with [%s]' % (size, 'concept', connection.engine))
-    data.to_sql('concept', connection, index=False, if_exists='append', chunksize=5000)
+    data.to_sql('concept', connection, index=False, if_exists='append', chunksize=20000)
 
 
 if __name__ == '__main__':

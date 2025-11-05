@@ -71,7 +71,7 @@ def sync(drop_exist=False):
                 if not df.empty:
                     df["股票代码"] = trade_code
                     df["时间"] = pd.to_datetime(df['时间'])
-                    df.to_sql("stock_zh_a_hist_30min_hfq", engine, index=False, if_exists='append', chunksize=5000)
+                    df.to_sql("stock_zh_a_hist_30min_hfq", engine, index=False, if_exists='append', chunksize=20000)
                     logger.info(f"Execute Sync stock_zh_a_hist_30min_hfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
             else:
                 logger.info(f"Execute Sync stock_zh_a_hist  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
