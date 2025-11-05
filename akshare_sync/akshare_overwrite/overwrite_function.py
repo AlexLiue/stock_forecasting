@@ -50,7 +50,7 @@ def request_get(url, params=None, timeout=20):
     """
     基于 requests 库获取网页内容, 考虑到代理的稳定性较低, 引入重试访问, 默认重试 5 次代理访问
     """
-    max_retry = 5
+    max_retry = 10
     cur_retry = 0
     while cur_retry < max_retry:
         try:
