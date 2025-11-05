@@ -22,16 +22,22 @@ from requests import exceptions
 
 from akshare_sync.util.tools import get_cfg
 
+"""
+重写 Akshare 函数, 引入 proxies 代理解决 IP 地址被封问题
+"""
 
 
+""" 读取配置文件中的 proxies 信息 """
 cfg = get_cfg()
 proxies = {
     "http": cfg['proxies']['http'],
     "https": cfg['proxies']['https']
 }
 
+""" 使用 fake_useragent  随机生成 UserAgent  """
 user_agent = UserAgent(os=["Windows", "Linux", "Ubuntu", "Mac OS X"])
 
+""" 构建 requests 的请求报文头 """
 headers = {
     "User-Agent": user_agent.random,
     "Connection": "close",
@@ -41,6 +47,9 @@ headers = {
 
 
 def request_get(url, params=None, timeout=20):
+    """
+    基于 requests 库获取网页内容, 考虑到代理的稳定性较低, 引入重试访问, 默认重试 5 次代理访问
+    """
     max_retry = 5
     cur_retry = 0
     while cur_retry < max_retry:
@@ -63,7 +72,6 @@ def request_get(url, params=None, timeout=20):
         raise exceptions.RequestException
 
     return None
-
 
 
 def stock_zh_a_hist(
