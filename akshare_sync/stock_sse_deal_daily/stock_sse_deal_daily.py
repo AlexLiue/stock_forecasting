@@ -42,35 +42,31 @@ def sync(drop_exist=False):
         engine = get_engine()
         query_start_date = query_last_api_sync_date('stock_sse_deal_daily', 'stock_sse_deal_daily')
         start_date = str(max(query_start_date, '20211231'))
-        end_date = str(datetime.datetime.now().strftime('%Y%m%d'))
+        end_date = str(datetime.datetime.now().strftime('%Y%m%d')) if datetime.datetime.now().strftime('%H:%M:%S') > "16:30:00" else (datetime.datetime.now() + relativedelta(days=-1)).strftime('%Y%m%d')
 
         # 查询交易日历
         global_data = GlobalData()
         trade_date = global_data.trade_date_a
         date_list = [date for date in trade_date if start_date < date <= end_date]
-        logger.info(f"Execute Sync stock_szse_summary From Date[{start_date}] to Date[{end_date}]")
-
-        for step_date in date_list:
-            logger.info(f"Execute Sync stock_sse_deal_daily Date[{step_date}]")
-            df = ak.stock_sse_deal_daily(date=step_date)
-            if not df.empty:
-                df = df.set_index("单日情况")
-                df = df.T
-                df["日期"] = step_date
-                df["板块"] = df.axes[0]
-                df = df.reset_index(drop=True)
-                df = df[
-                    ["日期", "板块", "挂牌数", "市价总值", "流通市值", "成交金额", "成交量", "平均市盈率", "换手率",
-                     "流通换手率"]]
-
-                df.to_sql("stock_sse_deal_daily", engine, index=False, if_exists='append', chunksize=20000)
-                logger.info(
-                    f"Execute Sync stock_sse_deal_daily Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
-
-                update_api_sync_date('stock_sse_deal_daily', 'stock_sse_deal_daily',
-                                     f'{str(step_date)}')
-
-
+        if len(date_list) > 0:
+            logger.info(f"Execute Sync stock_szse_summary From Date[{start_date}] to Date[{end_date}]")
+            for step_date in date_list:
+                logger.info(f"Execute Sync stock_sse_deal_daily Date[{step_date}]")
+                df = ak.stock_sse_deal_daily(date=step_date)
+                if not df.empty:
+                    df = df.set_index("单日情况")
+                    df = df.T
+                    df["日期"] = step_date
+                    df["板块"] = df.axes[0]
+                    df = df.reset_index(drop=True)
+                    df = df[
+                        ["日期", "板块", "挂牌数", "市价总值", "流通市值", "成交金额", "成交量", "平均市盈率", "换手率",
+                            "流通换手率"]]
+                    df.to_sql("stock_sse_deal_daily", engine, index=False, if_exists='append', chunksize=20000)
+                    logger.info(  f"Execute Sync stock_sse_deal_daily Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
+                    update_api_sync_date('stock_sse_deal_daily', 'stock_sse_deal_daily', f'{str(step_date)}')
+        else:
+            logger.info(  f"Execute Sync stock_szse_summary  Range: ({start_date},{end_date}] , Skip Sync ... ")
     except Exception as e:
         logger.error(f"Table [stock_sse_deal_daily] Sync Failed", exc_info=True)
 

@@ -43,7 +43,7 @@ class ProcessPool:
 
 
 # 全量历史初始化
-def sync(max_processes):
+def sync(processes):
     """ 同步的函数列表 """
     functions = [
         stock_trade_date.sync, #交易日历
@@ -62,26 +62,33 @@ def sync(max_processes):
     ]
 
     """ 创建执行的线程池对象, 并指定线程池大小, 并提交数据同步task任务  """
-    pool = ProcessPool(max_processes=max_processes)
-    for func in functions:
-        pool.submit_task(func)
+    pool = multiprocessing.Pool(processes=processes)
 
-    results = pool.get_results()
-    print(f"计算结果是：{results}")
+    results = [pool.apply_async(function, args=(False,)) for function in functions]
+
+    """ 关闭进程池，不再接受新的任务"""
+    pool.close()
+
+    """ 等待所有任务完成 """
+    pool.join()
+
+    """ 收集任务结果 """
+    for result in results:
+        print(result.get())
 
 
 def use_age():
-    print('Useage: python data_syn.py [--pool_size 4]')
+    print('Useage: python data_syn.py [--processes 4]')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='sync mode args')
-    parser.add_argument('--pool_size',default=4, type=int, help='同步并发线程池大小')
+    parser.add_argument('--processes',default=4, type=int, help='同步并发线程池大小')
     args = parser.parse_args()
-    pool_size = args.pool_size
-    print(f'Exec With Args:--pool_size [{pool_size}]')
+    processes = args.processes
+    print(f'Exec With Args:--processes [{processes}]')
 
-    sync(pool_size)
+    sync(processes)
 
 
 

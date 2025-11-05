@@ -41,7 +41,7 @@ def sync(drop_exist=False):
         engine = get_engine()
 
         query_start_date = query_last_api_sync_date('stock_szse_sector_summary', 'stock_szse_sector_summary')
-        start_date = str(max(query_start_date, '20181201'))
+        start_date = str(max(query_start_date, '201812'))
         logger.info(f"Execute Sync stock_szse_sector_summary Date[{start_date}]")
 
         end_date = str(datetime.datetime.now().strftime('%Y%m'))
