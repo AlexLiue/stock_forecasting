@@ -18,9 +18,8 @@ import datetime
 import os
 
 import pandas as pd
+from akshare import stock_zh_a_hist
 
-
-from akshare_sync.akshare_overwrite.overwrite_function import stock_zh_a_hist
 from akshare_sync.global_data.global_data import GlobalData
 from akshare_sync.sync_logs.sync_logs import update_sync_log_date, update_sync_log_state_to_failed
 
@@ -120,7 +119,7 @@ def sync(drop_exist=False):
 
         update_sync_log_date('stock_zh_a_hist', 'stock_zh_a_hist_daily_qfq', f'{str(end_date)}')
 
-    except Exception as e:
+    except Exception:
         logger.error(f"Table [stock_zh_a_hist_daily_qfq] Sync  Failed", exc_info=True)
         update_sync_log_state_to_failed('stock_zh_a_hist', 'stock_zh_a_hist_daily_qfq')
 

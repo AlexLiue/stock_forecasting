@@ -83,7 +83,7 @@ def sync(drop_exist=False):
 
         else:
             logger.info("Table [stock_table_api_summary] Early Synced, Skip ...")
-    except Exception as e:
+    except Exception:
         logger.error(f"Table [stock_table_api_summary] SyncFailed", exc_info=True)
         update_sync_log_state_to_failed('stock_table_api_summary', 'stock_table_api_summary')
 

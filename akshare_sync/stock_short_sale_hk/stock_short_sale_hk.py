@@ -117,7 +117,7 @@ def sync(drop_exist=False):
                 update_sync_log_date('stock_short_sale_hk', 'stock_short_sale_hk', f'{str(row_date)}')
         else:
             logger.info("Table [stock_short_sale_hk] Early Synced, Skip ...")
-    except Exception as e:
+    except Exception:
         logger.error(f"Table [stock_short_sale_hk] SyncFailed", exc_info=True)
         update_sync_log_state_to_failed('stock_short_sale_hk', 'stock_short_sale_hk')
 

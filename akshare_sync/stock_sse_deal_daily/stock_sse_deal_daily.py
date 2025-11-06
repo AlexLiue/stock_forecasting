@@ -15,11 +15,11 @@
 
 """
 import datetime
-from dateutil.relativedelta import relativedelta
 import os
-import time
+
 import akshare as ak
 import pandas as pd
+from dateutil.relativedelta import relativedelta
 
 from akshare_sync.global_data.global_data import GlobalData
 from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
@@ -68,7 +68,7 @@ def sync(drop_exist=False):
                     update_sync_log_date('stock_sse_deal_daily', 'stock_sse_deal_daily', f'{str(step_date)}')
         else:
             logger.info(  f"Execute Sync stock_szse_summary  Range: ({start_date},{end_date}] , Skip Sync ... ")
-    except Exception as e:
+    except Exception:
         logger.error(f"Table [stock_sse_deal_daily] Sync Failed", exc_info=True)
         update_sync_log_state_to_failed('stock_sse_deal_daily', 'stock_sse_deal_daily')
 

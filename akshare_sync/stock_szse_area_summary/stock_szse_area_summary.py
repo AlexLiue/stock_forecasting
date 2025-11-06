@@ -14,11 +14,11 @@
 
 """
 import datetime
-from dateutil.relativedelta import relativedelta
 import os
-import time
+
 import akshare as ak
 import pandas as pd
+from dateutil.relativedelta import relativedelta
 
 from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
     update_sync_log_state_to_failed
@@ -59,7 +59,7 @@ def sync(drop_exist=False):
             step = step + relativedelta(months=1)
             update_sync_log_date('stock_szse_area_summary', 'stock_szse_area_summary',
                                  f'{str(step.strftime('%Y%m%d'))}')
-    except Exception as e:
+    except Exception:
         logger.error(f"Table [stock_szse_area_summary] SyncFailed", exc_info=True)
         update_sync_log_state_to_failed('stock_szse_area_summary', 'stock_szse_area_summary')
 

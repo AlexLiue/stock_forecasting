@@ -18,18 +18,15 @@
 """
 import datetime
 import os
-import time
+import traceback
 
-import akshare as ak
-import numpy as np
 import pandas as pd
+from akshare import stock_szse_summary
 
-from akshare_sync.akshare_overwrite.overwrite_function import stock_szse_summary
 from akshare_sync.global_data.global_data import GlobalData
 from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
     update_sync_log_state_to_failed
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
-import traceback
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)

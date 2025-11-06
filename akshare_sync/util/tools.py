@@ -9,20 +9,14 @@ import configparser
 import datetime
 import logging
 import os
+import platform
 import re
 import sys
-import time
-import platform
-
 from pathlib import Path
 
-import akshare as ak
 import cx_Oracle
 import oracledb
-import pandas as pd
-import pymysql
 import sqlparse
-import tushare as ts
 from sqlalchemy import create_engine
 
 

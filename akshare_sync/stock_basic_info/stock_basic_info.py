@@ -14,9 +14,9 @@
 import datetime
 import os
 import pandas as pd
-from akshare import stock_info_sh_name_code, stock_info_bj_name_code, stock_hk_spot, stock_info_sh_delist
+from akshare import stock_info_sh_name_code, stock_info_bj_name_code, stock_hk_spot, stock_info_sh_delist, \
+    stock_info_sz_name_code
 
-from akshare_sync.akshare_overwrite.overwrite_function import stock_info_sz_name_code
 from akshare_sync.sync_logs.sync_logs import update_sync_log_date, query_last_api_sync_date, \
     update_sync_log_state_to_failed
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, \
@@ -124,7 +124,7 @@ def sync(drop_exist=False):
 
         else:
             logger.info("Table [stock_basic_info] Early Synced, Skip ...")
-    except Exception as e:
+    except Exception:
         logger.error(f"Table [stock_basic_info] Sync Failed", exc_info=True)
         update_sync_log_state_to_failed('stock_basic_info', 'stock_basic_info')
 

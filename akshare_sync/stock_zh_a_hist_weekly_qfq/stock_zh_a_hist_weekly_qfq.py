@@ -14,16 +14,13 @@
 限量: 单次返回指定沪深京 A 股上市公司、指定周期和指定日期间的历史行情日频率数据
 """
 import datetime
-import traceback
-
-from dateutil.relativedelta import relativedelta
 import os
-import pandas as pd
 
-from akshare_sync.akshare_overwrite.overwrite_function import stock_zh_a_hist
+import pandas as pd
+from akshare import stock_zh_a_hist
+
 from akshare_sync.global_data.global_data import GlobalData
 from akshare_sync.sync_logs.sync_logs import update_sync_log_date, update_sync_log_state_to_failed
-
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, exec_sql
 
 pd.set_option('display.max_columns', None)
@@ -120,7 +117,7 @@ def sync(drop_exist=False):
 
         update_sync_log_date('stock_zh_a_hist', 'stock_zh_a_hist_weekly_qfq', f'{str(end_date)}')
 
-    except Exception as e:
+    except Exception:
         logger.error(f"Table [stock_zh_a_hist_weekly_qfq] Sync  Failed", exc_info=True)
         update_sync_log_state_to_failed('stock_zh_a_hist', 'stock_zh_a_hist_weekly_qfq')
 
