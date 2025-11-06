@@ -14,7 +14,7 @@
 import datetime
 import os
 import pandas as pd
-from akshare import stock_info_sh_name_code, stock_info_bj_name_code, stock_hk_spot
+from akshare import stock_info_sh_name_code, stock_info_bj_name_code, stock_hk_spot, stock_info_sh_delist
 
 from akshare_sync.akshare_overwrite.overwrite_function import stock_info_sz_name_code
 from akshare_sync.sync_logs.sync_logs import update_sync_log_date, query_last_api_sync_date, \
@@ -86,6 +86,11 @@ def stock_info_code_name() -> pd.DataFrame:
     big_df["list_date"] = big_df['list_date'].apply(lambda d: str(d).replace('-',''))
     big_df["数据日期"] = str(datetime.datetime.now().strftime('%Y%m%d'))
     big_df.columns = ["证券代码", "证券简称", "交易所", "板块", "上市日期", "数据日期"]
+
+
+    """ 去除退市的股票 """
+    sh_delist_df = stock_info_sh_delist(symbol="全部")
+    big_df = big_df[~big_df["证券代码"].isin(sh_delist_df["公司代码"])]
 
     return big_df
 
