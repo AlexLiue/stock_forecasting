@@ -78,7 +78,6 @@ def sync(drop_exist=False):
                 logger.info(
                     f"Execute Sync stock_zh_a_hist_daily_hfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
 
-        engine.close()
         update_sync_log_date('stock_zh_a_hist', 'stock_zh_a_hist_daily_hfq', f'{str(end_date)}')
 
     except Exception as e:

@@ -55,10 +55,16 @@ def query_last_sync_info(trade_code, engine, logger):
     return result
 
 
-def get_end_date():
-    end_date = ''
-    if datetime.datetime.now().strftime('%H:%M:%S') > "16:30:00":
-        end_date = str(datetime.datetime.now().strftime('%Y-%m-%d')) + " 15:00:00"
+def get_end_date(trade_date_list):
+    now= datetime.datetime.now()
+    if now.strftime('%H:%M:%S') > "16:30:00":
+        until_date = now.strftime('%Y%m%d')
+        date_list = [date for date in trade_date_list if date <= until_date]
+        return datetime.datetime.strptime(max(date_list),'%Y%m%d').strftime('%Y-%m-%d') + " 15:00:00"
+    elif now.strftime('%H:%M:%S') < "9:30:00":
+        until_date = (now - datetime.timedelta(days=1)).strftime('%Y%m%d')
+        date_list = [date for date in trade_date_list if date <= until_date]
+        return datetime.datetime.strptime(max(date_list), '%Y%m%d').strftime('%Y-%m-%d') + " 15:00:00"
     else:
         now_date = datetime.datetime.now()
         hour = now_date.hour
@@ -81,8 +87,9 @@ def sync(drop_exist=False):
         # 查询交易股票列表
         global_data = GlobalData()
         trade_code_list = global_data.trade_code_a
+        trade_date_list = global_data.trade_date_a
         # 结束日期: 16:30:00 前取前一天的日期，否则取当天的日期
-        end_date = get_end_date()
+        end_date = get_end_date(trade_date_list)
 
         engine = get_engine()
         for row_idx in range(trade_code_list.shape[0]):
@@ -122,7 +129,6 @@ def sync(drop_exist=False):
             else:
                 logger.info(f"Execute Sync stock_zh_a_hist_30min_hfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
 
-        engine.close()
         update_sync_log_date('stock_zh_a_hist_min_em', 'stock_zh_a_hist_30min_hfq', f'{str(end_date)}')
 
     except Exception as e:
