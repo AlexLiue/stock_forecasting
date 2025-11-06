@@ -66,6 +66,7 @@ def request_get(url, params=None, timeout=20):
             break
         except Exception as e:
             print(traceback.format_exc())
+            time.sleep(3)
             cur_retry += 1
             time.sleep(1)
     if cur_retry == max_retry:
