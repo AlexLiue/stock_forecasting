@@ -189,7 +189,11 @@ def sync(drop_exist=False):
                 )
 
         update_sync_log_date(
-            "stock_zh_a_hist_min_em", "stock_zh_a_hist_30min_qfq", f"{str(end_date)}"
+            "stock_zh_a_hist_min_em",
+            "stock_zh_a_hist_30min_qfq",
+            datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S").strftime(
+                "%Y%m%d"
+            ),
         )
 
     except Exception:

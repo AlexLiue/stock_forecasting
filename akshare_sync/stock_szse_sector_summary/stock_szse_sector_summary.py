@@ -109,12 +109,13 @@ def sync(drop_exist=False):
                     f"Execute Sync stock_szse_sector_summary Date[{step_date}]"
                     + f" Write[{df.shape[0]}] Records"
                 )
-                step = step + relativedelta(months=1)
                 update_sync_log_date(
                     "stock_szse_sector_summary",
                     "stock_szse_sector_summary",
-                    f'{str(df["日期"].max())}',
+                    step.strftime("%Y%m%d"),
                 )
+
+                step = step + relativedelta(months=1)
             else:
                 break
 
