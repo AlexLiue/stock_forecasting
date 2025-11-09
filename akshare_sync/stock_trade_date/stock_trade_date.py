@@ -17,7 +17,6 @@ import akshare as ak
 import pandas as pd
 
 from akshare_sync.sync_logs.sync_logs import (
-    query_last_api_sync_date,
     update_sync_log_date,
     update_sync_log_state_to_failed,
 )
@@ -30,7 +29,7 @@ from akshare_sync.util.tools import (
 )
 
 
-def query_last_sync_date(trade_code, engine, logger):
+def query_last_sync_date(engine, logger):
     query_start_date = (
         f'SELECT NVL(MAX("数据日期"), 19900101) as max_date FROM STOCK_TRADE_DATE'
     )
@@ -47,7 +46,7 @@ def sync(drop_exist=False):
         dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
         exec_create_table_script(dir_path, drop_exist, logger)
 
-        last_date = query_last_sync_date(None, engine, logger)
+        last_date = query_last_sync_date(engine, logger)
         cur_date = datetime.datetime.now().date().strftime("%Y%m%d")
 
         if last_date < cur_date:

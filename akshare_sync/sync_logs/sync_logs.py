@@ -36,16 +36,16 @@ def init_create_table_sync_logs():
     exec_create_table_script(dir_path, False, logger)
 
 
-# 查询 API 同步的时间
-def query_last_api_sync_date(api_name, table_name):
-    cfg = get_cfg()
-    logger = get_logger("sync_logs", cfg["sync-logging"]["filename"])
-    engine = get_engine()
-    query_start_date = f'SELECT NVL(MAX("日期"), 19900101) as max_date FROM sync_logs WHERE "接口名"=\'{api_name}\' AND "表名"=\'{table_name}\''
-    logger.info(f"Execute SQL  [{query_start_date}]")
-    last_date = str(pd.read_sql(query_start_date, engine).iloc[0, 0])
-    logger.info(f"Execute SQL  Result [{last_date})]")
-    return last_date
+# # 查询 API 同步的时间
+# def query_last_api_sync_date(api_name, table_name):
+#     cfg = get_cfg()
+#     logger = get_logger("sync_logs", cfg["sync-logging"]["filename"])
+#     engine = get_engine()
+#     query_start_date = f'SELECT NVL(MAX("日期"), 19900101) as max_date FROM sync_logs WHERE "接口名"=\'{api_name}\' AND "表名"=\'{table_name}\''
+#     logger.info(f"Execute SQL  [{query_start_date}]")
+#     last_date = str(pd.read_sql(query_start_date, engine).iloc[0, 0])
+#     logger.info(f"Execute SQL  Result [{last_date})]")
+#     return last_date
 
 
 def str_date_day_add(str_date, days):
@@ -103,5 +103,4 @@ def update_sync_log_state_to_failed(api_name, table_name):
 
 
 if __name__ == "__main__":
-    date = query_last_api_sync_date("stock_sse_summary", "stock_sse_summary")
-    update_sync_log_date("stock_sse_summary", "stock_sse_summary", 20251024)
+    print("")

@@ -14,20 +14,15 @@
 """
 import datetime
 import os
-import re
-from io import StringIO
 from datetime import timedelta
 
 import pandas as pd
-import requests
 from akshare import stock_hk_short_sale
-from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
 from pandas import Timestamp
 
 import akshare_sync
 from akshare_sync.sync_logs.sync_logs import (
-    query_last_api_sync_date,
     update_sync_log_date,
     update_sync_log_state_to_failed,
 )
@@ -40,7 +35,7 @@ from akshare_sync.util.tools import (
 )
 
 
-def query_last_sync_date(trade_code, engine, logger):
+def query_last_sync_date(engine, logger):
     query_start_date = (
         f'SELECT NVL(MAX("日期"), 20120820) as max_date FROM STOCK_SHORT_SALE_HK'
     )
@@ -94,7 +89,7 @@ def sync(drop_exist=False):
         exec_create_table_script(dir_path, drop_exist, logger)
 
         engine = get_engine()
-        last_sync_date = query_last_sync_date(None, engine, logger)
+        last_sync_date = query_last_sync_date(engine, logger)
 
         begin_date = (
             datetime.datetime.strptime(last_sync_date, "%Y%m%d")

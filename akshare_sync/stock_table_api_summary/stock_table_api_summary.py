@@ -20,7 +20,6 @@ import requests
 from bs4 import BeautifulSoup
 
 from akshare_sync.sync_logs.sync_logs import (
-    query_last_api_sync_date,
     update_sync_log_date,
     update_sync_log_state_to_failed,
 )
@@ -40,7 +39,7 @@ pd.set_option("display.max_colwidth", None)
 pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
 
-def query_last_sync_date(trade_code, engine, logger):
+def query_last_sync_date(engine, logger):
     query_start_date = (
         f'SELECT NVL(MAX("数据日期"), 19900101) as max_date FROM STOCK_TABLE_API_SUMMARY'
     )
@@ -85,7 +84,7 @@ def sync(drop_exist=False):
         exec_create_table_script(dir_path, drop_exist, logger)
 
         engine = get_engine()
-        last_date = query_last_sync_date(None, engine, logger)
+        last_date = query_last_sync_date(engine, logger)
         cur_date = str(datetime.datetime.now().strftime("%Y%m%d"))
         if last_date < cur_date:
             # 获取数据

@@ -41,7 +41,7 @@ pd.set_option("display.max_colwidth", None)
 pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
 
-def query_last_sync_date(trade_code, engine, logger):
+def query_last_sync_date(engine, logger):
     query_start_date = (
         f'SELECT NVL(MAX("日期"), 19900101) as max_date FROM STOCK_SSE_DEAL_DAILY'
     )
@@ -57,7 +57,7 @@ def sync(drop_exist=False):
         exec_create_table_script(dir_path, drop_exist, logger)
 
         engine = get_engine()
-        query_start_date = query_last_sync_date(None, engine, logger)
+        query_start_date = query_last_sync_date(engine, logger)
         start_date = str(max(query_start_date, "20211231"))
         end_date = (
             str(datetime.datetime.now().strftime("%Y%m%d"))

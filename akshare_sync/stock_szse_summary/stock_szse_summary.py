@@ -25,7 +25,6 @@ from akshare import stock_szse_summary
 
 from akshare_sync.global_data.global_data import GlobalData
 from akshare_sync.sync_logs.sync_logs import (
-    query_last_api_sync_date,
     update_sync_log_date,
     update_sync_log_state_to_failed,
 )
@@ -44,7 +43,7 @@ pd.set_option("display.max_colwidth", None)
 pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
 
-def query_last_sync_date(trade_code, engine, logger):
+def query_last_sync_date(engine, logger):
     query_start_date = (
         f'SELECT NVL(MAX("日期"), 19900101) as max_date FROM STOCK_SZSE_SUMMARY'
     )
@@ -65,7 +64,7 @@ def sync(drop_exist=False):
         trade_date_set = global_data.trade_date_a
         engine = get_engine()
 
-        last_sync_date = query_last_sync_date(None, engine, logger)
+        last_sync_date = query_last_sync_date(engine, logger)
         start_date = str(max(last_sync_date, "20100101"))
         end_date = str(datetime.datetime.now().strftime("%Y%m%d"))
         date_list = [date for date in trade_date_set if start_date < date <= end_date]

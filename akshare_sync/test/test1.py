@@ -1,8 +1,7 @@
-import pandas as pd
 from datetime import timedelta
 
+import pandas as pd
 from pandas import Timestamp
-from ruamel_yaml.timestamp import TimeStamp
 
 
 def get_split_range(start_date, end_date, freq="70D"):

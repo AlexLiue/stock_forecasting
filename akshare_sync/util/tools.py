@@ -82,8 +82,6 @@ def get_logger(log_name, file_name):
 
 
 def once_init_decorator(func):
-    cfg = get_cfg()
-    logger = get_logger("tools", cfg["sync-logging"]["filename"])
     called = False
 
     def wrapper(*args, **kwargs):
@@ -160,7 +158,7 @@ def load_sql_script(path):
         if format_item.startswith("BEGIN"):
             res.append(format_item)
             session_flag = True
-        elif session_flag == False:
+        elif not session_flag:
             res.append(format_item)
             i += 1
         else:
@@ -194,7 +192,6 @@ def exec_create_table_script(script_dir, drop_exist, logger):
         count = 0
         flt_cnt = 0
         suc_cnt = 0
-        str1 = ""
         for home, dirs, files in os.walk(script_dir):
             for filename in files:
                 if filename.endswith(".sql"):

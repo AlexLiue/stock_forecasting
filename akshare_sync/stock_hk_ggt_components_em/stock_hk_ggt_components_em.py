@@ -22,7 +22,6 @@ import pandas as pd
 from akshare import stock_hk_ggt_components_em
 
 from akshare_sync.sync_logs.sync_logs import (
-    query_last_api_sync_date,
     update_sync_log_date,
     update_sync_log_state_to_failed,
 )
@@ -41,28 +40,35 @@ pd.set_option("display.max_colwidth", None)
 pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
 
+def query_last_sync_date(engine, logger):
+    query_start_date = (
+        f'SELECT NVL(MAX("数据日期"), 19900101) as max_date FROM STOCK_HK_GGT_COMPONENTS_EM'
+    )
+    logger.info(f"Execute Query SQL  [{query_start_date}]")
+    return str(pd.read_sql(query_start_date, engine).iloc[0, 0])
+
+
 # 全量初始化表数据
 def sync(drop_exist=False):
     cfg = get_cfg()
     logger = get_logger("stock_hk_ggt_components_em", cfg["sync-logging"]["filename"])
 
     try:
-        start_date = query_last_api_sync_date(
-            "stock_hk_ggt_components_em", "stock_hk_ggt_components_em"
-        )
+        dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+        exec_create_table_script(dir_path, drop_exist, logger)
+        engine = get_engine()
+        start_date = query_last_sync_date(engine, logger)
         end_date = str(datetime.datetime.now().strftime("%Y%m%d"))
         if start_date < end_date:
-            dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
-            exec_create_table_script(dir_path, drop_exist, logger)
-
             # 获取数据
             hk_ggt_df = stock_hk_ggt_components_em()
             hk_ggt_df["交易所"] = "HK"
-            hk_ggt_df = hk_ggt_df[["代码", "名称", "交易所"]]
-            hk_ggt_df.columns = ["证券代码", "证券简称", "交易所"]
+            hk_ggt_df["数据日期"] = end_date
+            hk_ggt_df = hk_ggt_df[["代码", "名称", "交易所", "数据日期"]]
+            hk_ggt_df.columns = ["证券代码", "证券简称", "交易所", "数据日期"]
             df = hk_ggt_df
             # 写入数据库
-            engine = get_engine()
+
             logger.info(
                 f"Write [{df.shape[0]}] records into table [stock_hk_ggt_components_em] with [{engine.engine}]"
             )

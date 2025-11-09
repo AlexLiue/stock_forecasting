@@ -26,7 +26,6 @@ from akshare.utils.context import AkshareConfig
 
 from akshare_sync.sync_logs.sync_logs import (
     update_sync_log_date,
-    query_last_api_sync_date,
     update_sync_log_state_to_failed,
 )
 from akshare_sync.util.tools import (
@@ -44,11 +43,12 @@ pd.set_option("display.width", None)
 pd.set_option("display.max_colwidth", None)
 pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
+
 cfg = get_cfg()
 logger = get_logger("stock_basic_info", cfg["sync-logging"]["filename"])
 
 
-def query_last_sync_date(trade_code, engine, logger):
+def query_last_sync_date(engine):
     query_start_date = (
         f'SELECT NVL(MAX("数据日期"), 19900101) as max_date FROM STOCK_BASIC_INFO'
     )
@@ -140,7 +140,7 @@ def sync(drop_exist=False):
 
         engine = get_engine()
 
-        start_date = query_last_sync_date(None, engine, logger)
+        start_date = query_last_sync_date(engine)
         if start_date < str(datetime.datetime.now().strftime("%Y%m%d")):
             # 获取数据
             df = stock_info_code_name()
