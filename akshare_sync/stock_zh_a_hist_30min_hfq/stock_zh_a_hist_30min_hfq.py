@@ -22,15 +22,24 @@ import pandas as pd
 from akshare import stock_zh_a_hist_min_em
 
 from akshare_sync.global_data.global_data import GlobalData
-from akshare_sync.sync_logs.sync_logs import update_sync_log_date, update_sync_log_state_to_failed
-from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, exec_sql, \
-    save_to_database
+from akshare_sync.sync_logs.sync_logs import (
+    update_sync_log_date,
+    update_sync_log_state_to_failed,
+)
+from akshare_sync.util.tools import (
+    exec_create_table_script,
+    get_engine,
+    get_logger,
+    get_cfg,
+    exec_sql,
+    save_to_database,
+)
 
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', None)
-pd.set_option('display.width', None)
-pd.set_option('display.max_colwidth', None)
-pd.set_option('display.float_format', lambda x: '%.2f' % x) #
+pd.set_option("display.max_columns", None)
+pd.set_option("display.max_rows", None)
+pd.set_option("display.width", None)
+pd.set_option("display.max_colwidth", None)
+pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
 
 def query_last_sync_info(trade_code, engine, logger):
@@ -48,28 +57,34 @@ def query_last_sync_info(trade_code, engine, logger):
     logger.info(f"Execute Query SQL  [{query_last_close}]")
     last_close = pd.read_sql(query_last_close, engine)
     if last_close.shape[0] > 0:
-       result.append(last_close.iloc[0,0])
+        result.append(last_close.iloc[0, 0])
     else:
-       result.append(None)
+        result.append(None)
 
     return result
 
 
 def get_end_date(trade_date_list):
-    now= datetime.datetime.now()
-    if now.strftime('%H:%M:%S') > "16:30:00":
-        until_date = now.strftime('%Y%m%d')
+    now = datetime.datetime.now()
+    if now.strftime("%H:%M:%S") > "16:30:00":
+        until_date = now.strftime("%Y%m%d")
         date_list = [date for date in trade_date_list if date <= until_date]
-        return datetime.datetime.strptime(max(date_list),'%Y%m%d').strftime('%Y-%m-%d') + " 15:00:00"
-    elif now.strftime('%H:%M:%S') < "9:30:00":
-        until_date = (now - datetime.timedelta(days=1)).strftime('%Y%m%d')
+        return (
+            datetime.datetime.strptime(max(date_list), "%Y%m%d").strftime("%Y-%m-%d")
+            + " 15:00:00"
+        )
+    elif now.strftime("%H:%M:%S") < "9:30:00":
+        until_date = (now - datetime.timedelta(days=1)).strftime("%Y%m%d")
         date_list = [date for date in trade_date_list if date <= until_date]
-        return datetime.datetime.strptime(max(date_list), '%Y%m%d').strftime('%Y-%m-%d') + " 15:00:00"
+        return (
+            datetime.datetime.strptime(max(date_list), "%Y%m%d").strftime("%Y-%m-%d")
+            + " 15:00:00"
+        )
     else:
         now_date = datetime.datetime.now()
         hour = now_date.hour
-        minute = '30' if now_date.minute > 30 else '00'
-        end_date = now_date.strftime('%Y-%m-%d') + f" {hour:02}:{minute:02}:00"
+        minute = "30" if now_date.minute > 30 else "00"
+        end_date = now_date.strftime("%Y-%m-%d") + f" {hour:02}:{minute:02}:00"
     return end_date
 
 
@@ -78,7 +93,7 @@ def sync(drop_exist=False):
     同步 30分钟级 前复权数据，由于当股票分红后前复权的数据需要重新计算，因此需要检测历史数据是否发生变动，如发生变动则需要重新同步
     """
     cfg = get_cfg()
-    logger = get_logger('stock_zh_a_hist_30min_hfq', cfg['sync-logging']['filename'])
+    logger = get_logger("stock_zh_a_hist_30min_hfq", cfg["sync-logging"]["filename"])
 
     try:
         dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
@@ -102,40 +117,86 @@ def sync(drop_exist=False):
             start_date = last_sync_date
 
             if start_date < end_date:
-                logger.info( f"Execute Sync stock_zh_a_hist_30min_hfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}]")
-                df = stock_zh_a_hist_min_em(symbol=trade_code, start_date=start_date, end_date=end_date, period="30", adjust="hfq")
+                logger.info(
+                    f"Execute Sync stock_zh_a_hist_30min_hfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}]"
+                )
+                df = stock_zh_a_hist_min_em(
+                    symbol=trade_code,
+                    start_date=start_date,
+                    end_date=end_date,
+                    period="30",
+                    adjust="hfq",
+                )
                 if not df.empty:
                     df["股票代码"] = trade_code
-                    df["时间"] = pd.to_datetime(df['时间'])
+                    df["时间"] = pd.to_datetime(df["时间"])
                     """ 判断复权的数据是否发生变动 """
-                    if last_sync_close is None or df.loc[df["时间"]==start_date, "收盘"][0] == last_sync_close:
-                        df = df.loc[df["时间"]!=start_date]
-                        save_to_database(df, "stock_zh_a_hist_30min_hfq", engine, index=False, if_exists='append', chunksize=20000)
-                        logger.info(f"Execute Sync stock_zh_a_hist_30min_hfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
+                    if (
+                        last_sync_close is None
+                        or df.loc[df["时间"] == start_date, "收盘"][0] == last_sync_close
+                    ):
+                        df = df.loc[df["时间"] != start_date]
+                        save_to_database(
+                            df,
+                            "stock_zh_a_hist_30min_hfq",
+                            engine,
+                            index=False,
+                            if_exists="append",
+                            chunksize=20000,
+                        )
+                        logger.info(
+                            f"Execute Sync stock_zh_a_hist_30min_hfq trade_code[{trade_code}]"
+                            + f" Write[{df.shape[0]}] Records"
+                        )
                     else:
                         clean_sql = f"DELETE FROM stock_zh_a_hist_30min_hfq WHERE \"股票代码\"='{trade_code}'"
-                        logger.info(f"Execute Sync stock_zh_a_hist_30min_hfq, Detect QFQ data updated, Clean History Data With SQL [{clean_sql}], Recall Sync")
+                        logger.info(
+                            f"Execute Sync stock_zh_a_hist_30min_hfq, Detect QFQ data updated, Clean History Data With SQL [{clean_sql}], Recall Sync"
+                        )
                         exec_sql(clean_sql)
 
-                        last_sync_info = query_last_sync_info(trade_code, engine, logger)
+                        last_sync_info = query_last_sync_info(
+                            trade_code, engine, logger
+                        )
                         last_sync_date = last_sync_info[0]
                         start_date = last_sync_date
-                        df = stock_zh_a_hist_min_em(symbol=trade_code, start_date=start_date, end_date=end_date, period="30", adjust="hfq")
+                        df = stock_zh_a_hist_min_em(
+                            symbol=trade_code,
+                            start_date=start_date,
+                            end_date=end_date,
+                            period="30",
+                            adjust="hfq",
+                        )
                         if not df.empty:
                             df["股票代码"] = trade_code
-                            df["时间"] = pd.to_datetime(df['时间'])
-                            save_to_database(df, "stock_zh_a_hist_30min_hfq", engine, index=False, if_exists='append',  chunksize=20000)
-                            logger.info(  f"Execute Sync stock_zh_a_hist_30min_hfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
+                            df["时间"] = pd.to_datetime(df["时间"])
+                            save_to_database(
+                                df,
+                                "stock_zh_a_hist_30min_hfq",
+                                engine,
+                                index=False,
+                                if_exists="append",
+                                chunksize=20000,
+                            )
+                            logger.info(
+                                f"Execute Sync stock_zh_a_hist_30min_hfq trade_code[{trade_code}]"
+                                + f" Write[{df.shape[0]}] Records"
+                            )
             else:
-                logger.info(f"Execute Sync stock_zh_a_hist_30min_hfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
+                logger.info(
+                    f"Execute Sync stock_zh_a_hist_30min_hfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... "
+                )
 
-        update_sync_log_date('stock_zh_a_hist_min_em', 'stock_zh_a_hist_30min_hfq', f'{str(end_date)}')
+        update_sync_log_date(
+            "stock_zh_a_hist_min_em", "stock_zh_a_hist_30min_hfq", f"{str(end_date)}"
+        )
 
     except Exception:
         logger.error(f"Table [stock_zh_a_hist_30min_hfq] Sync  Failed", exc_info=True)
-        update_sync_log_state_to_failed('stock_zh_a_hist_min_em', 'stock_zh_a_hist_30min_hfq')
+        update_sync_log_state_to_failed(
+            "stock_zh_a_hist_min_em", "stock_zh_a_hist_30min_hfq"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sync(False)
-

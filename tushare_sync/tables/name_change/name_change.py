@@ -14,7 +14,12 @@ tushare 接口说明： https://tushare.pro/document/2?doc_id=100
 
 import os
 
-from tushare_sync.utils.utils import exec_create_table_script, get_tushare_api, get_mock_connection, get_logger
+from tushare_sync.utils.utils import (
+    exec_create_table_script,
+    get_tushare_api,
+    get_mock_connection,
+    get_logger,
+)
 
 
 # 全量初始化表数据
@@ -24,17 +29,21 @@ def sync(drop_exist=False):
 
     ts_api = get_tushare_api()
     connection = get_mock_connection()
-    logger = get_logger('name_change', 'data_syn.log')
+    logger = get_logger("name_change", "data_syn.log")
 
-    fields = 'ts_code,name,start_date,end_date,ann_date,change_reason'
+    fields = "ts_code,name,start_date,end_date,ann_date,change_reason"
     logger.info("Query data from tushare with api[namechange], fields[%s]" % fields)
 
-    data = ts_api.namechange(ts_code='', fields=fields)
+    data = ts_api.namechange(ts_code="", fields=fields)
 
     logger.info(
-        'Write [%d] records into table [stock_basic] with [%s]' % (data.last_valid_index() + 1, connection.engine))
-    data.to_sql('name_change', connection, index=False, if_exists='append', chunksize=20000)
+        "Write [%d] records into table [stock_basic] with [%s]"
+        % (data.last_valid_index() + 1, connection.engine)
+    )
+    data.to_sql(
+        "name_change", connection, index=False, if_exists="append", chunksize=20000
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sync(True)

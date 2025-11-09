@@ -27,24 +27,18 @@ def sync(drop_exist=True):
     limit = 1000
     interval = 1
     exec_sync_with_ts_code(
-        table_name='stk_rewards',
-        api_name='stk_rewards',
-        fields=[
-            "id",
-            "concept_name",
-            "ts_code",
-            "name",
-            "in_date",
-            "out_date"
-        ],
-        date_column='ann_date',
+        table_name="stk_rewards",
+        api_name="stk_rewards",
+        fields=["id", "concept_name", "ts_code", "name", "in_date", "out_date"],
+        date_column="ann_date",
         start_date=19970101,
-        end_date=str(datetime.datetime.now().strftime('%Y%m%d')),
+        end_date=str(datetime.datetime.now().strftime("%Y%m%d")),
         date_step=36000,
         limit=limit,
         interval=interval,
-        ts_code_limit=1)
+        ts_code_limit=1,
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sync()

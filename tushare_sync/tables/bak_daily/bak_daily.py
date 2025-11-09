@@ -15,12 +15,17 @@ tushare 接口说明：https://tushare.pro/document/2?doc_id=255
 
 import os
 import datetime
-from tushare_sync.utils.utils import exec_create_table_script, exec_sync_with_spec_date_column, get_cfg, query_last_sync_date, \
-    max_date
+from tushare_sync.utils.utils import (
+    exec_create_table_script,
+    exec_sync_with_spec_date_column,
+    get_cfg,
+    query_last_sync_date,
+    max_date,
+)
 
 limit = 5000  # 每次读取记录条数
 interval = 15  # 读取的时间间隔, Tushare 限制
-begin_date = '20170101'  # Tushare 里数据最早开始时间
+begin_date = "20170101"  # Tushare 里数据最早开始时间
 
 
 def exec_sync(start_date, end_date):
@@ -28,8 +33,8 @@ def exec_sync(start_date, end_date):
     global limit
     global interval
     exec_sync_with_spec_date_column(
-        table_name='bak_daily',
-        api_name='bak_daily',
+        table_name="bak_daily",
+        api_name="bak_daily",
         fields=[
             "ts_code",
             "trade_date",
@@ -61,13 +66,14 @@ def exec_sync(start_date, end_date):
             "avg_turnover",
             "attack",
             "interval_3",
-            "interval_6"
+            "interval_6",
         ],
-        date_column='trade_date',
+        date_column="trade_date",
         start_date=start_date,
         end_date=end_date,
         limit=limit,
-        interval=interval)
+        interval=interval,
+    )
 
 
 def sync(drop_exist=False):
@@ -76,15 +82,17 @@ def sync(drop_exist=False):
 
     global begin_date
     now = datetime.datetime.now()
-    end_date = str(now.strftime('%Y%m%d'))
+    end_date = str(now.strftime("%Y%m%d"))
 
     # 查询历史最大同步日期
     cfg = get_cfg()
-    date_query_sql = "select max(trade_date) date from %s.bak_daily" % cfg['mysql']['database']
+    date_query_sql = (
+        "select max(trade_date) date from %s.bak_daily" % cfg["mysql"]["database"]
+    )
     last_date = query_last_sync_date(date_query_sql)
     start_date = max_date(last_date, begin_date)
     exec_sync(start_date, end_date)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sync(False)

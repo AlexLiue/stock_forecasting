@@ -25,28 +25,26 @@ from akshare_sync.stock_zh_a_hist_weekly_qfq import stock_zh_a_hist_weekly_qfq
 
 # 全量历史初始化
 def sync(processes_size):
-    stock_trade_date.sync()  #交易日历
+    stock_trade_date.sync()  # 交易日历
     stock_basic_info.sync()  # 股票基本信息: 股票代码、股票名称、交易所、板块
 
     """ 同步的函数列表 """
     functions = [
-        #
-        # stock_table_api_summary.sync,  # 表 API 接口信息
-        # stock_short_sale_hk.sync,  # 港股 HK 淡仓申报
-        # stock_sse_summary.sync,  # 上海证券交易所-股票数据总貌
-        # stock_szse_summary.sync,  # 深圳证券交易所-市场总貌-证券类别统计
-        # stock_szse_area_summary.sync,
-        # stock_szse_sector_summary.sync,
-        # stock_sse_deal_daily.sync,  # 上海证券交易所-数据-股票数据-成交概况-股票成交概况-每日股票情况
-        # stock_zh_a_hist_30min_qfq.sync,  # 东方财富网-行情首页-港股-每日分时行情-30分钟-前复权
-        # stock_zh_a_hist_30min_hfq.sync,  # 东方财富网-行情首页-港股-每日分时行情-30分钟-后复权
-        # stock_zh_a_hist_daily_qfq.sync,  # 东方财富-沪深京 A 股日频率数据 - 前复权
-        # stock_zh_a_hist_daily_hfq.sync,  # 东方财富-沪深京 A 股日频率数据 - 后复权
-        # stock_zh_a_hist_weekly_qfq.sync,  # 东方财富-沪深京 A 股周频率数据 - 前复权
-        # stock_zh_a_hist_weekly_hfq.sync,  # 东方财富-沪深京 A 股周频率数据 - 后复权
-        # stock_zh_a_hist_monthly_qfq.sync,  # 东方财富-沪深京 A 股月频率数据 - 前复权
-        # stock_zh_a_hist_monthly_hfq.sync  # 东方财富-沪深京 A 股月频率数据 - 后复权
-
+        stock_table_api_summary.sync,  # 表 API 接口信息
+        stock_short_sale_hk.sync,  # 港股 HK 淡仓申报
+        stock_sse_summary.sync,  # 上海证券交易所-股票数据总貌
+        stock_szse_summary.sync,  # 深圳证券交易所-市场总貌-证券类别统计
+        stock_szse_area_summary.sync,
+        stock_szse_sector_summary.sync,
+        stock_sse_deal_daily.sync,  # 上海证券交易所-数据-股票数据-成交概况-股票成交概况-每日股票情况
+        stock_zh_a_hist_30min_qfq.sync,  # 东方财富网-行情首页-港股-每日分时行情-30分钟-前复权
+        stock_zh_a_hist_30min_hfq.sync,  # 东方财富网-行情首页-港股-每日分时行情-30分钟-后复权
+        stock_zh_a_hist_daily_qfq.sync,  # 东方财富-沪深京 A 股日频率数据 - 前复权
+        stock_zh_a_hist_daily_hfq.sync,  # 东方财富-沪深京 A 股日频率数据 - 后复权
+        stock_zh_a_hist_weekly_qfq.sync,  # 东方财富-沪深京 A 股周频率数据 - 前复权
+        stock_zh_a_hist_weekly_hfq.sync,  # 东方财富-沪深京 A 股周频率数据 - 后复权
+        stock_zh_a_hist_monthly_qfq.sync,  # 东方财富-沪深京 A 股月频率数据 - 前复权
+        stock_zh_a_hist_monthly_hfq.sync,  # 东方财富-沪深京 A 股月频率数据 - 后复权
     ]
 
     """ 创建执行的线程池对象, 并指定线程池大小, 并提交数据同步task任务  """
@@ -66,19 +64,14 @@ def sync(processes_size):
 
 
 def use_age():
-    print('Useage: python syn_start.py [--processes 4]')
+    print("Useage: python syn_start.py [--processes 4]")
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='sync mode args')
-    parser.add_argument('--processes',default=4, type=int, help='同步并发线程池大小')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="sync mode args")
+    parser.add_argument("--processes", default=4, type=int, help="同步并发线程池大小")
     args = parser.parse_args()
     processes = args.processes
-    print(f'Exec With Args:--processes [{processes}]')
+    print(f"Exec With Args:--processes [{processes}]")
 
     sync(processes)
-
-
-
-
-

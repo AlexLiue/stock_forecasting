@@ -15,14 +15,19 @@ tushare 接口说明：https://tushare.pro/document/2?doc_id=124
 import datetime
 import os
 
-from tushare_sync.utils.utils import exec_create_table_script, exec_sync_with_spec_date_column, get_cfg, query_last_sync_date, \
-    max_date
+from tushare_sync.utils.utils import (
+    exec_create_table_script,
+    exec_sync_with_spec_date_column,
+    get_cfg,
+    query_last_sync_date,
+    max_date,
+)
 
 
 def exec_sync(start_date, end_date):
     exec_sync_with_spec_date_column(
-        table_name='repurchase',
-        api_name='repurchase',
+        table_name="repurchase",
+        api_name="repurchase",
         fields=[
             "ts_code",
             "ann_date",
@@ -34,13 +39,14 @@ def exec_sync(start_date, end_date):
             "high_limit",
             "low_limit",
             "repo_goal",
-            "update_flag"
+            "update_flag",
         ],
-        date_column='ann_date',
+        date_column="ann_date",
         start_date=start_date,
         end_date=end_date,
         limit=3000,
-        interval=0.2)
+        interval=0.2,
+    )
 
 
 # 全量初始化表数据
@@ -50,15 +56,17 @@ def sync(drop_exist=False):
     exec_create_table_script(dir_path, drop_exist)
 
     # 查询历史最大同步日期
-    begin_date = '20070101'
+    begin_date = "20070101"
     cfg = get_cfg()
-    date_query_sql = "select max(ann_date) date from %s.repurchase" % cfg['mysql']['database']
+    date_query_sql = (
+        "select max(ann_date) date from %s.repurchase" % cfg["mysql"]["database"]
+    )
     last_date = query_last_sync_date(date_query_sql)
     start_date = max_date(last_date, begin_date)
-    end_date = str(datetime.datetime.now().strftime('%Y%m%d'))
+    end_date = str(datetime.datetime.now().strftime("%Y%m%d"))
 
     exec_sync(start_date, end_date)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sync(True)

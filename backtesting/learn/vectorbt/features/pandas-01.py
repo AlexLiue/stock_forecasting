@@ -1,4 +1,3 @@
-
 import vectorbt as vbt
 import pandas as pd
 import numpy as np
@@ -10,6 +9,7 @@ big_ts = pd.DataFrame(np.random.uniform(size=(1000, 1000)))
 @njit
 def zscore_nb(x):
     return (x[-1] - np.mean(x)) / np.std(x)
+
 
 big_ts.rolling(2).apply(zscore_nb, raw=True)
 # %timeit big_ts.rolling(2).apply(zscore_nb, raw=True)
@@ -27,4 +27,5 @@ sr.vbt.rolling_split(
     set_lens=(1, 1),
     left_to_right=False,
     plot=True,
-    trace_names=['train', 'valid', 'test'])
+    trace_names=["train", "valid", "test"],
+)

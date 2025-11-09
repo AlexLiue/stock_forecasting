@@ -16,13 +16,19 @@ tushare 接口说明：https://tushare.pro/document/2?doc_id=79
 import os
 import datetime
 
-from tushare_sync.utils.utils import exec_create_table_script, query_last_sync_date, max_date, get_cfg, exec_sync_with_ts_code
+from tushare_sync.utils.utils import (
+    exec_create_table_script,
+    query_last_sync_date,
+    max_date,
+    get_cfg,
+    exec_sync_with_ts_code,
+)
 
 
 def exec_sync(start_date, end_date):
     exec_sync_with_ts_code(
-        table_name='fina_mainbz',
-        api_name='fina_mainbz',
+        table_name="fina_mainbz",
+        api_name="fina_mainbz",
         fields=[
             "ts_code",
             "end_date",
@@ -32,15 +38,15 @@ def exec_sync(start_date, end_date):
             "bz_cost",
             "curr_type",
             "bz_code",
-            "update_flag"
+            "update_flag",
         ],
-        date_column='end_date',
+        date_column="end_date",
         start_date=start_date,
         end_date=end_date,
         date_step=3650,
         limit=1000,
         interval=1.1,
-        ts_code_limit=1
+        ts_code_limit=1,
     )
 
 
@@ -51,15 +57,17 @@ def sync(drop_exist=False):
     exec_create_table_script(dir_path, drop_exist)
 
     # 查询历史最大同步日期
-    begin_date = '20000101'
+    begin_date = "20000101"
     cfg = get_cfg()
-    date_query_sql = "select max(end_date) date from %s.fina_mainbz" % cfg['mysql']['database']
+    date_query_sql = (
+        "select max(end_date) date from %s.fina_mainbz" % cfg["mysql"]["database"]
+    )
     last_date = query_last_sync_date(date_query_sql)
     start_date = max_date(last_date, begin_date)
-    end_date = str(datetime.datetime.now().strftime('%Y%m%d'))
+    end_date = str(datetime.datetime.now().strftime("%Y%m%d"))
 
     exec_sync(start_date, end_date)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sync(True)

@@ -19,7 +19,10 @@ tushare 接口说明：https://tushare.pro/document/2?doc_id=294
 
 import os
 import datetime
-from tushare_sync.utils.utils import exec_create_table_script, exec_sync_with_spec_date_column
+from tushare_sync.utils.utils import (
+    exec_create_table_script,
+    exec_sync_with_spec_date_column,
+)
 
 
 # 全量初始化表数据
@@ -29,40 +32,32 @@ def init(drop_exist):
     exec_create_table_script(dir_path, drop_exist)
 
     exec_sync_with_spec_date_column(
-        table_name='cyq_chips',
-        api_name='cyq_chips',
-        fields=[
-            "ts_code",
-            "trade_date",
-            "price",
-            "percent"
-        ],
-        date_column='trade_date',
-        start_date='20050101',
-        end_date=str(datetime.datetime.now().strftime('%Y%m%d')),
+        table_name="cyq_chips",
+        api_name="cyq_chips",
+        fields=["ts_code", "trade_date", "price", "percent"],
+        date_column="trade_date",
+        start_date="20050101",
+        end_date=str(datetime.datetime.now().strftime("%Y%m%d")),
         limit=2000,
-        interval=13
+        interval=13,
     )
 
 
 # 增量追加表数据
 def append():
     exec_sync_with_spec_date_column(
-        table_name='cyq_chips',
-        api_name='cyq_chips',
-        fields=[
-            "ts_code",
-            "trade_date",
-            "price",
-            "percent"
-        ],
-        date_column='trade_date',
-        start_date=str((datetime.datetime.now() + datetime.timedelta(days=0)).strftime('%Y%m%d')),
-        end_date=str(datetime.datetime.now().strftime('%Y%m%d')),
+        table_name="cyq_chips",
+        api_name="cyq_chips",
+        fields=["ts_code", "trade_date", "price", "percent"],
+        date_column="trade_date",
+        start_date=str(
+            (datetime.datetime.now() + datetime.timedelta(days=0)).strftime("%Y%m%d")
+        ),
+        end_date=str(datetime.datetime.now().strftime("%Y%m%d")),
         limit=2000,
-        interval=13
+        interval=13,
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     append()

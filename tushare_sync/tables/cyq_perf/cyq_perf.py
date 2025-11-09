@@ -17,7 +17,10 @@ tushare 接口说明：https://tushare.pro/document/2?doc_id=293
 
 import os
 import datetime
-from tushare_sync.utils.utils import exec_create_table_script, exec_sync_with_spec_date_column
+from tushare_sync.utils.utils import (
+    exec_create_table_script,
+    exec_sync_with_spec_date_column,
+)
 
 
 # 全量初始化表数据
@@ -27,8 +30,8 @@ def init(drop_exist):
     exec_create_table_script(dir_path, drop_exist)
 
     exec_sync_with_spec_date_column(
-        table_name='cyq_perf',
-        api_name='cyq_perf',
+        table_name="cyq_perf",
+        api_name="cyq_perf",
         fields=[
             "ts_code",
             "trade_date",
@@ -40,21 +43,21 @@ def init(drop_exist):
             "cost_85pct",
             "cost_95pct",
             "weight_avg",
-            "winner_rate"
+            "winner_rate",
         ],
-        date_column='trade_date',
-        start_date='20050101',
-        end_date=str(datetime.datetime.now().strftime('%Y%m%d')),
+        date_column="trade_date",
+        start_date="20050101",
+        end_date=str(datetime.datetime.now().strftime("%Y%m%d")),
         limit=5000,
-        interval=13
+        interval=13,
     )
 
 
 # 增量追加表数据
 def append():
     exec_sync_with_spec_date_column(
-        table_name='cyq_perf',
-        api_name='cyq_perf',
+        table_name="cyq_perf",
+        api_name="cyq_perf",
         fields=[
             "ts_code",
             "trade_date",
@@ -66,15 +69,17 @@ def append():
             "cost_85pct",
             "cost_95pct",
             "weight_avg",
-            "winner_rate"
+            "winner_rate",
         ],
-        date_column='trade_date',
-        start_date=str((datetime.datetime.now() + datetime.timedelta(days=-3)).strftime('%Y%m%d')),
-        end_date=str(datetime.datetime.now().strftime('%Y%m%d')),
+        date_column="trade_date",
+        start_date=str(
+            (datetime.datetime.now() + datetime.timedelta(days=-3)).strftime("%Y%m%d")
+        ),
+        end_date=str(datetime.datetime.now().strftime("%Y%m%d")),
         limit=5000,
-        interval=13
+        interval=13,
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     append()

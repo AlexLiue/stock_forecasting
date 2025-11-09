@@ -16,7 +16,13 @@ tushare 接口说明：https://tushare.pro/document/2?doc_id=79
 import os
 import datetime
 
-from tushare_sync.utils.utils import exec_create_table_script, query_last_sync_date, max_date, get_cfg, exec_sync_with_ts_code
+from tushare_sync.utils.utils import (
+    exec_create_table_script,
+    query_last_sync_date,
+    max_date,
+    get_cfg,
+    exec_sync_with_ts_code,
+)
 
 begin_date = "20040101"
 limit = 3000
@@ -27,8 +33,8 @@ def exec_sync(start_date, end_date):
     global limit
     global interval
     exec_sync_with_ts_code(
-        table_name='fina_indicator',
-        api_name='fina_indicator',
+        table_name="fina_indicator",
+        api_name="fina_indicator",
         fields=[
             "ts_code",
             "ann_date",
@@ -196,15 +202,15 @@ def exec_sync(start_date, end_date):
             "q_netprofit_qoq",
             "equity_yoy",
             "rd_exp",
-            "update_flag"
+            "update_flag",
         ],
-        date_column='ann_date',
+        date_column="ann_date",
         start_date=start_date,
         end_date=end_date,
         date_step=365,
         limit=3000,
         interval=0.2,
-        ts_code_limit=1000
+        ts_code_limit=1000,
     )
 
 
@@ -217,13 +223,15 @@ def sync(drop_exist=False):
     # 查询历史最大同步日期
     global begin_date
     cfg = get_cfg()
-    date_query_sql = "select max(ann_date) date from %s.fina_indicator" % cfg['mysql']['database']
+    date_query_sql = (
+        "select max(ann_date) date from %s.fina_indicator" % cfg["mysql"]["database"]
+    )
     last_date = query_last_sync_date(date_query_sql)
     start_date = max_date(last_date, begin_date)
-    end_date = str(datetime.datetime.now().strftime('%Y%m%d'))
+    end_date = str(datetime.datetime.now().strftime("%Y%m%d"))
 
     exec_sync(start_date, end_date)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sync(True)

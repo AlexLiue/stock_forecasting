@@ -30,7 +30,7 @@ class GlobalData:
         return self.value
 
     cfg = get_cfg()
-    logger = get_logger('global_data', cfg['sync-logging']['filename'])
+    logger = get_logger("global_data", cfg["sync-logging"]["filename"])
     logger.info("Exec Init Global Shared Data...")
 
     engine = get_engine()
@@ -38,21 +38,23 @@ class GlobalData:
     if not table_exist:
         stock_basic_info.sync(False)
 
-    query_sql = f"SELECT \"证券代码\", \"证券简称\", \"交易所\" ,\"板块\"" \
-                f"FROM STOCK_BASIC_INFO sbi " \
-                "WHERE \"证券代码\" not like 'ST%%' AND \"证券代码\" not like '*ST%%'" \
-                f"ORDER BY \"证券代码\" ASC"
+    query_sql = (
+        f'SELECT "证券代码", "证券简称", "交易所" ,"板块"'
+        f"FROM STOCK_BASIC_INFO sbi "
+        "WHERE \"证券代码\" not like 'ST%%' AND \"证券代码\" not like '*ST%%'"
+        f'ORDER BY "证券代码" ASC'
+    )
     logger.info(f"Execute SQL [{query_sql}]")
     basic_info = pd.read_sql(query_sql, engine)
 
-    trade_date_a = list(ak.tool_trade_date_hist_sina()['trade_date'].apply(lambda d: d.strftime('%Y%m%d')))
+    trade_date_a = list(
+        ak.tool_trade_date_hist_sina()["trade_date"].apply(
+            lambda d: d.strftime("%Y%m%d")
+        )
+    )
     trade_date_a.sort()
 
-    trade_code_a = basic_info[basic_info['交易所'].isin(['SZSE', 'SSE', 'BSE'])]
+    trade_code_a = basic_info[basic_info["交易所"].isin(["SZSE", "SSE", "BSE"])]
 
     def initialize(self):
         pass
-
-
-
-

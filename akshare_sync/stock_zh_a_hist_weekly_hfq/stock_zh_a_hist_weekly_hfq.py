@@ -21,18 +21,27 @@ from akshare import stock_zh_a_hist
 from dateutil.relativedelta import relativedelta
 
 from akshare_sync.global_data.global_data import GlobalData
-from akshare_sync.sync_logs.sync_logs import update_sync_log_date, update_sync_log_state_to_failed
-from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, save_to_database
+from akshare_sync.sync_logs.sync_logs import (
+    update_sync_log_date,
+    update_sync_log_state_to_failed,
+)
+from akshare_sync.util.tools import (
+    exec_create_table_script,
+    get_engine,
+    get_logger,
+    get_cfg,
+    save_to_database,
+)
 
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', None)
-pd.set_option('display.width', None)
-pd.set_option('display.max_colwidth', None)
-pd.set_option('display.float_format', lambda x: '%.2f' % x) #
+pd.set_option("display.max_columns", None)
+pd.set_option("display.max_rows", None)
+pd.set_option("display.width", None)
+pd.set_option("display.max_colwidth", None)
+pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
 
 def query_last_sync_date(trade_code, engine, logger):
-    query_start_date = f"SELECT NVL(MAX(\"日期\"), 19900101) as max_date FROM stock_zh_a_hist_weekly_hfq WHERE \"股票代码\"='{trade_code}'"
+    query_start_date = f'SELECT NVL(MAX("日期"), 19900101) as max_date FROM stock_zh_a_hist_weekly_hfq WHERE "股票代码"=\'{trade_code}\''
     logger.info(f"Execute Query SQL  [{query_start_date}]")
     return str(pd.read_sql(query_start_date, engine).iloc[0, 0])
 
@@ -44,16 +53,15 @@ def get_last_friday_date():
     """
     now = datetime.datetime.now()
     weekday = now.weekday()
-    if weekday < 5 or (weekday == 5 and now.strftime('%H:%M:%S')<'16:30:00'):
-        return (now - datetime.timedelta(days=weekday + 3)).strftime('%Y%m%d')
+    if weekday < 5 or (weekday == 5 and now.strftime("%H:%M:%S") < "16:30:00"):
+        return (now - datetime.timedelta(days=weekday + 3)).strftime("%Y%m%d")
     else:
-        return (now - datetime.timedelta(days=weekday - 4)).strftime('%Y%m%d')
-
+        return (now - datetime.timedelta(days=weekday - 4)).strftime("%Y%m%d")
 
 
 def sync(drop_exist=False):
     cfg = get_cfg()
-    logger = get_logger('stock_zh_a_hist_weekly_hfq', cfg['sync-logging']['filename'])
+    logger = get_logger("stock_zh_a_hist_weekly_hfq", cfg["sync-logging"]["filename"])
 
     try:
         dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
@@ -71,26 +79,50 @@ def sync(drop_exist=False):
             trade_code = row.iloc[0]
             trade_name = row.iloc[1]
             last_sync_date = query_last_sync_date(trade_code, engine, logger)
-            start_date =  (datetime.datetime.strptime(last_sync_date, '%Y%m%d') + relativedelta(weeks=1)).strftime('%Y%m%d')
+            start_date = (
+                datetime.datetime.strptime(last_sync_date, "%Y%m%d")
+                + relativedelta(weeks=1)
+            ).strftime("%Y%m%d")
 
             if start_date < end_date:
-                logger.info(f"Execute Sync stock_zh_a_hist  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}]")
-                df = stock_zh_a_hist(symbol=trade_code, period="weekly", start_date=start_date, end_date=end_date, adjust="hfq", timeout=20)
+                logger.info(
+                    f"Execute Sync stock_zh_a_hist  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}]"
+                )
+                df = stock_zh_a_hist(
+                    symbol=trade_code,
+                    period="weekly",
+                    start_date=start_date,
+                    end_date=end_date,
+                    adjust="hfq",
+                    timeout=20,
+                )
                 if not df.empty:
-                    df["日期"] = df["日期"].apply(lambda x: x.strftime('%Y%m%d'))
-                    save_to_database(df, "stock_zh_a_hist_weekly_hfq", engine, index=False, if_exists='append', chunksize=20000)
+                    df["日期"] = df["日期"].apply(lambda x: x.strftime("%Y%m%d"))
+                    save_to_database(
+                        df,
+                        "stock_zh_a_hist_weekly_hfq",
+                        engine,
+                        index=False,
+                        if_exists="append",
+                        chunksize=20000,
+                    )
                     logger.info(
-                        f"Execute Sync stock_zh_a_hist_weekly_hfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
+                        f"Execute Sync stock_zh_a_hist_weekly_hfq trade_code[{trade_code}]"
+                        + f" Write[{df.shape[0]}] Records"
+                    )
             else:
-                logger.info(f"Execute Sync stock_zh_a_hist_weekly_hfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")
+                logger.info(
+                    f"Execute Sync stock_zh_a_hist_weekly_hfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... "
+                )
 
-        update_sync_log_date('stock_zh_a_hist', 'stock_zh_a_hist_weekly_hfq', f'{str(end_date)}')
+        update_sync_log_date(
+            "stock_zh_a_hist", "stock_zh_a_hist_weekly_hfq", f"{str(end_date)}"
+        )
 
     except Exception:
         logger.error(f"Table [stock_zh_a_hist_weekly_hfq] Sync  Failed", exc_info=True)
-        update_sync_log_state_to_failed('stock_zh_a_hist', 'stock_zh_a_hist_weekly_hfq')
+        update_sync_log_state_to_failed("stock_zh_a_hist", "stock_zh_a_hist_weekly_hfq")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sync(False)
-

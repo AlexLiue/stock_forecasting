@@ -73,8 +73,10 @@ def sync_spc(drop_exist):
 
 
 def use_age():
-    print('Useage: python syn_start.py --mode [init | append | init_spc | append_spc] [--drop_exist]')
+    print(
+        "Useage: python syn_start.py --mode [init | append | init_spc | append_spc] [--drop_exist]"
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sync(False)

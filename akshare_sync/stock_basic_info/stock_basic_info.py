@@ -15,27 +15,43 @@ import datetime
 import os
 
 import pandas as pd
-from akshare import stock_info_sh_name_code, stock_info_bj_name_code, stock_hk_spot, stock_info_sh_delist, \
-    stock_info_sz_name_code
+from akshare import (
+    stock_info_sh_name_code,
+    stock_info_bj_name_code,
+    stock_hk_spot,
+    stock_info_sh_delist,
+    stock_info_sz_name_code,
+)
 from akshare.utils.context import AkshareConfig
 
-from akshare_sync.sync_logs.sync_logs import update_sync_log_date, query_last_api_sync_date, \
-    update_sync_log_state_to_failed
-from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, \
-    exec_sql, save_to_database
+from akshare_sync.sync_logs.sync_logs import (
+    update_sync_log_date,
+    query_last_api_sync_date,
+    update_sync_log_state_to_failed,
+)
+from akshare_sync.util.tools import (
+    exec_create_table_script,
+    get_engine,
+    get_logger,
+    get_cfg,
+    exec_sql,
+    save_to_database,
+)
 
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', None)
-pd.set_option('display.width', None)
-pd.set_option('display.max_colwidth', None)
-pd.set_option('display.float_format', lambda x: '%.2f' % x) #
+pd.set_option("display.max_columns", None)
+pd.set_option("display.max_rows", None)
+pd.set_option("display.width", None)
+pd.set_option("display.max_colwidth", None)
+pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
 cfg = get_cfg()
-logger = get_logger('stock_basic_info', cfg['sync-logging']['filename'])
+logger = get_logger("stock_basic_info", cfg["sync-logging"]["filename"])
 
 
 def query_last_sync_date(trade_code, engine, logger):
-    query_start_date = f"SELECT NVL(MAX(\"数据日期\"), 19900101) as max_date FROM STOCK_BASIC_INFO"
+    query_start_date = (
+        f'SELECT NVL(MAX("数据日期"), 19900101) as max_date FROM STOCK_BASIC_INFO'
+    )
     logger.info(f"Execute Query SQL  [{query_start_date}]")
     return str(pd.read_sql(query_start_date, engine).iloc[0, 0])
 
@@ -100,19 +116,19 @@ def stock_info_code_name() -> pd.DataFrame:
 
     AkshareConfig.set_proxies(proxy)
 
-    big_df = pd.concat([stock_sh_a, stock_sh_kcb, stock_sz_a, stock_sz_b, stock_bse, stock_hk], ignore_index=True)
-    big_df["list_date"] = big_df['list_date'].apply(lambda d: str(d).replace('-',''))
-    big_df["数据日期"] = str(datetime.datetime.now().strftime('%Y%m%d'))
+    big_df = pd.concat(
+        [stock_sh_a, stock_sh_kcb, stock_sz_a, stock_sz_b, stock_bse, stock_hk],
+        ignore_index=True,
+    )
+    big_df["list_date"] = big_df["list_date"].apply(lambda d: str(d).replace("-", ""))
+    big_df["数据日期"] = str(datetime.datetime.now().strftime("%Y%m%d"))
     big_df.columns = ["证券代码", "证券简称", "交易所", "板块", "上市日期", "数据日期"]
-
 
     """ 去除退市的股票 """
     sh_delist_df = stock_info_sh_delist(symbol="全部")
     big_df = big_df[~big_df["证券代码"].isin(sh_delist_df["公司代码"])]
 
     return big_df
-
-
 
 
 # 全量初始化表数据
@@ -125,29 +141,39 @@ def sync(drop_exist=False):
         engine = get_engine()
 
         start_date = query_last_sync_date(None, engine, logger)
-        if start_date < str(datetime.datetime.now().strftime('%Y%m%d')):
+        if start_date < str(datetime.datetime.now().strftime("%Y%m%d")):
             # 获取数据
             df = stock_info_code_name()
 
             # 清理历史数据
             clean_sql = f"TRUNCATE TABLE STOCK_BASIC_INFO"
-            logger.info('Execute Clean SQL [%s]' % clean_sql)
+            logger.info("Execute Clean SQL [%s]" % clean_sql)
             exec_sql(clean_sql)
 
             # 写入数据库
-            logger.info(f'Write [{df.shape[0]}] records into table [stock_basic_info] with [{engine.engine}]')
-            save_to_database(df, 'stock_basic_info', engine, index=False, if_exists='append', chunksize=20000)
+            logger.info(
+                f"Write [{df.shape[0]}] records into table [stock_basic_info] with [{engine.engine}]"
+            )
+            save_to_database(
+                df,
+                "stock_basic_info",
+                engine,
+                index=False,
+                if_exists="append",
+                chunksize=20000,
+            )
 
-            update_sync_log_date('stock_basic_info', 'stock_basic_info',
-                                 f'{str(datetime.datetime.now().strftime('%Y%m%d'))}')
+            update_sync_log_date(
+                "stock_basic_info",
+                "stock_basic_info",
+                str(datetime.datetime.now().strftime("%Y%m%d")),
+            )
         else:
             logger.info("Table [stock_basic_info] Early Synced, Skip ...")
     except Exception:
         logger.error(f"Table [stock_basic_info] Sync Failed", exc_info=True)
-        update_sync_log_state_to_failed('stock_basic_info', 'stock_basic_info')
+        update_sync_log_state_to_failed("stock_basic_info", "stock_basic_info")
 
 
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     sync(False)

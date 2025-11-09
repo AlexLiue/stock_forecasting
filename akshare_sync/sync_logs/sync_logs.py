@@ -14,23 +14,29 @@ import os
 
 import pandas as pd
 
-from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, get_connection
+from akshare_sync.util.tools import (
+    exec_create_table_script,
+    get_engine,
+    get_logger,
+    get_cfg,
+    get_connection,
+)
 
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', None)
-pd.set_option('display.width', None)
-pd.set_option('display.max_colwidth', None)
-pd.set_option('display.float_format', lambda x: '%.2f' % x) #
+pd.set_option("display.max_columns", None)
+pd.set_option("display.max_rows", None)
+pd.set_option("display.width", None)
+pd.set_option("display.max_colwidth", None)
+pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
 # 查询 API 同步的时间
 def query_last_api_sync_date(api_name, table_name):
     cfg = get_cfg()
-    logger = get_logger('sync_logs', cfg['sync-logging']['filename'])
+    logger = get_logger("sync_logs", cfg["sync-logging"]["filename"])
     engine = get_engine()
     dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
     exec_create_table_script(dir_path, False, logger)
 
-    query_start_date = f"SELECT NVL(MAX(\"日期\"), 19900101) as max_date FROM sync_logs WHERE \"接口名\"='{api_name}' AND \"表名\"='{table_name}'"
+    query_start_date = f'SELECT NVL(MAX("日期"), 19900101) as max_date FROM sync_logs WHERE "接口名"=\'{api_name}\' AND "表名"=\'{table_name}\''
     logger.info(f"Execute SQL  [{query_start_date}]")
     last_date = str(pd.read_sql(query_start_date, engine).iloc[0, 0])
     logger.info(f"Execute SQL  Result [{last_date})]")
@@ -38,9 +44,12 @@ def query_last_api_sync_date(api_name, table_name):
 
 
 def str_date_day_add(str_date, days):
-    return str((datetime.datetime.strptime(str_date, '%Y%m%d') +
-                datetime.timedelta(days=int(days))).strftime('%Y%m%d'))
-
+    return str(
+        (
+            datetime.datetime.strptime(str_date, "%Y%m%d")
+            + datetime.timedelta(days=int(days))
+        ).strftime("%Y%m%d")
+    )
 
 
 def update_sync_log_date(api_name, table_name, date):
@@ -48,7 +57,7 @@ def update_sync_log_date(api_name, table_name, date):
     执行成功后，更新 SYNC_LOGS 表的同步日期和状态
     """
     cfg = get_cfg()
-    logger = get_logger('sync_logs', cfg['sync-logging']['filename'])
+    logger = get_logger("sync_logs", cfg["sync-logging"]["filename"])
     engine = get_engine()
     conn = get_connection()
     cursor = conn.cursor()
@@ -59,7 +68,7 @@ def update_sync_log_date(api_name, table_name, date):
         logger.info(f"Execute SQL  [{insert_sql}]")
         cursor.execute(insert_sql)
     else:
-        update_sql =  f"UPDATE SYNC_LOGS SET \"日期\"='{date}',\"状态\"='成功' WHERE \"接口名\"='{api_name}' AND \"表名\"='{table_name}'"
+        update_sql = f"UPDATE SYNC_LOGS SET \"日期\"='{date}',\"状态\"='成功' WHERE \"接口名\"='{api_name}' AND \"表名\"='{table_name}'"
         logger.info(f"Execute SQL  [{update_sql}]")
         cursor.execute(update_sql)
     conn.commit()
@@ -69,7 +78,7 @@ def update_sync_log_date(api_name, table_name, date):
 
 def update_sync_log_state_to_failed(api_name, table_name):
     cfg = get_cfg()
-    logger = get_logger('sync_logs', cfg['sync-logging']['filename'])
+    logger = get_logger("sync_logs", cfg["sync-logging"]["filename"])
     engine = get_engine()
     conn = get_connection()
     cursor = conn.cursor()
@@ -80,7 +89,7 @@ def update_sync_log_state_to_failed(api_name, table_name):
         logger.info(f"Execute SQL  [{insert_sql}]")
         cursor.execute(insert_sql)
     else:
-        update_sql =  f"UPDATE SYNC_LOGS SET \"状态\"='失败' WHERE \"接口名\"='{api_name}' AND \"表名\"='{table_name}'"
+        update_sql = f"UPDATE SYNC_LOGS SET \"状态\"='失败' WHERE \"接口名\"='{api_name}' AND \"表名\"='{table_name}'"
         logger.info(f"Execute SQL  [{update_sql}]")
         cursor.execute(update_sql)
     conn.commit()
@@ -88,10 +97,6 @@ def update_sync_log_state_to_failed(api_name, table_name):
     conn.close()
 
 
-
-
-
-if __name__ == '__main__':
-    date = query_last_api_sync_date('stock_sse_summary', 'stock_sse_summary')
-    update_sync_log_date('stock_sse_summary', 'stock_sse_summary', 20251024)
-
+if __name__ == "__main__":
+    date = query_last_api_sync_date("stock_sse_summary", "stock_sse_summary")
+    update_sync_log_date("stock_sse_summary", "stock_sse_summary", 20251024)
