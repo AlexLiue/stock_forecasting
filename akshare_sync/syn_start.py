@@ -5,7 +5,7 @@ import argparse
 import multiprocessing
 
 from akshare_sync.stock_basic_info import stock_basic_info
-from akshare_sync.stock_short_sale_hk import stock_short_sale_hk
+from akshare_sync.stock_hk_short_sale import stock_hk_short_sale
 from akshare_sync.stock_sse_deal_daily import stock_sse_deal_daily
 from akshare_sync.stock_sse_summary import stock_sse_summary
 from akshare_sync.stock_szse_area_summary import stock_szse_area_summary
@@ -31,7 +31,7 @@ def sync(processes_size):
     """ 同步的函数列表 """
     functions = [
         stock_table_api_summary.sync,  # 表 API 接口信息
-        stock_short_sale_hk.sync,  # 港股 HK 淡仓申报
+        stock_hk_short_sale.sync,  # 港股 HK 淡仓申报
         stock_sse_summary.sync,  # 上海证券交易所-股票数据总貌
         stock_szse_summary.sync,  # 深圳证券交易所-市场总貌-证券类别统计
         stock_szse_area_summary.sync,
