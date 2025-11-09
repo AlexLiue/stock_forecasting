@@ -15,4 +15,5 @@ proxies = {
     "https": cfg["proxy"]["https"]
 }
 """ 创建代理字典 """
+print(f"Exec Set Proxy[{proxies}]")
 AkshareConfig.set_proxies(proxies)

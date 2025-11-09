@@ -17,6 +17,7 @@ import os
 import pandas as pd
 from akshare import stock_info_sh_name_code, stock_info_bj_name_code, stock_hk_spot, stock_info_sh_delist, \
     stock_info_sz_name_code
+from akshare.utils.context import AkshareConfig
 
 from akshare_sync.sync_logs.sync_logs import update_sync_log_date, query_last_api_sync_date, \
     update_sync_log_state_to_failed
@@ -29,7 +30,14 @@ pd.set_option('display.width', None)
 pd.set_option('display.max_colwidth', None)
 pd.set_option('display.float_format', lambda x: '%.2f' % x) #
 
+cfg = get_cfg()
+logger = get_logger('stock_basic_info', cfg['sync-logging']['filename'])
 
+
+def query_last_sync_date(trade_code, engine, logger):
+    query_start_date = f"SELECT NVL(MAX(\"数据日期\"), 19900101) as max_date FROM STOCK_BASIC_INFO"
+    logger.info(f"Execute Query SQL  [{query_start_date}]")
+    return str(pd.read_sql(query_start_date, engine).iloc[0, 0])
 
 
 def stock_info_code_name() -> pd.DataFrame:
@@ -38,49 +46,59 @@ def stock_info_code_name() -> pd.DataFrame:
     :return: 沪深京 A 股数据
     :rtype: pandas.DataFrame
     """
+    logger.info("Exec STOCK_BASIC_INFO [stock_info_sh_name_code] [上交所-主板A股]")
     stock_sh_a = stock_info_sh_name_code(symbol="主板A股").dropna()
     stock_sh_a["交易所"] = "SSE"
     stock_sh_a["板块"] = "主板A股"
     stock_sh_a = stock_sh_a[["证券代码", "证券简称", "交易所", "板块", "上市日期"]]
     stock_sh_a.columns = ["symbol", "name", "exchange", "market", "list_date"]
 
-    stock_sh_b = stock_info_sh_name_code(symbol="主板A股").dropna()
+    logger.info("Exec STOCK_BASIC_INFO [stock_info_sh_name_code] [上交所-主板B股]")
+    stock_sh_b = stock_info_sh_name_code(symbol="主板B股").dropna()
     stock_sh_b["交易所"] = "SSE"
     stock_sh_b["板块"] = "主板B股"
     stock_sh_b = stock_sh_b[["证券代码", "证券简称", "交易所", "板块", "上市日期"]]
     stock_sh_b.columns = ["symbol", "name", "exchange", "market", "list_date"]
 
+    logger.info("Exec STOCK_BASIC_INFO [stock_info_sh_name_code] [上交所-科创板]")
     stock_sh_kcb = stock_info_sh_name_code(symbol="科创板").dropna()
     stock_sh_kcb["交易所"] = "SSE"
     stock_sh_kcb["板块"] = "科创板"
     stock_sh_kcb = stock_sh_kcb[["证券代码", "证券简称", "交易所", "板块", "上市日期"]]
     stock_sh_kcb.columns = ["symbol", "name", "exchange", "market", "list_date"]
 
+    logger.info("Exec STOCK_BASIC_INFO [stock_info_sh_name_code] [深交所-A股列表]")
     stock_sz_a = stock_info_sz_name_code(symbol="A股列表").dropna()
     stock_sz_a["A股代码"] = stock_sz_a["A股代码"].astype(str).str.zfill(6)
     stock_sz_a["交易所"] = "SZSE"
     stock_sz_a = stock_sz_a[["A股代码", "A股简称", "交易所", "板块", "A股上市日期"]]
     stock_sz_a.columns = ["symbol", "name", "exchange", "market", "list_date"]
 
+    logger.info("Exec STOCK_BASIC_INFO [stock_info_sz_name_code] [深交所-B股列表]")
     stock_sz_b = stock_info_sz_name_code(symbol="B股列表").dropna()
     stock_sz_b["B股代码"] = stock_sz_b["B股代码"].astype(str).str.zfill(6)
     stock_sz_b["交易所"] = "SZSE"
     stock_sz_b = stock_sz_b[["B股代码", "B股简称", "交易所", "板块", "B股上市日期"]]
     stock_sz_b.columns = ["symbol", "name", "exchange", "market", "list_date"]
 
-
+    logger.info("Exec STOCK_BASIC_INFO [stock_info_bj_name_code] [北交所]")
+    proxy = AkshareConfig.get_proxies()
+    AkshareConfig.set_proxies(None)
     stock_bse = stock_info_bj_name_code().dropna()
     stock_bse.loc[:, "交易所"] = "BSE"
     stock_bse["板块"] = "北交所"
     stock_bse = stock_bse[["证券代码", "证券简称", "交易所", "板块", "上市日期"]]
     stock_bse.columns = ["symbol", "name", "exchange", "market", "list_date"]
 
+    logger.info("Exec STOCK_BASIC_INFO [stock_hk_spot] [港交所]")
     stock_hk = stock_hk_spot().dropna()
     stock_hk["交易所"] = "HKSE"
     stock_hk["上市日期"] = ""
     stock_hk["板块"] = "港交所"
     stock_hk = stock_hk[["代码", "中文名称", "交易所", "板块", "上市日期"]]
     stock_hk.columns = ["symbol", "name", "exchange", "market", "list_date"]
+
+    AkshareConfig.set_proxies(proxy)
 
     big_df = pd.concat([stock_sh_a, stock_sh_kcb, stock_sz_a, stock_sz_b, stock_bse, stock_hk], ignore_index=True)
     big_df["list_date"] = big_df['list_date'].apply(lambda d: str(d).replace('-',''))
@@ -95,17 +113,19 @@ def stock_info_code_name() -> pd.DataFrame:
     return big_df
 
 
+
+
 # 全量初始化表数据
 def sync(drop_exist=False):
-    cfg = get_cfg()
-    logger = get_logger('stock_basic_info', cfg['sync-logging']['filename'])
 
     try:
-        start_date = query_last_api_sync_date('stock_basic_info', 'stock_basic_info')
-        if start_date < str(datetime.datetime.now().strftime('%Y%m%d')):
-            dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
-            exec_create_table_script(dir_path, drop_exist, logger)
+        dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+        exec_create_table_script(dir_path, drop_exist, logger)
 
+        engine = get_engine()
+
+        start_date = query_last_sync_date(None, engine, logger)
+        if start_date < str(datetime.datetime.now().strftime('%Y%m%d')):
             # 获取数据
             df = stock_info_code_name()
 
@@ -115,13 +135,11 @@ def sync(drop_exist=False):
             exec_sql(clean_sql)
 
             # 写入数据库
-            engine = get_engine()
             logger.info(f'Write [{df.shape[0]}] records into table [stock_basic_info] with [{engine.engine}]')
             save_to_database(df, 'stock_basic_info', engine, index=False, if_exists='append', chunksize=20000)
 
             update_sync_log_date('stock_basic_info', 'stock_basic_info',
                                  f'{str(datetime.datetime.now().strftime('%Y%m%d'))}')
-
         else:
             logger.info("Table [stock_basic_info] Early Synced, Skip ...")
     except Exception:

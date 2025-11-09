@@ -224,24 +224,6 @@ def query_table_is_exist(table_name):
         return False
 
 
-def query_last_sync_date(sql):
-    """
-    查询历史同步数据的最大日期
-    :param sql: 执行查询的SQL
-    :return: 查询结果
-    """
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(sql + ';')
-    result = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    last_date = result[0][0]
-    result = "19700101"
-    if last_date is not None:
-        result = str(last_date)
-    return result
-
 
 # 获取两个日期的最小值
 def min_date(date1, date2):

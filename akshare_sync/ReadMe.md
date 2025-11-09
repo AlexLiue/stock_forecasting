@@ -33,7 +33,7 @@ docker run --env DB_CONN=redis://:password@ip:port/0 -p 5010:5010 jhao104/proxy_
 ##  执行同步
 
 ```shell
-python data_syn.py --processes 4
+python syn_start.py --processes 4
 ```
 
 ## Oracle 结果数据示列
