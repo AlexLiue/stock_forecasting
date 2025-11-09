@@ -18,6 +18,7 @@ import cx_Oracle
 import oracledb
 import sqlparse
 from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
 
 
 # 加载配置信息函数
@@ -256,6 +257,18 @@ def max_date(date1, date2):
     else:
         return date2
 
+
+
+def save_to_database(df, table_name, engine, index=False, if_exists='append', chunksize=20000):
+    """
+    将数据存储到数据库
+    实现事务功能，
+    """
+    try:
+        with engine.begin() as connection:  # 开启事务
+            df.to_sql(table_name, con=connection, index=index, if_exists=if_exists, chunksize=chunksize)
+    except SQLAlchemyError as e:
+        raise e
 #
 # if __name__ == '__main__':
 #     # ts_codes_1 = get_ts_code_list(0.3, 1000)

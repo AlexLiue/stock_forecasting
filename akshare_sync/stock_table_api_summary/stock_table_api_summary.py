@@ -14,13 +14,15 @@
 """
 import datetime
 import os
+
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
 from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
     update_sync_log_state_to_failed
-from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, exec_sql
+from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, exec_sql, \
+    save_to_database
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -65,7 +67,7 @@ def sync(drop_exist=False):
             exec_create_table_script(dir_path, drop_exist, logger)
 
             # 获取数据
-            data = get_table_api_content()
+            df = get_table_api_content()
 
             # 清理历史数据
             clean_sql = f"TRUNCATE TABLE stock_table_api_summary"
@@ -73,10 +75,10 @@ def sync(drop_exist=False):
             exec_sql(clean_sql)
 
             # 写入数据库
-            connection = get_engine()
+            engine = get_engine()
             logger.info(
-                f'Write [{data.shape[0]}] records into table [stock_table_api_summary] with [{connection.engine}]')
-            data.to_sql('stock_table_api_summary', connection, index=False, if_exists='append', chunksize=20000)
+                f'Write [{df.shape[0]}] records into table [stock_table_api_summary] with [{engine.engine}]')
+            save_to_database(df, 'stock_table_api_summary', engine, index=False, if_exists='append', chunksize=20000)
 
             update_sync_log_date('stock_table_api_summary', 'stock_table_api_summary',
                                  f'{str(datetime.datetime.now().strftime('%Y%m%d'))}')

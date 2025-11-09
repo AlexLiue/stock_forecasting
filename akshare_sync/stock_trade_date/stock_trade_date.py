@@ -18,7 +18,7 @@ import pandas as pd
 
 from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
     update_sync_log_state_to_failed
-from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
+from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, save_to_database
 
 
 # 全量初始化表数据
@@ -40,10 +40,10 @@ def sync(drop_exist=False):
             sse = pd.DataFrame({"exchange": "SSE", "trade_date": trade_date["trade_date"]})
             szse = pd.DataFrame({"exchange": "SZSE", "trade_date": trade_date["trade_date"]})
             bse = pd.DataFrame({"exchange": "BSE", "trade_date": trade_date["trade_date"]})
-            trade_data_a = pd.concat([sse, szse, bse])
-            trade_data_a.columns = ["交易所", "交易日期"]
-            trade_data_a.to_sql("stock_trade_date", engine, index=False, if_exists='append', chunksize=20000)
-            logger.info(f"Execute Sync stock_trade_date Date[{cur_date}]" + f" Write[{trade_data_a.shape[0]}] Records")
+            df = pd.concat([sse, szse, bse])
+            df.columns = ["交易所", "交易日期"]
+            save_to_database(df, "stock_trade_date", engine, index=False, if_exists='append', chunksize=20000)
+            logger.info(f"Execute Sync stock_trade_date Date[{cur_date}]" + f" Write[{df.shape[0]}] Records")
             update_sync_log_date('tool_trade_date_hist_sina', 'stock_trade_date', f'{cur_date}')
 
     except Exception as e:

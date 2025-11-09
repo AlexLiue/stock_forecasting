@@ -22,11 +22,13 @@ import traceback
 
 import pandas as pd
 from akshare import stock_szse_summary
+from distributed.utils_test import throws
+from sqlalchemy.orm import sessionmaker
 
 from akshare_sync.global_data.global_data import GlobalData
 from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
     update_sync_log_state_to_failed
-from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
+from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, save_to_database
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -36,6 +38,7 @@ pd.set_option('display.float_format', lambda x: '%.2f' % x) #
 
 
 def sync(drop_exist=False):
+    global session, tran
     cfg = get_cfg()
     logger = get_logger('stock_szse_summary', cfg['sync-logging']['filename'])
     try:
@@ -46,11 +49,15 @@ def sync(drop_exist=False):
         global_data = GlobalData()
         trade_date_set = global_data.trade_date_a
         engine = get_engine()
+
+        session = sessionmaker(bind=engine,autoflush=False)()
+
         query_start_date = query_last_api_sync_date('stock_szse_summary', 'stock_szse_summary')
         start_date = str(max(query_start_date, '20100101'))
         end_date = str(datetime.datetime.now().strftime('%Y%m%d'))
         date_list = [date for date in trade_date_set if start_date < date <= end_date]
         logger.info(f"Execute Sync stock_szse_summary From Date[{start_date}] to Date[{end_date}]")
+
 
         for step_date in date_list:
             logger.info(f"Execute Sync stock_szse_summary Date[{step_date}]")
@@ -58,9 +65,17 @@ def sync(drop_exist=False):
             if not df.empty:
                 df["日期"] = step_date
                 df = df[["日期", "证券类别", "数量", "成交金额", "总市值", "流通市值"]]
-                df.to_sql("stock_szse_summary", engine, index=False, if_exists='append', chunksize=20000)
-                logger.info(f"Execute Sync stock_szse_summary Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
-                update_sync_log_date('stock_szse_summary', 'stock_szse_summary', f'{step_date}')
+                try:
+                    session = session.begin()
+                    save_to_database(df, "stock_szse_summary", engine, index=False, if_exists='append', chunksize=20000)
+                    session.commit()
+                except Exception as e:
+                    session.rollback()  # 发生错误时回滚事务
+                    print(f"Transaction failed, Exec rollback: {e}")
+                    throws(e)
+            logger.info(f"Execute Sync stock_szse_summary Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
+            update_sync_log_date('stock_szse_summary', 'stock_szse_summary', f'{step_date}')
+        session.close()
     except Exception as e:
         logger.error(
             f"Table [stock_zh_a_hist_weekly_hfq] Sync Failed Cause By [{e.__cause__}] Stack[{traceback.format_exc()}]")

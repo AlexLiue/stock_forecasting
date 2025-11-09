@@ -17,9 +17,11 @@
 
 import datetime
 import os
+
 import akshare as ak
 import pandas as pd
-from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
+
+from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, save_to_database
 
 pd.set_option('display.max_columns', None)
 
@@ -53,17 +55,17 @@ def sync(drop_exist=False):
         trade_date = row.iloc[0]
         date = str(trade_date.strftime('%Y%m%d'))
         logger.info(f"Execute Sync Exchange[SSE] TradeDate[{date}] By [stock_margin_detail_sse]")
-        margin = ak.stock_margin_detail_sse(date=date)
-        if not margin.empty:
-            margin["交易日期"] = trade_date
-            margin["交易所"] = "SSE"
-            margin = margin[
+        df = ak.stock_margin_detail_sse(date=date)
+        if not df.empty:
+            df["交易日期"] = trade_date
+            df["交易所"] = "SSE"
+            df = df[
                 ["交易日期", "标的证券代码", "标的证券简称", "交易所", "融资买入额", "融资余额", "融资偿还额",
                  "融券卖出量", "融券余量", "融券偿还量"]]
-            margin.columns = ["trade_date", "symbol", "name", "exchange", "buy_value", "buy_balance", "buy_return",
+            df.columns = ["trade_date", "symbol", "name", "exchange", "buy_value", "buy_balance", "buy_return",
                               "sell_value", "sell_balance_vol", "sell_return"]
-            margin.to_sql("stock_margin", engine, index=False, if_exists='append', chunksize=20000)
-            logger.info(f"Execute Sync Exchange[SSE] TradeDate[{date}] Write[{margin.shape[0]}] Records")
+            save_to_database(df, "stock_margin", engine, index=False, if_exists='append', chunksize=20000)
+            logger.info(f"Execute Sync Exchange[SSE] TradeDate[{date}] Write[{df.shape[0]}] Records")
 
     # SSE 融资融券明细
     trade_date_sql = f"SELECT trade_date FROM {db}.stock_trade_date WHERE exchange ='SZSE';"
@@ -83,16 +85,16 @@ def sync(drop_exist=False):
         trade_date = row.iloc[0]
         date = str(trade_date.strftime('%Y%m%d'))
         logger.info(f"Execute Sync Exchange[SZSE] TradeDate[{date}] By [stock_margin_detail_szse]")
-        margin = ak.stock_margin_detail_szse(date=date)
-        if not margin.empty:
-            margin["交易日期"] = trade_date
-            margin["交易所"] = "SZSE"
-            margin = margin[["交易日期", "证券代码", "证券简称", "交易所", "融资买入额", "融资余额",
+        df = ak.stock_margin_detail_szse(date=date)
+        if not df.empty:
+            df["交易日期"] = trade_date
+            df["交易所"] = "SZSE"
+            df = df[["交易日期", "证券代码", "证券简称", "交易所", "融资买入额", "融资余额",
                              "融券卖出量", "融券余量", "融券余额", "融资融券余额"]]
-            margin.columns = ["trade_date", "symbol", "name", "exchange", "buy_value", "buy_balance",
+            df.columns = ["trade_date", "symbol", "name", "exchange", "buy_value", "buy_balance",
                               "sell_value", "sell_balance_vol", "sell_balance_val", "margin_balance"]
-            margin.to_sql("stock_margin", engine, index=False, if_exists='append', chunksize=20000)
-            logger.info(f"Execute Sync Exchange[SZSE] TradeDate[{date}] Write[{margin.shape[0]}] Records")
+            save_to_database(df, "stock_margin", engine, index=False, if_exists='append', chunksize=20000)
+            logger.info(f"Execute Sync Exchange[SZSE] TradeDate[{date}] Write[{df.shape[0]}] Records")
 
 
 

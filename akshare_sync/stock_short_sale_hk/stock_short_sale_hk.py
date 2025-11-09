@@ -15,15 +15,15 @@
 import datetime
 import os
 import re
+from io import StringIO
 
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from io import StringIO
 
 from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
     update_sync_log_state_to_failed
-from akshare_sync.util.tools import get_cfg, get_logger, exec_create_table_script, get_engine
+from akshare_sync.util.tools import get_cfg, get_logger, exec_create_table_script, get_engine, save_to_database
 
 headers = {
     'Accept': '*/*',
@@ -106,14 +106,14 @@ def sync(drop_exist=False):
                 row_date = row.iloc[0]
                 row_url = row.iloc[1]
                 logger.info(f"Table [stock_short_sale_hk] Execute Sync Date: [{row_date}] Url [{row_url}] to Database")
-                data = get_stock_short_sale_hk_report(row_url)
+                df = get_stock_short_sale_hk_report(row_url)
 
-                data["日期"]=pd.to_datetime(data['日期'], format='%d%m%Y').dt.strftime('%Y%m%d')
+                df["日期"]=pd.to_datetime(df['日期'], format='%d%m%Y').dt.strftime('%Y%m%d')
 
                 # 写入数据库
-                connection = get_engine()
-                logger.info(f'Write [{data.shape[0]}] records into table [stock_short_sale_hk] with [{connection.engine}]')
-                data.to_sql('stock_short_sale_hk', connection, index=False, if_exists='append', chunksize=20000)
+                engine = get_engine()
+                logger.info(f'Write [{df.shape[0]}] records into table [stock_short_sale_hk] with [{engine.engine}]')
+                save_to_database(df, 'stock_short_sale_hk', engine, index=False, if_exists='append', chunksize=20000)
                 update_sync_log_date('stock_short_sale_hk', 'stock_short_sale_hk', f'{str(row_date)}')
         else:
             logger.info("Table [stock_short_sale_hk] Early Synced, Skip ...")

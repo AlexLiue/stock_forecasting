@@ -24,7 +24,7 @@ from dateutil.relativedelta import relativedelta
 from akshare_sync.global_data.global_data import GlobalData
 from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
     update_sync_log_state_to_failed
-from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
+from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, save_to_database
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -63,7 +63,7 @@ def sync(drop_exist=False):
                     df = df[
                         ["日期", "板块", "挂牌数", "市价总值", "流通市值", "成交金额", "成交量", "平均市盈率", "换手率",
                             "流通换手率"]]
-                    df.to_sql("stock_sse_deal_daily", engine, index=False, if_exists='append', chunksize=20000)
+                    save_to_database(df, "stock_sse_deal_daily", engine, index=False, if_exists='append', chunksize=20000)
                     logger.info(  f"Execute Sync stock_sse_deal_daily Date[{step_date}]" + f" Write[{df.shape[0]}] Records")
                     update_sync_log_date('stock_sse_deal_daily', 'stock_sse_deal_daily', f'{str(step_date)}')
         else:

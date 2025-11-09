@@ -13,6 +13,7 @@
 """
 import datetime
 import os
+
 import pandas as pd
 from akshare import stock_info_sh_name_code, stock_info_bj_name_code, stock_hk_spot, stock_info_sh_delist, \
     stock_info_sz_name_code
@@ -20,8 +21,7 @@ from akshare import stock_info_sh_name_code, stock_info_bj_name_code, stock_hk_s
 from akshare_sync.sync_logs.sync_logs import update_sync_log_date, query_last_api_sync_date, \
     update_sync_log_state_to_failed
 from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, \
-    exec_sql
-
+    exec_sql, save_to_database
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -107,7 +107,7 @@ def sync(drop_exist=False):
             exec_create_table_script(dir_path, drop_exist, logger)
 
             # 获取数据
-            data = stock_info_code_name()
+            df = stock_info_code_name()
 
             # 清理历史数据
             clean_sql = f"TRUNCATE TABLE STOCK_BASIC_INFO"
@@ -115,9 +115,9 @@ def sync(drop_exist=False):
             exec_sql(clean_sql)
 
             # 写入数据库
-            connection = get_engine()
-            logger.info(f'Write [{data.shape[0]}] records into table [stock_basic_info] with [{connection.engine}]')
-            data.to_sql('stock_basic_info', connection, index=False, if_exists='append', chunksize=20000)
+            engine = get_engine()
+            logger.info(f'Write [{df.shape[0]}] records into table [stock_basic_info] with [{engine.engine}]')
+            save_to_database(df, 'stock_basic_info', engine, index=False, if_exists='append', chunksize=20000)
 
             update_sync_log_date('stock_basic_info', 'stock_basic_info',
                                  f'{str(datetime.datetime.now().strftime('%Y%m%d'))}')

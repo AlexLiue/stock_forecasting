@@ -21,7 +21,8 @@ from akshare import stock_zh_a_hist
 
 from akshare_sync.global_data.global_data import GlobalData
 from akshare_sync.sync_logs.sync_logs import update_sync_log_date, update_sync_log_state_to_failed
-from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, exec_sql
+from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, exec_sql, \
+    save_to_database
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -97,7 +98,7 @@ def sync(drop_exist=False):
                     """ 判断前复权的数据是否发生变动 """
                     if last_sync_close is None or df.loc[df["日期"]==start_date, "收盘"][0] == last_sync_close:
                         df = df.loc[df["日期"]!=start_date]
-                        df.to_sql("stock_zh_a_hist_weekly_qfq", engine, index=False, if_exists='append', chunksize=20000)
+                        save_to_database(df, "stock_zh_a_hist_weekly_qfq", engine, index=False, if_exists='append', chunksize=20000)
                         logger.info(f"Execute Sync stock_zh_a_hist_weekly_qfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
                     else:
                         clean_sql = f"DELETE FROM STOCK_ZH_A_HIST_WEEKLY_QFQ WHERE \"股票代码\"='{trade_code}'"
@@ -110,7 +111,7 @@ def sync(drop_exist=False):
                         df = stock_zh_a_hist(symbol=trade_code,  period="weekly", start_date=start_date, end_date=end_date, adjust="qfq", timeout=20)
                         if not df.empty:
                             df["日期"] = df["日期"].apply(lambda x: x.strftime('%Y%m%d'))
-                            df.to_sql("stock_zh_a_hist_weekly_qfq", engine, index=False, if_exists='append', chunksize=20000)
+                            save_to_database(df, "stock_zh_a_hist_weekly_qfq", engine, index=False, if_exists='append', chunksize=20000)
                             logger.info(f"Execute Sync stock_zh_a_hist_weekly_qfq trade_code[{trade_code}]" + f" Write[{df.shape[0]}] Records")
             else:
                 logger.info(f"Execute Sync stock_zh_a_hist_weekly_qfq  trade_code[{trade_code}] trade_name[{trade_name}] from [{start_date}] to [{end_date}], Skip Sync ... ")

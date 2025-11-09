@@ -20,7 +20,7 @@ from akshare import stock_sse_summary
 
 from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
     update_sync_log_state_to_failed
-from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
+from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, save_to_database
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -46,23 +46,23 @@ def sync(drop_exist=False):
             stock_sse_summary_df = stock_sse_summary()
             stock_sse_summary_df = stock_sse_summary_df.set_index("项目")
 
-            data = stock_sse_summary_df.T
-            data["项目"] = data.axes[0]
+            df = stock_sse_summary_df.T
+            df["项目"] = df.axes[0]
 
-            data = data[
+            df = df[
                 ["报告时间", "项目", "上市股票", "总股本", "流通股本", "总市值", "流通市值", "平均市盈率"]]
-            data.columns = ["日期", "项目", "上市股票", "总股本", "流通股本", "总市值", "流通市值", "平均市盈率"]
-            data = data.reset_index(drop=True)
+            df.columns = ["日期", "项目", "上市股票", "总股本", "流通股本", "总市值", "流通市值", "平均市盈率"]
+            df = df.reset_index(drop=True)
 
             logger.info(f"Execute Filter : 日期 > %s", start_date)
-            data = data[data["日期"] > start_date]
+            df = df[df["日期"] > start_date]
 
             # 写入数据库
-            connection = get_engine()
-            logger.info(f'Write [{data.shape[0]}] records into table [stock_sse_summary] with [{connection.engine}]')
-            data.to_sql('stock_sse_summary', connection, index=False, if_exists='append', chunksize=20000)
+            engine = get_engine()
+            logger.info(f'Write [{df.shape[0]}] records into table [stock_sse_summary] with [{engine.engine}]')
+            save_to_database(df, 'stock_sse_summary', engine, index=False, if_exists='append', chunksize=20000)
 
-            update_sync_log_date('stock_sse_summary', 'stock_sse_summary', f'{str(max(data["日期"]))}')
+            update_sync_log_date('stock_sse_summary', 'stock_sse_summary', f'{str(max(df["日期"]))}')
 
         else:
             logger.info(f"Table [stock_sse_summary] Early Synced start_date[{start_date}] end_date[{end_date}], Skip ...")

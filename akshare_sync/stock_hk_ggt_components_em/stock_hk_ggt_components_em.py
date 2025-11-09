@@ -23,7 +23,7 @@ from akshare import stock_hk_ggt_components_em
 
 from akshare_sync.sync_logs.sync_logs import query_last_api_sync_date, update_sync_log_date, \
     update_sync_log_state_to_failed
-from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg
+from akshare_sync.util.tools import exec_create_table_script, get_engine, get_logger, get_cfg, save_to_database
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -50,11 +50,11 @@ def sync(drop_exist=False):
             hk_ggt_df["交易所"]= "HK"
             hk_ggt_df = hk_ggt_df[["代码","名称","交易所"]]
             hk_ggt_df.columns=["证券代码","证券简称","交易所"]
-            data = hk_ggt_df
+            df = hk_ggt_df
             # 写入数据库
-            connection = get_engine()
-            logger.info(f'Write [{data.shape[0]}] records into table [stock_hk_ggt_components_em] with [{connection.engine}]')
-            data.to_sql('stock_hk_ggt_components_em', connection, index=False, if_exists='append', chunksize=20000)
+            engine = get_engine()
+            logger.info(f'Write [{df.shape[0]}] records into table [stock_hk_ggt_components_em] with [{engine.engine}]')
+            save_to_database(df, 'stock_hk_ggt_components_em', engine, index=False, if_exists='append', chunksize=20000)
 
             update_sync_log_date('stock_hk_ggt_components_em', 'stock_hk_ggt_components_em', f'{end_date}')
 

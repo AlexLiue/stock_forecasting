@@ -6,7 +6,6 @@ from akshare_sync.util.tools import get_cfg, get_engine, query_table_is_exist
 from akshare_sync.util.tools import get_logger
 
 
-
 class GlobalData:
     """
     交易所 |板块  |

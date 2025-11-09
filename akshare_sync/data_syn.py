@@ -7,10 +7,10 @@ import multiprocessing
 from akshare_sync.stock_basic_info import stock_basic_info
 from akshare_sync.stock_short_sale_hk import stock_short_sale_hk
 from akshare_sync.stock_sse_deal_daily import stock_sse_deal_daily
+from akshare_sync.stock_sse_summary import stock_sse_summary
 from akshare_sync.stock_szse_area_summary import stock_szse_area_summary
 from akshare_sync.stock_szse_sector_summary import stock_szse_sector_summary
 from akshare_sync.stock_szse_summary import stock_szse_summary
-from akshare_sync.stock_sse_summary import stock_sse_summary
 from akshare_sync.stock_table_api_summary import stock_table_api_summary
 from akshare_sync.stock_trade_date import stock_trade_date
 from akshare_sync.stock_zh_a_hist_30min_hfq import stock_zh_a_hist_30min_hfq
