@@ -40,6 +40,14 @@ pd.set_option("display.max_colwidth", None)
 pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
 
+def query_last_sync_date(trade_code, engine, logger):
+    query_start_date = (
+        f'SELECT NVL(MAX("数据日期"), 19900101) as max_date FROM STOCK_TABLE_API_SUMMARY'
+    )
+    logger.info(f"Execute Query SQL  [{query_start_date}]")
+    return str(pd.read_sql(query_start_date, engine).iloc[0, 0])
+
+
 def get_table_api_content():
     url = "https://akshare.akfamily.xyz/data/stock/stock.html"
     params = {}
@@ -73,15 +81,16 @@ def sync(drop_exist=False):
     logger = get_logger("stock_table_api_summary", cfg["sync-logging"]["filename"])
 
     try:
-        start_date = query_last_api_sync_date(
-            "stock_table_api_summary", "stock_table_api_summary"
-        )
-        if start_date < str(datetime.datetime.now().strftime("%Y%m%d")):
-            dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
-            exec_create_table_script(dir_path, drop_exist, logger)
+        dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+        exec_create_table_script(dir_path, drop_exist, logger)
 
+        engine = get_engine()
+        last_date = query_last_sync_date(None, engine, logger)
+        cur_date = str(datetime.datetime.now().strftime("%Y%m%d"))
+        if last_date < cur_date:
             # 获取数据
             df = get_table_api_content()
+            df["数据日期"] = cur_date
 
             # 清理历史数据
             clean_sql = f"TRUNCATE TABLE stock_table_api_summary"
@@ -103,9 +112,7 @@ def sync(drop_exist=False):
             )
 
             update_sync_log_date(
-                "stock_table_api_summary",
-                "stock_table_api_summary",
-                str(datetime.datetime.now().strftime("%Y%m%d")),
+                "stock_table_api_summary", "stock_table_api_summary", cur_date
             )
 
         else:

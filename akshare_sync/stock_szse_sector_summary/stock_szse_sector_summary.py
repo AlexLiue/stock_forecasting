@@ -22,7 +22,6 @@ from akshare import stock_szse_sector_summary
 from dateutil.relativedelta import relativedelta
 
 from akshare_sync.sync_logs.sync_logs import (
-    query_last_api_sync_date,
     update_sync_log_date,
     update_sync_log_state_to_failed,
 )
@@ -41,6 +40,14 @@ pd.set_option("display.max_colwidth", None)
 pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
 
+def query_last_sync_date(trade_code, engine, logger):
+    query_start_date = (
+        f'SELECT NVL(MAX("日期"), 19900101) as max_date FROM STOCK_SZSE_SECTOR_SUMMARY'
+    )
+    logger.info(f"Execute Query SQL  [{query_start_date}]")
+    return str(pd.read_sql(query_start_date, engine).iloc[0, 0])
+
+
 def sync(drop_exist=False):
     cfg = get_cfg()
     logger = get_logger("stock_szse_sector_summary", cfg["sync-logging"]["filename"])
@@ -49,9 +56,7 @@ def sync(drop_exist=False):
         exec_create_table_script(dir_path, drop_exist, logger)
         engine = get_engine()
 
-        query_start_date = query_last_api_sync_date(
-            "stock_szse_sector_summary", "stock_szse_sector_summary"
-        )
+        query_start_date = query_last_sync_date(None, engine, logger)
         start_date = str(max(query_start_date, "201812"))
         logger.info(f"Execute Sync stock_szse_sector_summary Date[{start_date}]")
 

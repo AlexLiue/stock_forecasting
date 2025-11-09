@@ -21,7 +21,6 @@ import pandas as pd
 from dateutil.relativedelta import relativedelta
 
 from akshare_sync.sync_logs.sync_logs import (
-    query_last_api_sync_date,
     update_sync_log_date,
     update_sync_log_state_to_failed,
 )
@@ -40,6 +39,14 @@ pd.set_option("display.max_colwidth", None)
 pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
 
+def query_last_sync_date(trade_code, engine, logger):
+    query_start_date = (
+        f'SELECT NVL(MAX("日期"), 19900101) as max_date FROM STOCK_SZSE_AREA_SUMMARY'
+    )
+    logger.info(f"Execute Query SQL  [{query_start_date}]")
+    return str(pd.read_sql(query_start_date, engine).iloc[0, 0])
+
+
 def sync(drop_exist=False):
     cfg = get_cfg()
     logger = get_logger("stock_szse_area_summary", cfg["sync-logging"]["filename"])
@@ -48,10 +55,8 @@ def sync(drop_exist=False):
         exec_create_table_script(dir_path, drop_exist, logger)
         engine = get_engine()
 
-        query_start_date = query_last_api_sync_date(
-            "stock_szse_area_summary", "stock_szse_area_summary"
-        )
-        start_date = str(max(query_start_date, "20191201"))
+        last_sync_date = query_last_sync_date(None, engine, logger)
+        start_date = str(max(last_sync_date, "20191201"))
         logger.info(f"Execute Sync stock_szse_area_summary Date[{start_date}]")
 
         end_date = str(datetime.datetime.now().strftime("%Y%m%d"))
