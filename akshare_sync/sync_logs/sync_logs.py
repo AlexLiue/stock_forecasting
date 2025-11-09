@@ -28,14 +28,19 @@ pd.set_option("display.width", None)
 pd.set_option("display.max_colwidth", None)
 pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
+
+def init_create_table_sync_logs():
+    cfg = get_cfg()
+    logger = get_logger("sync_logs", cfg["sync-logging"]["filename"])
+    dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+    exec_create_table_script(dir_path, False, logger)
+
+
 # 查询 API 同步的时间
 def query_last_api_sync_date(api_name, table_name):
     cfg = get_cfg()
     logger = get_logger("sync_logs", cfg["sync-logging"]["filename"])
     engine = get_engine()
-    dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
-    exec_create_table_script(dir_path, False, logger)
-
     query_start_date = f'SELECT NVL(MAX("日期"), 19900101) as max_date FROM sync_logs WHERE "接口名"=\'{api_name}\' AND "表名"=\'{table_name}\''
     logger.info(f"Execute SQL  [{query_start_date}]")
     last_date = str(pd.read_sql(query_start_date, engine).iloc[0, 0])
