@@ -41,10 +41,10 @@ pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
 def query_last_sync_date(engine, logger):
     query_start_date = (
-        f'SELECT NVL(MAX("日期"), 19900101) as max_date FROM STOCK_SZSE_AREA_SUMMARY'
+        f'SELECT NVL(MAX("日期"), 199001) as max_date FROM STOCK_SZSE_AREA_SUMMARY'
     )
     logger.info(f"Execute Query SQL  [{query_start_date}]")
-    return str(pd.read_sql(query_start_date, engine).iloc[0, 0])
+    return str(pd.read_sql(query_start_date, engine).iloc[0, 0]) + "01"
 
 
 def sync(drop_exist=False):
