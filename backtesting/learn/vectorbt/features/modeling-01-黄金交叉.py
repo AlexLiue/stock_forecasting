@@ -21,7 +21,9 @@ stock_df = ak.stock_zh_a_hist(
     end_date="20251107",
     adjust="qfq",
 )
-stock_df["日期"] = stock_df["日期"].apply(lambda x: datetime.strptime(str(x), "%Y-%m-%d"))
+stock_df["日期"] = stock_df["日期"].apply(
+    lambda x: datetime.strptime(str(x), "%Y-%m-%d")
+)
 stock_df.set_index("日期", inplace=True)
 
 close_price = stock_df["收盘"]
@@ -45,7 +47,9 @@ stock_df = ak.stock_zh_a_hist(
     end_date="20251107",
     adjust="qfq",
 )
-stock_df["日期"] = stock_df["日期"].apply(lambda x: datetime.strptime(str(x), "%Y-%m-%d"))
+stock_df["日期"] = stock_df["日期"].apply(
+    lambda x: datetime.strptime(str(x), "%Y-%m-%d")
+)
 stock_df.set_index("日期", inplace=True)
 
 price = stock_df["收盘"]

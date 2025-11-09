@@ -12,7 +12,6 @@
 tushare 接口说明：https://tushare.pro/document/2?doc_id=49
 """
 
-
 import os
 import datetime
 from tushare_sync.utils.utils import (

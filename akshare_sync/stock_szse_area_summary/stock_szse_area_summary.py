@@ -13,6 +13,7 @@
 目标表名:  stock_szse_area_summary
 
 """
+
 import datetime
 import os
 
@@ -70,7 +71,17 @@ def sync(drop_exist=False):
             logger.info(f"Execute Sync stock_szse_area_summary Date[{step_date}]")
             df = ak.stock_szse_area_summary(date=step_date)
             df["日期"] = step_date
-            df = df[["日期", "地区", "总交易额", "占市场", "股票交易额", "基金交易额", "债券交易额"]]
+            df = df[
+                [
+                    "日期",
+                    "地区",
+                    "总交易额",
+                    "占市场",
+                    "股票交易额",
+                    "基金交易额",
+                    "债券交易额",
+                ]
+            ]
             save_to_database(
                 df,
                 "stock_szse_area_summary",

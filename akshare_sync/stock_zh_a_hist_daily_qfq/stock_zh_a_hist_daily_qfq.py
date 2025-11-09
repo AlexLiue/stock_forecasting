@@ -13,6 +13,7 @@
 
 限量: 单次返回指定沪深京 A 股上市公司、指定周期和指定日期间的历史行情日频率数据
 """
+
 import datetime
 import os
 
@@ -119,7 +120,8 @@ def sync(drop_exist=False):
                     """ 判断前复权的数据是否发生变动 """
                     if (
                         last_sync_close is None
-                        or df.loc[df["日期"] == start_date, "收盘"][0] == last_sync_close
+                        or df.loc[df["日期"] == start_date, "收盘"][0]
+                        == last_sync_close
                     ):
                         df = df.loc[df["日期"] != start_date]
                         save_to_database(
@@ -155,7 +157,9 @@ def sync(drop_exist=False):
                             timeout=20,
                         )
                         if not df.empty:
-                            df["日期"] = df["日期"].apply(lambda x: x.strftime("%Y%m%d"))
+                            df["日期"] = df["日期"].apply(
+                                lambda x: x.strftime("%Y%m%d")
+                            )
                             save_to_database(
                                 df,
                                 "stock_zh_a_hist_daily_qfq",

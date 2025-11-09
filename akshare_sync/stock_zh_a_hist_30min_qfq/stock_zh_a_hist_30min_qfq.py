@@ -133,7 +133,8 @@ def sync(drop_exist=False):
                     """ 判断前复权的数据是否发生变动 """
                     if (
                         last_sync_close is None
-                        or df.loc[df["时间"] == start_date, "收盘"][0] == last_sync_close
+                        or df.loc[df["时间"] == start_date, "收盘"][0]
+                        == last_sync_close
                     ):
                         df = df.loc[df["时间"] != start_date]
                         save_to_database(

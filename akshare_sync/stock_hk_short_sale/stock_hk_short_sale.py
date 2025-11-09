@@ -12,6 +12,7 @@
     根据于申报日持有须申报淡仓的市场参与者或其申报代理人向证监会所呈交的通知书内的资料而计算
 
 """
+
 import datetime
 import os
 from datetime import timedelta

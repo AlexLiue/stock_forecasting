@@ -254,7 +254,9 @@ def exec_mysql_script(script_dir):
                 fullname = os.path.join(dirname, script_dir, filename)
                 file_object = open(fullname)
                 for line in file_object:
-                    if not line.startswith("--") and not line.startswith("/*"):  # 处理注释
+                    if not line.startswith("--") and not line.startswith(
+                        "/*"
+                    ):  # 处理注释
                         str1 = (
                             str1 + " " + " ".join(line.strip().split())
                         )  # pymysql一次只能执行一条sql语句

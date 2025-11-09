@@ -12,6 +12,7 @@
 目标表名:  stock_sse_summary
 
 """
+
 import datetime
 import os
 
@@ -76,8 +77,28 @@ def sync(drop_exist=False):
             df = stock_sse_summary_df.T
             df["项目"] = df.axes[0]
 
-            df = df[["报告时间", "项目", "上市股票", "总股本", "流通股本", "总市值", "流通市值", "平均市盈率"]]
-            df.columns = ["日期", "项目", "上市股票", "总股本", "流通股本", "总市值", "流通市值", "平均市盈率"]
+            df = df[
+                [
+                    "报告时间",
+                    "项目",
+                    "上市股票",
+                    "总股本",
+                    "流通股本",
+                    "总市值",
+                    "流通市值",
+                    "平均市盈率",
+                ]
+            ]
+            df.columns = [
+                "日期",
+                "项目",
+                "上市股票",
+                "总股本",
+                "流通股本",
+                "总市值",
+                "流通市值",
+                "平均市盈率",
+            ]
             df = df.reset_index(drop=True)
 
             logger.info(f"Execute Filter : 日期 > %s", start_date)

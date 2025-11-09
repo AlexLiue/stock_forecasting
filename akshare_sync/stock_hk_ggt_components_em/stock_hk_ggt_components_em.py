@@ -15,6 +15,7 @@
 限量: 单次获取所有港股通成份股数据
 
 """
+
 import datetime
 import os
 
@@ -41,9 +42,7 @@ pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
 
 def query_last_sync_date(engine, logger):
-    query_start_date = (
-        f'SELECT NVL(MAX("数据日期"), 19900101) as max_date FROM STOCK_HK_GGT_COMPONENTS_EM'
-    )
+    query_start_date = f'SELECT NVL(MAX("数据日期"), 19900101) as max_date FROM STOCK_HK_GGT_COMPONENTS_EM'
     logger.info(f"Execute Query SQL  [{query_start_date}]")
     return str(pd.read_sql(query_start_date, engine).iloc[0, 0])
 

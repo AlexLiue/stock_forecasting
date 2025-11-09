@@ -5,6 +5,7 @@ from numba import njit
 
 big_ts = pd.DataFrame(np.random.uniform(size=(1000, 1000)))
 
+
 # pandas
 @njit
 def zscore_nb(x):

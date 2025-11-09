@@ -64,7 +64,9 @@ def sync(drop_exist=False):
 
 
 def sync_spc(drop_exist):
-    bak_basic.sync(drop_exist)  # 沪深股票-基础信息-备用列表 （读取限制,每分钟调用2次, 每天最多访问该接口20次）
+    bak_basic.sync(
+        drop_exist
+    )  # 沪深股票-基础信息-备用列表 （读取限制,每分钟调用2次, 每天最多访问该接口20次）
     concept.sync(drop_exist)  # 沪深股票-市场参考数据-概念股分类（已经停止维护）
     concept_detail.sync(drop_exist)  # 沪深股票-市场参考数据-概念股列表 （已经停止维护）
     cyq_perf.sync(drop_exist)  # 沪深股票-特色数据-每日筹码及胜率（受限:5/min,10/h)

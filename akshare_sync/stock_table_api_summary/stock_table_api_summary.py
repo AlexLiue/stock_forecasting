@@ -12,6 +12,7 @@
 目标表名:  stock_table_api_summary
 
 """
+
 import datetime
 import os
 
@@ -40,9 +41,7 @@ pd.set_option("display.float_format", lambda x: "%.2f" % x)  #
 
 
 def query_last_sync_date(engine, logger):
-    query_start_date = (
-        f'SELECT NVL(MAX("数据日期"), 19900101) as max_date FROM STOCK_TABLE_API_SUMMARY'
-    )
+    query_start_date = f'SELECT NVL(MAX("数据日期"), 19900101) as max_date FROM STOCK_TABLE_API_SUMMARY'
     logger.info(f"Execute Query SQL  [{query_start_date}]")
     return str(pd.read_sql(query_start_date, engine).iloc[0, 0])
 

@@ -1,6 +1,7 @@
 """
 数据同步程序入口
 """
+
 import argparse
 import multiprocessing
 

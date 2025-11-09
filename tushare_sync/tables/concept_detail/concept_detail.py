@@ -13,6 +13,7 @@
 
 已停止维护，仅进行初始化，最后维护时间2021年2月
 """
+
 import datetime
 import os
 from tushare_sync.utils.utils import exec_create_table_script, exec_sync_with_ts_code
