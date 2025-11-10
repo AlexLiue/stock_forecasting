@@ -3,13 +3,14 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2025/11/3 21:33
 # @Author  : PcLiu
-# @FileName: stock_hk_short_sale.py
+# @FileName: stock_hk_short_sale_em.py
 ===========================
 
-接口: stock_hk_short_sale
+接口: stock_hk_short_sale_em
 
-描述: 指明股份合计须申报淡仓, 港股 HK 淡仓申报 （香港证监会每周更新一次）
-    根据于申报日持有须申报淡仓的市场参与者或其申报代理人向证监会所呈交的通知书内的资料而计算
+描述: 东方财富港股卖空数据
+
+https://hk.eastmoney.com/sellshort.htm算
 
 """
 
@@ -53,7 +54,7 @@ def get_last_week_friday_date():
     return (now - datetime.timedelta(days=weekday + 3)).strftime("%Y%m%d")
 
 
-def date_split_range(start_date, end_date, freq="70D"):
+def get_split_range(start_date, end_date, freq="70D"):
     """
     将时间拆分成若干个区间, 单次执行一个区间的数据同步, 防止单次拉取数据量过大
     """
@@ -99,7 +100,7 @@ def sync(drop_exist=False):
         end_date = get_last_week_friday_date()
 
         if begin_date <= end_date:
-            date_ranges = date_split_range(begin_date, end_date, freq="70D")
+            date_ranges = get_split_range(begin_date, end_date, freq="70D")
             for i, (batch_start, batch_end) in enumerate(date_ranges, 1):
                 logger.info(
                     f"Exec Sync STOCK_SHORT_SALE_HK Batch[{i}]: StartDate[{batch_start}] EndDate[{batch_end}] "
