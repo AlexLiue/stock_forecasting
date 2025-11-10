@@ -31,7 +31,7 @@ from akshare_sync.util.tools import (
 
 def query_last_sync_date(engine, logger):
     query_start_date = (
-        f'SELECT NVL(MAX("数据日期"), 19900101) as max_date FROM STOCK_TRADE_DATE'
+        f'SELECT NVL(MAX("交易日期"), 19900101) as max_date FROM STOCK_TRADE_DATE'
     )
     logger.info(f"Execute Query SQL  [{query_start_date}]")
     return str(pd.read_sql(query_start_date, engine).iloc[0, 0])
