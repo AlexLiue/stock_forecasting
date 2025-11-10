@@ -16,7 +16,6 @@
 import datetime
 import os
 import time
-from datetime import timedelta
 
 import pandas as pd
 from akshare import stock_hk_ccass_records
@@ -79,7 +78,7 @@ def sync(drop_exist=False, ggt=True):
             )
 
             if begin_date <= end_date:
-                date_list = pd.date_range(start=begin_date, end=end_date, freq="1D")
+                date_list = pd.date_range(start=begin_date, end=end_date, freq="B")  #freq="B" 指工作日周一到周五
                 for date in date_list:
                     trade_date = date.strftime("%Y%m%d")
                     logger.info(
