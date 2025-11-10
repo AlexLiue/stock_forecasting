@@ -284,6 +284,40 @@ def save_to_database(
         raise e
 
 
+def save_to_database_v2(
+    df1,
+    df2,
+    table_name1,
+    table_name2,
+    engine,
+    index=False,
+    if_exists="append",
+    chunksize=20000,
+):
+    """
+    将数据存储到数据库 同时写入两张表数据
+    实现事务功能，
+    """
+    try:
+        with engine.begin() as connection:  # 开启事务
+            df1.to_sql(
+                table_name1,
+                con=connection,
+                index=index,
+                if_exists=if_exists,
+                chunksize=chunksize,
+            )
+            df2.to_sql(
+                table_name2,
+                con=connection,
+                index=index,
+                if_exists=if_exists,
+                chunksize=chunksize,
+            )
+    except SQLAlchemyError as e:
+        raise e
+
+
 #
 # if __name__ == '__main__':
 #     # ts_codes_1 = get_ts_code_list(0.3, 1000)
