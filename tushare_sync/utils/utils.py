@@ -346,7 +346,7 @@ def exec_sync_with_ts_code(
                                 "offset": offset,
                                 "limit": limit,
                             },
-                            fields=fields
+                            fields=fields,
                         )
                         time.sleep(interval)
                         if data.last_valid_index() is not None:
@@ -450,7 +450,7 @@ def exec_sync_with_spec_date_column(
                             "offset": offset,
                             "limit": limit,
                         },
-                        fields=fields
+                        fields=fields,
                     )
                     time.sleep(interval)
                     if data.last_valid_index() is not None:
@@ -566,7 +566,7 @@ def exec_sync_with_spec_date_column_v2(
                             "offset": offset,
                             "limit": limit,
                         },
-                        fields=fields
+                        fields=fields,
                     )
                     time.sleep(interval)
                     if data.last_valid_index() is not None:

@@ -53,7 +53,6 @@ def query_last_sync_date(engine, logger):
 
 
 def sync(drop_exist=False):
-
     cfg = get_cfg()
     logger = get_logger("stock_szse_summary", cfg["sync-logging"]["filename"])
     try:

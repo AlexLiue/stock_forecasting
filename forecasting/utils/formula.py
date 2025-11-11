@@ -13,7 +13,6 @@ def EMA(DF, N):
 
 
 def MA(DF, N):
-
     return pd.Series.rolling(DF, N).mean()
 
 

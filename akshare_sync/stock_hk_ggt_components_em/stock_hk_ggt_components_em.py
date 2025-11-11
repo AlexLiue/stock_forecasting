@@ -32,6 +32,7 @@ from akshare_sync.util.tools import (
     get_logger,
     get_cfg,
     save_to_database,
+    exec_sql,
 )
 
 pd.set_option("display.max_columns", None)
@@ -68,23 +69,29 @@ def sync(drop_exist=False):
             df = hk_ggt_df
             # 写入数据库
 
-            logger.info(
-                f"Write [{df.shape[0]}] records into table [stock_hk_ggt_components_em] with [{engine.engine}]"
-            )
-            save_to_database(
-                df,
-                "stock_hk_ggt_components_em",
-                engine,
-                index=False,
-                if_exists="append",
-                chunksize=20000,
-            )
+            if not df.empty:
+                clean_sql = "TRUNCATE TABLE STOCK_HK_GGT_COMPONENTS_EM"
+                logger.info(
+                    f"Execute Sync stock_hk_ggt_components_em, Detect QFQ data updated, Clean History Data With SQL [{clean_sql}], Recall Sync"
+                )
+                exec_sql(clean_sql)
 
-            update_sync_log_date(
-                "stock_hk_ggt_components_em",
-                "stock_hk_ggt_components_em",
-                f"{end_date}",
-            )
+                save_to_database(
+                    df,
+                    "stock_hk_ggt_components_em",
+                    engine,
+                    index=False,
+                    if_exists="append",
+                    chunksize=20000,
+                )
+                logger.info(
+                    f"Write [{df.shape[0]}] records into table [stock_hk_ggt_components_em] with [{engine.engine}]"
+                )
+                update_sync_log_date(
+                    "stock_hk_ggt_components_em",
+                    "stock_hk_ggt_components_em",
+                    f"{end_date}",
+                )
 
         else:
             logger.info(

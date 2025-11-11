@@ -56,5 +56,15 @@ class GlobalData:
 
     trade_code_a = basic_info[basic_info["交易所"].isin(["SZSE", "SSE", "BSE"])]
 
+    """ 加载港股基础信息 """
+    query_hk_ggt_sql = (
+        f'SELECT "证券代码", "证券简称", "交易所"'
+        f"FROM STOCK_HK_GGT_COMPONENTS_EM t "
+        f'ORDER BY "证券代码" ASC'
+    )
+    logger.info(f"Execute SQL [{query_hk_ggt_sql}]")
+    hk_ggt_info = pd.read_sql(query_hk_ggt_sql, engine)
+    trade_code_hk = hk_ggt_info
+
     def initialize(self):
         pass

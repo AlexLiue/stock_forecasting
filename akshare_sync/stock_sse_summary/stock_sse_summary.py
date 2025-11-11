@@ -118,7 +118,7 @@ def sync(drop_exist=False):
                     chunksize=20000,
                 )
                 update_sync_log_date(
-                    "stock_sse_summary", "stock_sse_summary", f'{str(max(df["日期"]))}'
+                    "stock_sse_summary", "stock_sse_summary", f"{str(max(df['日期']))}"
                 )
         else:
             logger.info(

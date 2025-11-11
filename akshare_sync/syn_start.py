@@ -7,6 +7,7 @@ import multiprocessing
 
 from akshare_sync.stock_basic_info import stock_basic_info
 from akshare_sync.stock_hk_ccass_records import stock_hk_ccass_records
+from akshare_sync.stock_hk_ggt_components_em import stock_hk_ggt_components_em
 from akshare_sync.stock_hk_short_sale import stock_hk_short_sale
 from akshare_sync.stock_sse_deal_daily import stock_sse_deal_daily
 from akshare_sync.stock_sse_summary import stock_sse_summary
@@ -29,6 +30,7 @@ from akshare_sync.stock_zh_a_hist_weekly_qfq import stock_zh_a_hist_weekly_qfq
 def sync(processes_size):
     stock_trade_date.sync()  # 交易日历
     stock_basic_info.sync()  # 股票基本信息: 股票代码、股票名称、交易所、板块
+    stock_hk_ggt_components_em.sync()  # 东方财富网-行情中心-港股市场-港股通成份股
 
     """ 同步的函数列表 """
     functions = [
@@ -72,7 +74,7 @@ def use_age():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="sync mode args")
-    parser.add_argument("--processes", default=8, type=int, help="同步并发线程池大小")
+    parser.add_argument("--processes", default=4, type=int, help="同步并发线程池大小")
     args = parser.parse_args()
     processes = args.processes
     print(f"Exec With Args:--processes [{processes}]")
