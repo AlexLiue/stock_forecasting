@@ -106,7 +106,7 @@ def sync(drop_exist=False, ggt=True):
                         logger.info(
                             f"Exec [{index}/{ggt_size}] [{trade_date}/{end_date}]: Sync Table[stock_hk_ccass_records] trade_code[{trade_code}] trade_name[{trade_name}] Date[{trade_date}] is Empty ..."
                         )
-                    time.sleep(2)
+                    time.sleep(4)
             else:
                 logger.info(
                     f"Table [stock_hk_ccass_records] trade_code[{trade_code}] trade_name[{trade_name}] FromDate[{begin_date}] ToDate[{end_date}], Skip ..."
