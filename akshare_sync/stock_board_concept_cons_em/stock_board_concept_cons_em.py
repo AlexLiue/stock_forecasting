@@ -93,9 +93,9 @@ def sync(drop_exist=False):
                 )
                 df = stock_board_concept_cons_em(symbol=board_name)
                 if not df.empty:
-                    df["板块代码"] = board_code
-                    df["板块名称"] = board_name
-                    df["日期"] = cur_date
+                    df.loc[:,"板块代码"] = board_code
+                    df.loc[:,"板块名称"] = board_name
+                    df.loc[:,"日期"] = cur_date
                     df = df[["日期", "板块代码", "板块名称", "代码", "名称"]]
                     df.columns = [
                         "日期",
