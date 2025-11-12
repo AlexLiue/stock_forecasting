@@ -64,55 +64,64 @@ def sync(drop_exist=False, ggt=True):
         if start_date < end_date:
             # 获取数据
             df = stock_board_concept_name_em()
-            df["日期"] = end_date
-            df = df[[
-                "日期",
-                "排名",
-                "板块名称",
-                "板块代码",
-                "最新价",
-                "涨跌额",
-                "涨跌幅",
-                "总市值",
-                "换手率",
-                "上涨家数",
-                "下跌家数",
-                "领涨股票",
-                "领涨股票-涨跌幅"]
-            ]
-            df.columns = [
-                "日期",
-                "排名",
-                "板块名称",
-                "板块代码",
-                "最新价",
-                "涨跌额",
-                "涨跌幅",
-                "总市值",
-                "换手率",
-                "上涨家数",
-                "下跌家数",
-                "领涨股票",
-                "领涨股票_涨跌幅"]
-
             if not df.empty:
-                # 写入数据库
-                save_to_database(
-                    df,
-                    "stock_board_concept_name_em",
-                    engine,
-                    index=False,
-                    if_exists="append",
-                    chunksize=20000,
-                )
-                logger.info(
-                    f"Write [{df.shape[0]}] records into table [stock_board_concept_name_em] with [{engine.engine}]"
-                )
-                update_sync_log_date(
-                    "stock_board_concept_name_em",
-                    "stock_board_concept_name_em",
-                    end_date,
-                )
+                # 清理历史数据
+                clean_sql = f"TRUNCATE TABLE STOCK_BOARD_CONCEPT_NAME_EM"
+                logger.info("Execute Clean SQL [%s]" % clean_sql)
+                exec_sql(clean_sql)
+
+                df["日期"] = end_date
+                df = df[
+                    [
+                        "日期",
+                        "排名",
+                        "板块名称",
+                        "板块代码",
+                        "最新价",
+                        "涨跌额",
+                        "涨跌幅",
+                        "总市值",
+                        "换手率",
+                        "上涨家数",
+                        "下跌家数",
+                        "领涨股票",
+                        "领涨股票-涨跌幅",
+                    ]
+                ]
+                df.columns = [
+                    "日期",
+                    "排名",
+                    "板块名称",
+                    "板块代码",
+                    "最新价",
+                    "涨跌额",
+                    "涨跌幅",
+                    "总市值",
+                    "换手率",
+                    "上涨家数",
+                    "下跌家数",
+                    "领涨股票",
+                    "领涨股票_涨跌幅",
+                ]
+
+                if not df.empty:
+                    # 写入数据库
+                    save_to_database(
+                        df,
+                        "stock_board_concept_name_em",
+                        engine,
+                        index=False,
+                        if_exists="append",
+                        chunksize=20000,
+                    )
+                    logger.info(
+                        f"Write [{df.shape[0]}] records into table [stock_board_concept_name_em] with [{engine.engine}]"
+                    )
+                    update_sync_log_date(
+                        "stock_board_concept_name_em",
+                        "stock_board_concept_name_em",
+                        end_date,
+                    )
         else:
             logger.info("Table [stock_board_concept_name_em] Early Synced, Skip ...")
     except Exception:
