@@ -47,10 +47,7 @@ def load_board_concept_name(engine, logger):
     return pd.read_sql(sql=board_concept_sql, con=engine)
 
 
-def sync(drop_exist=False, ggt=True):
-    """
-    ggt: 仅同步港股通里的成分数据
-    """
+def sync(drop_exist=False):
     cfg = get_cfg()
     logger = get_logger("stock_board_concept_hist_em", cfg["sync-logging"]["filename"])
 
