@@ -6,6 +6,7 @@ import argparse
 import multiprocessing
 
 from akshare_sync.stock_basic_info import stock_basic_info
+from akshare_sync.stock_board_concept_name_em import stock_board_concept_name_em
 from akshare_sync.stock_hk_ccass_records import stock_hk_ccass_records
 from akshare_sync.stock_hk_ggt_components_em import stock_hk_ggt_components_em
 from akshare_sync.stock_hk_short_sale import stock_hk_short_sale
@@ -31,6 +32,7 @@ def sync(processes_size):
     stock_trade_date.sync()  # 交易日历
     stock_basic_info.sync()  # 股票基本信息: 股票代码、股票名称、交易所、板块
     stock_hk_ggt_components_em.sync()  # 东方财富网-行情中心-港股市场-港股通成份股
+    stock_board_concept_name_em.sync() # 东方财富网-行情中心-沪深京板块-概念板块
 
     """ 同步的函数列表 """
     functions = [

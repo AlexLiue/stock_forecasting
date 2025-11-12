@@ -115,6 +115,9 @@ def sync(drop_exist=False, ggt=True):
             "stock_hk_ccass_records", "stock_hk_ccass_records", end_date
         )
         update_sync_log_date(
+            "stock_hk_ccass_records", "stock_hk_ccass_records", end_date
+        )
+        update_sync_log_date(
             "stock_hk_ccass_records", "stock_hk_ccass_records_summary", end_date
         )
     except Exception:
