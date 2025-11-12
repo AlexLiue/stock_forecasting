@@ -49,7 +49,7 @@ def query_last_sync_date(engine, logger):
     return str(pd.read_sql(query_start_date, engine).iloc[0, 0])
 
 
-def sync(drop_exist=False, ggt=True):
+def sync(drop_exist=False):
     cfg = get_cfg()
     logger = get_logger("stock_board_concept_name_em", cfg["sync-logging"]["filename"])
 
@@ -132,4 +132,4 @@ def sync(drop_exist=False, ggt=True):
 
 
 if __name__ == "__main__":
-    sync(True)
+    sync(False)

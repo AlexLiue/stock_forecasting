@@ -131,4 +131,4 @@ def sync(drop_exist=False):
 
 
 if __name__ == "__main__":
-    sync(True)
+    sync(False)
