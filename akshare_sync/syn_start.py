@@ -10,6 +10,7 @@ from akshare_sync.stock_board_concept_cons_em import stock_board_concept_cons_em
 from akshare_sync.stock_board_concept_hist_em import stock_board_concept_hist_em
 from akshare_sync.stock_board_concept_name_em import stock_board_concept_name_em
 from akshare_sync.stock_board_industry_cons_em import stock_board_industry_cons_em
+from akshare_sync.stock_board_industry_hist_em import stock_board_industry_hist_em
 from akshare_sync.stock_board_industry_name_em import stock_board_industry_name_em
 from akshare_sync.stock_hk_ccass_records import stock_hk_ccass_records
 from akshare_sync.stock_hk_ggt_components_em import stock_hk_ggt_components_em
@@ -52,7 +53,7 @@ def sync(processes_size):
         stock_board_concept_cons_em.sync, # 东方财富-沪深板块-概念板块-板块成份
         stock_board_concept_hist_em.sync,  # 东方财富-沪深板块-概念板块-历史行情数据
         stock_board_industry_cons_em.sync, # 东方财富-沪深板块-行业板块-板块成份
-
+        stock_board_industry_hist_em.sync, #东方财富-沪深板块-行业板块-历史行情数据
         stock_zh_a_hist_30min_qfq.sync,  # 东方财富网-行情首页-港股-每日分时行情-30分钟-前复权
         stock_zh_a_hist_30min_hfq.sync,  # 东方财富网-行情首页-港股-每日分时行情-30分钟-后复权
         stock_zh_a_hist_daily_qfq.sync,  # 东方财富-沪深京 A 股日频率数据 - 前复权
