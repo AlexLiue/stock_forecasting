@@ -6,8 +6,10 @@ import argparse
 import multiprocessing
 
 from akshare_sync.stock_basic_info import stock_basic_info
+from akshare_sync.stock_board_concept_cons_em import stock_board_concept_cons_em
 from akshare_sync.stock_board_concept_hist_em import stock_board_concept_hist_em
 from akshare_sync.stock_board_concept_name_em import stock_board_concept_name_em
+from akshare_sync.stock_board_industry_name_em import stock_board_industry_name_em
 from akshare_sync.stock_hk_ccass_records import stock_hk_ccass_records
 from akshare_sync.stock_hk_ggt_components_em import stock_hk_ggt_components_em
 from akshare_sync.stock_hk_short_sale import stock_hk_short_sale
@@ -34,6 +36,7 @@ def sync(processes_size):
     stock_basic_info.sync()  # 股票基本信息: 股票代码、股票名称、交易所、板块
     stock_hk_ggt_components_em.sync()  # 东方财富网-行情中心-港股市场-港股通成份股
     stock_board_concept_name_em.sync()  # 东方财富网-行情中心-沪深京板块-概念板块
+    stock_board_industry_name_em.sync() # 东方财富网-行情中心-沪深京板块-行业板块
 
     """ 同步的函数列表 """
     functions = [
@@ -42,9 +45,10 @@ def sync(processes_size):
         stock_hk_ccass_records.sync,  # 香港证监会公示数据-中央结算系統持股记录
         stock_sse_summary.sync,  # 上海证券交易所-股票数据总貌
         stock_szse_summary.sync,  # 深圳证券交易所-市场总貌-证券类别统计
-        stock_szse_area_summary.sync,
-        stock_szse_sector_summary.sync,
+        stock_szse_area_summary.sync, # 深圳证券交易所-市场总貌-地区交易排序
+        stock_szse_sector_summary.sync, # 深圳证券交易所-统计资料-股票行业成交数据
         stock_sse_deal_daily.sync,  # 上海证券交易所-数据-股票数据-成交概况-股票成交概况-每日股票情况
+        stock_board_concept_cons_em.sync, # 东方财富-沪深板块-概念板块-板块成份
         stock_board_concept_hist_em.sync,  # 东方财富-沪深板块-概念板块-历史行情数据
         stock_zh_a_hist_30min_qfq.sync,  # 东方财富网-行情首页-港股-每日分时行情-30分钟-前复权
         stock_zh_a_hist_30min_hfq.sync,  # 东方财富网-行情首页-港股-每日分时行情-30分钟-后复权

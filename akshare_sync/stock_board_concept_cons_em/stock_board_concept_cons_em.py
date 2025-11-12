@@ -8,11 +8,11 @@
 
 接口: stock_board_concept_cons_em
 
-目标地址: http://quote.eastmoney.com/bk/90.BK0715.html
+目标地址: http://quote.eastmoney.com/center/boardlist.html#boards-BK06551
 
-描述: 东方财富-沪深板块-概念板块-历史行情数据
+描述: 东方财富-沪深板块-概念板块-板块成份
 
-限量: 单次返回指定 symbol 和 adjust 的历史数据
+限量: 单次返回当前时刻所有成份股
 """
 
 import datetime
