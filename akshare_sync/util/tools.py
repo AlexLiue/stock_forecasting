@@ -148,7 +148,7 @@ def exec_sql(sql):
 
 def load_sql_script(path):
     file = open(path, "r", encoding="UTF-8")
-    sql_script = file.read().upper()
+    sql_script = file.read().upper().replace('\n', ' ')
     stats = sqlparse.split(sql_script)
     res = []
     i = 0

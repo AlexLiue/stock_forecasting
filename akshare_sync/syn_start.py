@@ -21,6 +21,7 @@ from akshare_sync.stock_szse_area_summary import stock_szse_area_summary
 from akshare_sync.stock_szse_sector_summary import stock_szse_sector_summary
 from akshare_sync.stock_szse_summary import stock_szse_summary
 from akshare_sync.stock_table_api_summary import stock_table_api_summary
+from akshare_sync.stock_table_summary import stock_table_summary
 from akshare_sync.stock_trade_date import stock_trade_date
 from akshare_sync.stock_zh_a_hist_30min_hfq import stock_zh_a_hist_30min_hfq
 from akshare_sync.stock_zh_a_hist_30min_qfq import stock_zh_a_hist_30min_qfq
@@ -78,6 +79,8 @@ def sync(processes_size):
     """ 收集任务结果 """
     for result in results:
         print(result.get())
+
+    stock_table_summary.sync() # Stock 表汇总信息
 
 
 def use_age():
