@@ -23,6 +23,7 @@ from akshare_sync.stock_szse_summary import stock_szse_summary
 from akshare_sync.stock_table_api_summary import stock_table_api_summary
 from akshare_sync.stock_table_summary import stock_table_summary
 from akshare_sync.stock_trade_date import stock_trade_date
+from akshare_sync.stock_value_em import stock_value_em
 from akshare_sync.stock_zh_a_hist_30min_hfq import stock_zh_a_hist_30min_hfq
 from akshare_sync.stock_zh_a_hist_30min_qfq import stock_zh_a_hist_30min_qfq
 from akshare_sync.stock_zh_a_hist_daily_hfq import stock_zh_a_hist_daily_hfq
@@ -54,7 +55,8 @@ def sync(processes_size):
         stock_board_concept_cons_em.sync, # 东方财富-沪深板块-概念板块-板块成份
         stock_board_concept_hist_em.sync,  # 东方财富-沪深板块-概念板块-历史行情数据
         stock_board_industry_cons_em.sync, # 东方财富-沪深板块-行业板块-板块成份
-        stock_board_industry_hist_em.sync, #东方财富-沪深板块-行业板块-历史行情数据
+        stock_board_industry_hist_em.sync, # 东方财富-沪深板块-行业板块-历史行情数据
+        stock_value_em.sync,               # 东方财富网-数据中心-估值分析-每日互动-每日互动-估值分析
         stock_zh_a_hist_30min_qfq.sync,  # 东方财富网-行情首页-港股-每日分时行情-30分钟-前复权
         stock_zh_a_hist_30min_hfq.sync,  # 东方财富网-行情首页-港股-每日分时行情-30分钟-后复权
         stock_zh_a_hist_daily_qfq.sync,  # 东方财富-沪深京 A 股日频率数据 - 前复权
