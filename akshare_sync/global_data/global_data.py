@@ -39,9 +39,9 @@ class GlobalData:
         stock_basic_info.sync(False)
 
     query_sql = (
-        f'SELECT "证券代码", "证券简称", "交易所" ,"板块"'
+        f'SELECT "证券代码", "证券简称", "交易所", "板块" '
         f"FROM STOCK_BASIC_INFO sbi "
-        "WHERE \"证券代码\" not like 'ST%%' AND \"证券代码\" not like '*ST%%'"
+        "WHERE \"证券简称\" not like 'ST%%' AND \"证券简称\" not like '*ST%%' "
         f'ORDER BY "证券代码" ASC'
     )
     logger.info(f"Execute SQL [{query_sql}]")
