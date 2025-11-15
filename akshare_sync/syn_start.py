@@ -91,7 +91,7 @@ def use_age():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="sync mode args")
-    parser.add_argument("--processes", default=4, type=int, help="同步并发线程池大小")
+    parser.add_argument("--processes", default=8, type=int, help="同步并发线程池大小")
     args = parser.parse_args()
     processes = args.processes
     print(f"Exec With Args:--processes [{processes}]")

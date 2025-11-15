@@ -26,6 +26,7 @@ from akshare_sync.sync_logs.sync_logs import (
     update_sync_log_date,
     update_sync_log_state_to_failed,
 )
+from akshare_sync.test.test1 import end_date
 from akshare_sync.util.tools import (
     exec_create_table_script,
     get_engine,
@@ -58,12 +59,17 @@ def sync(drop_exist=False):
         # 查询交易股票列表
         global_data = GlobalData()
         trade_code_list = global_data.trade_code_a
+        trade_date_lit = global_data.trade_date_a
+
         # 结束日期: 16:30:00 前取前一天的日期，否则取当天的日期
-        end_date = (
+        last_date = (
             str(datetime.datetime.now().strftime("%Y%m%d"))
             if datetime.datetime.now().strftime("%H:%M:%S") > "16:30:00"
             else (datetime.datetime.now() + relativedelta(days=-1)).strftime("%Y%m%d")
         )
+        date_list = [date for date in trade_date_lit if date <= last_date]
+        end_date = max(date_list)
+
 
         engine = get_engine()
         for row_idx in range(trade_code_list.shape[0]):

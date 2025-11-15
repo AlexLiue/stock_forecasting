@@ -19,6 +19,7 @@ import os
 
 import pandas as pd
 from akshare import stock_zh_a_hist
+from dateutil.relativedelta import relativedelta
 
 from akshare_sync.global_data.global_data import GlobalData
 from akshare_sync.sync_logs.sync_logs import (
@@ -91,7 +92,15 @@ def sync(drop_exist=False):
         trade_code_list = global_data.trade_code_a
         trade_date_list = global_data.trade_date_a
         # 结束日期: 最近的周五日期
-        end_date = get_last_trade_date(trade_date_list)
+
+        # 结束日期: 16:30:00 前取前一天的日期，否则取当天的日期
+        last_date = (
+            str(datetime.datetime.now().strftime("%Y%m%d"))
+            if datetime.datetime.now().strftime("%H:%M:%S") > "16:30:00"
+            else (datetime.datetime.now() + relativedelta(days=-1)).strftime("%Y%m%d")
+        )
+        date_list = [date for date in trade_date_list if date <= last_date]
+        end_date = max(date_list)
 
         engine = get_engine()
         for row_idx in range(trade_code_list.shape[0]):
