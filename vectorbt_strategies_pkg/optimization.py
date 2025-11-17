@@ -1,7 +1,7 @@
 import itertools, seaborn as sns
 import matplotlib.pyplot as plt, pandas as pd, numpy as np
 import vectorbt as vbt, os
-from .strategies_core import MA_Cross, RSI_MeanReversion
+from strategies_core import MA_Cross, RSI_MeanReversion
 
 def optimize_ma_cross(close, short_range=range(5,21,5), long_range=range(30,101,10)):
     results=[]

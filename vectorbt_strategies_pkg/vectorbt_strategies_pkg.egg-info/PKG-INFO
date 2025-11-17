@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: vectorbt_strategies_pkg
+Version: 1.0.0
+Summary: 基于 VectorBT 的多策略量化分析与可视化框架（含50+策略定义、优化、报告）
+Author: QuantAI
+Requires-Dist: vectorbt
+Requires-Dist: yfinance
+Requires-Dist: matplotlib
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: seaborn
+Requires-Dist: fpdf

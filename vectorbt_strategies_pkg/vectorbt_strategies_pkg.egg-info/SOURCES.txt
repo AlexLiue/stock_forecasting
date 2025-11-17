@@ -1,0 +1,11 @@
+setup.py
+test/__init__.py
+test/test_backtest_runner.py
+test/test_strategies_basic.py
+test/test_visualization_report.py
+vectorbt_strategies_pkg.egg-info/PKG-INFO
+vectorbt_strategies_pkg.egg-info/SOURCES.txt
+vectorbt_strategies_pkg.egg-info/dependency_links.txt
+vectorbt_strategies_pkg.egg-info/entry_points.txt
+vectorbt_strategies_pkg.egg-info/requires.txt
+vectorbt_strategies_pkg.egg-info/top_level.txt

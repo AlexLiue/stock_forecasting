@@ -1,0 +1,7 @@
+vectorbt
+yfinance
+matplotlib
+numpy
+pandas
+seaborn
+fpdf

@@ -1,0 +1,2 @@
+[console_scripts]
+vbt-strategies = vectorbt_strategies_pkg.cli:main
